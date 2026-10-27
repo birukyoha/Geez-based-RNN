@@ -132,6 +132,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .brand p { font-size: var(--step--1); color: var(--muted); }
 .masthead-meta { font-size: var(--step--1); color: var(--muted); text-align: right; }
 @media (max-width: 640px) { .masthead-meta { display: none; } }
+.theme-switch { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--bg); flex: none; }
+.theme-switch button {
+  appearance: none; border: 0; background: none; cursor: pointer;
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  padding: 5px 11px; border-radius: 999px;
+}
+.theme-switch button:hover { color: var(--ink); }
+.theme-switch button[aria-checked="true"] { background: var(--ink); color: var(--surface); }
 .masthead-meta strong { color: var(--ink); font-weight: 600; }
 
 .tabs {

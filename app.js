@@ -35,6 +35,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
+  // ---------- Theme switch (Auto / Light / Dark) ----------
+  const themeButtons = document.querySelectorAll('[data-theme-choice]');
+  function applyTheme(choice) {
+    if (choice === 'light' || choice === 'dark') document.documentElement.setAttribute('data-theme', choice);
+    else document.documentElement.removeAttribute('data-theme');
+    themeButtons.forEach((b) => b.setAttribute('aria-checked', String(b.dataset.themeChoice === choice)));
+  }
+  let savedTheme = 'auto';
+  try { savedTheme = localStorage.getItem('geez-theme') || 'auto'; } catch (e) { /* storage blocked */ }
+  applyTheme(savedTheme);
+  themeButtons.forEach((b) => b.addEventListener('click', () => {
+    const choice = b.dataset.themeChoice;
+    applyTheme(choice);
+    try { localStorage.setItem('geez-theme', choice); } catch (e) { /* storage blocked */ }
+  }));
+
   // ---------- Tabs + hash routing ----------
   const ROUTES = {
     encrypt: 'encrypt-tab', decrypt: 'decrypt-tab', map: 'visualizer-tab',
