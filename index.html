@@ -279,10 +279,7 @@
           <h3>Neuron connections (thesis §4.2)</h3>
           <div class="sub" id="descLeft">Node 1 fires and fans out to all 8 hidden nodes</div>
         </div>
-        <div class="btn-row">
-          <span id="nnActiveBadge" class="badge">tr1</span>
-          <button id="btnToggleAllPairs" class="btn secondary small" type="button">Show all 8 steps</button>
-        </div>
+        <span id="nnActiveBadge" class="badge rubric">tr1</span>
       </div>
       <div class="nn-legend">
         <span><i class="ln k"></i>Active input node</span>
@@ -291,9 +288,17 @@
         <span><i class="ln b"></i>Feedback loop</span>
       </div>
       <div class="canvas-frame"><canvas id="canvasLeft" aria-label="Neuron connection diagram"></canvas></div>
-      <div id="nnAllPairsGallery" hidden>
-        <div id="nnGalleryGrid" class="gallery"></div>
+    </div>
+
+    <div class="panel" id="nnAllPairsGallery">
+      <div class="panel-head">
+        <div>
+          <h3>All 8 recursions, tr1 to tr8 (thesis §4.3)</h3>
+          <div class="sub">Each recursion takes the previous row as input and writes the next row of the block. Select one to step the inspector to it.</div>
+        </div>
+        <span class="badge" id="galleryCharBadge">'A'</span>
       </div>
+      <div id="nnGalleryGrid" class="gallery"></div>
     </div>
   </section>
 

@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastEncryption = null;
   let inspectorStep = 1;
   let playInterval = null;
-  let showAllSteps = false;
   let activeOrderFilter = 0;
   let highlightedSpokeIdx = -1;
 
@@ -540,32 +539,35 @@ document.addEventListener('DOMContentLoaded', () => {
     $('nnActiveBadge').textContent = `tr${inspectorStep}`;
     $('descLeft').textContent = `Step tr${inspectorStep}: input node ${inspectorStep} fires and fans out to all 8 hidden nodes`;
     drawThesisNNCanvas($('canvasLeft'), traces[idx], idx, false);
-    if (showAllSteps) renderGalleryGrid(traces);
+    renderGalleryGrid(traces);
+  }
+
+  function rowStrip(bits) {
+    return `<span class="bit-strip">${bits.map((b) => `<i class="${b ? 'on' : ''}"></i>`).join('')}</span>`;
   }
 
   function renderGalleryGrid(traces) {
     const grid = $('nnGalleryGrid');
+    $('galleryCharBadge').textContent = `'${selectedChar === ' ' ? 'space' : selectedChar}'`;
     grid.innerHTML = '';
     for (let s = 0; s < 8; s++) {
+      const t = traces[s];
       const card = document.createElement('button');
       card.type = 'button';
       card.className = `gallery-card${inspectorStep === s + 1 ? ' gallery-card-active' : ''}`;
-      card.innerHTML = `<div class="gallery-card-header"><span>tr${s + 1}</span><span>${traces[s].outputVector.join('')}</span></div>`;
+      card.setAttribute('aria-label', `Recursion tr${s + 1}: input ${t.inputVector.join('')}, output ${t.outputVector.join('')}`);
+      card.innerHTML = `<div class="gallery-card-header"><span>Recursion tr${s + 1}</span><span>writes row ${s + 1}</span></div>`;
       const c = document.createElement('canvas');
-      drawThesisNNCanvas(c, traces[s], s, true);
       card.appendChild(c);
+      const foot = document.createElement('div');
+      foot.className = 'gallery-card-foot';
+      foot.innerHTML = `<span><em>X</em> ${t.inputVector.join('')}</span><span class="arrow">→</span><span><em>A</em> ${t.outputVector.join('')}</span>${rowStrip(t.outputVector)}`;
+      card.appendChild(foot);
       card.addEventListener('click', () => { inspectorStep = s + 1; renderInspector(); });
       grid.appendChild(card);
+      drawThesisNNCanvas(c, t, s, false);
     }
   }
-
-  $('btnToggleAllPairs').addEventListener('click', () => {
-    showAllSteps = !showAllSteps;
-    $('nnAllPairsGallery').hidden = !showAllSteps;
-    $('btnToggleAllPairs').textContent = showAllSteps ? 'Hide all steps' : 'Show all 8 steps';
-    $('btnToggleAllPairs').classList.toggle('active', showAllSteps);
-    if (showAllSteps) renderGalleryGrid(engine.encryptCharacter(selectedChar).traces);
-  });
 
   // ---------- Numeric wheel ----------
   const WHEEL = 560;

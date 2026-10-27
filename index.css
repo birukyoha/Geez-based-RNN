@@ -469,12 +469,21 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; 
 .ln.f { background: var(--ochre); }
 .ln.o { background: var(--ok); }
 .ln.b { background: var(--muted); }
-.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-.gallery-card { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer; background: var(--bg); }
+.gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .gallery { grid-template-columns: minmax(0, 1fr); } }
+.gallery-card { appearance: none; padding: 0; text-align: left; font: inherit; color: inherit; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer; background: var(--bg); display: grid; min-width: 0; }
+.gallery-card:hover { border-color: var(--muted); }
 .gallery-card canvas { display: block; width: 100%; height: auto; }
-.gallery-card-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; padding: 6px 10px; color: var(--muted); border-bottom: 1px solid var(--line); }
-.gallery-card-active { border-color: var(--rubric); }
-.gallery-card-active .gallery-card-header { color: var(--rubric); }
+.gallery-card-header { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 600; padding: 8px 12px; color: var(--muted); border-bottom: 1px solid var(--line); background: var(--surface); }
+.gallery-card-header span:first-child { color: var(--ink); }
+.gallery-card-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 12px; border-top: 1px solid var(--line); background: var(--surface); font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.gallery-card-foot em { font-style: normal; color: var(--muted); margin-right: 2px; }
+.gallery-card-foot .arrow { color: var(--muted); }
+.bit-strip { display: inline-grid; grid-template-columns: repeat(8, 10px); gap: 2px; margin-left: auto; }
+.bit-strip i { width: 10px; height: 10px; border-radius: 2px; background: var(--bit-off); border: 1px solid var(--line); }
+.bit-strip i.on { background: var(--bit-on); border-color: var(--bit-on); }
+.gallery-card-active { border-color: var(--rubric); box-shadow: 0 0 0 2px var(--rubric-soft); }
+.gallery-card-active .gallery-card-header span:first-child { color: var(--rubric); }
 
 /* ---------- Script (architecture) ---------- */
 .doc { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
