@@ -1,379 +1,436 @@
 /**
- * Ge'ez RNN Cipher Application Logic & Event Handlers
+ * Ge'ez RNN Cipher — UI logic
+ * Engine: geez_rnn_engine.js · Data: geez_dataset.js
  */
-
 document.addEventListener('DOMContentLoaded', () => {
-  const cipherEngine = new GeezRNNCipher();
+  const engine = new GeezRNNCipher();
+  const $ = (id) => document.getElementById(id);
 
-  // State Variables
+  // ---------- State ----------
   let selectedChar = 'A';
-  let currentEncryptionResult = null;
+  let lastEncryption = null;
   let inspectorStep = 1;
   let playInterval = null;
+  let showAllSteps = false;
+  let activeOrderFilter = 0;
+  let highlightedSpokeIdx = -1;
 
-  // DOM Elements
+  // ---------- Theme tokens (canvas + SVG read colors from CSS) ----------
+  function tokens() {
+    const s = getComputedStyle(document.documentElement);
+    const v = (n) => s.getPropertyValue(n).trim();
+    return {
+      bg: v('--bg'), surface: v('--surface'), surface2: v('--surface-2'), line: v('--line'),
+      ink: v('--ink'), muted: v('--muted'), rubric: v('--rubric'), ochre: v('--ochre'), ok: v('--ok'),
+      mono: v('--font-mono') || 'monospace', ethiopic: v('--font-ethiopic') || 'serif', ui: v('--font-ui') || 'sans-serif'
+    };
+  }
+  function alpha(color, a) {
+    // Accepts #rrggbb; returns rgba string
+    const m = /^#([0-9a-f]{6})$/i.exec(color);
+    if (!m) return color;
+    const n = parseInt(m[1], 16);
+    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // ---------- Tabs + hash routing ----------
+  const ROUTES = {
+    encrypt: 'encrypt-tab', decrypt: 'decrypt-tab', map: 'visualizer-tab',
+    inspector: 'inspector-tab', model: 'architecture-tab', history: 'infographics-tab'
+  };
+  const TAB_TO_ROUTE = Object.fromEntries(Object.entries(ROUTES).map(([k, v]) => [v, k]));
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.tab-content');
 
-  // Encryption Tab Controls
-  const inputText = document.getElementById('inputText');
-  const keyPassphrase = document.getElementById('keyPassphrase');
-  const enableAES = document.getElementById('enableAES');
-  const btnEncrypt = document.getElementById('btnEncrypt');
+  function showTab(tabId, updateHash = true) {
+    if (!$(tabId)) tabId = 'encrypt-tab';
+    tabButtons.forEach((b) => {
+      const on = b.dataset.tab === tabId;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-current', on ? 'page' : 'false');
+    });
+    tabContents.forEach((c) => c.classList.toggle('active', c.id === tabId));
+    if (tabId === 'visualizer-tab') renderVisualizer();
+    if (tabId === 'inspector-tab') renderInspector();
+    if (tabId === 'architecture-tab') renderNumerologyWheel();
+    if (tabId === 'infographics-tab') renderGeezTree();
+    if (updateHash) {
+      const route = TAB_TO_ROUTE[tabId];
+      if (route && location.hash !== '#' + route) {
+        try { history.replaceState(null, '', '#' + route); } catch (e) { location.hash = route; }
+      }
+    }
+  }
+  tabButtons.forEach((btn) => btn.addEventListener('click', () => {
+    showTab(btn.dataset.tab);
+    window.scrollTo({ top: 0 });
+  }));
+  function routeFromHash() {
+    const key = (location.hash || '').replace('#', '');
+    if (ROUTES[key]) showTab(ROUTES[key], false);
+  }
+  window.addEventListener('hashchange', routeFromHash);
 
-  const outputBinary = document.getElementById('outputBinary');
-  const outputHex = document.getElementById('outputHex');
-  const outputAES = document.getElementById('outputAES');
-
-  // Decryption Tab Controls
-  const decryptInputType = document.getElementById('decryptInputType');
-  const decryptCiphertextInput = document.getElementById('decryptCiphertextInput');
-  const decryptPassphraseGroup = document.getElementById('decryptPassphraseGroup');
-  const decryptPassphrase = document.getElementById('decryptPassphrase');
-  const btnDecrypt = document.getElementById('btnDecrypt');
-
-  const outputDecryptedResult = document.getElementById('outputDecryptedResult');
-  const outputDecryptStatus = document.getElementById('outputDecryptStatus');
-
-  // Visualizer Tab Controls
-  const matrixGrid = document.getElementById('matrixGrid');
-  const selectedCharLabel = document.getElementById('selectedCharLabel');
-  const charSelector = document.getElementById('charSelector');
-  const ethiopicClassList = document.getElementById('ethiopicClassList');
-
-  // Inspector Tab Controls
-  const inspectorTableBody = document.getElementById('inspectorTableBody');
-  const currentStepLabel = document.getElementById('currentStepLabel');
-  const btnPrevStep = document.getElementById('btnPrevStep');
-  const btnPlayStep = document.getElementById('btnPlayStep');
-  const btnNextStep = document.getElementById('btnNextStep');
-  const inspectorCharBadge = document.getElementById('inspectorCharBadge');
-
-  // Neural Network Visualizer Controls (Thesis §4.2)
-  const nnActiveBadge = document.getElementById('nnActiveBadge');
-  const btnToggleAllPairs = document.getElementById('btnToggleAllPairs');
-  const nnAllPairsGallery = document.getElementById('nnAllPairsGallery');
-  const nnGalleryGrid = document.getElementById('nnGalleryGrid');
-
-  const canvasLeft = document.getElementById('canvasLeft');
-  const paneLeft = document.getElementById('paneLeft');
-  const titleLeft = document.getElementById('titleLeft');
-  const descLeft = document.getElementById('descLeft');
-
-  let showAllSteps = false;
-
-  // --- 1. Tab Switch Logic ---
-  tabButtons.forEach(btn => {
+  // ---------- Copy buttons ----------
+  document.querySelectorAll('.copy-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const targetTab = btn.getAttribute('data-tab');
-      tabButtons.forEach(b => b.classList.remove('active'));
-      tabContents.forEach(c => c.classList.remove('active'));
-
-      btn.classList.add('active');
-      document.getElementById(targetTab).classList.add('active');
-
-      if (targetTab === 'visualizer-tab') renderVisualizer();
-      if (targetTab === 'inspector-tab') renderInspector();
-      if (targetTab === 'architecture-tab') renderArchitectureTab();
-      if (targetTab === 'infographics-tab') renderInfographicsTab();
+      const el = $(btn.dataset.copy);
+      const text = el ? el.textContent.trim() : '';
+      if (!text || text === '–') return;
+      const done = () => {
+        btn.textContent = 'Copied';
+        btn.classList.add('done');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1400);
+      };
+      const fallback = () => {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        btn.textContent = 'Selected';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1400);
+      };
+      try {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } catch (e) { fallback(); }
     });
   });
 
-  // --- 2. Encryption Execution ---
-  async function performEncryption() {
-    const text = inputText.value || 'HELLOGEEZ';
-    const result = cipherEngine.encryptText(text);
-    currentEncryptionResult = result;
-
-    outputBinary.textContent = result.fullBinary.match(/.{1,8}/g).join(' ');
-    outputHex.textContent = result.hex;
-
-    // Default pre-fill decrypt tab with generated Hex
-    if (!decryptCiphertextInput.value) {
-      decryptCiphertextInput.value = result.hex;
+  // ---------- Mini 8x8 tiles ----------
+  function tileHtml(block, caption, active) {
+    let cells = '';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const flag = c < 2 || r === 7;
+        const on = block[r][c] === 1;
+        cells += `<i class="${on ? 'on' : (flag ? 'flag' : '')}"></i>`;
+      }
     }
-
-    // AES-128 Hybrid Integration
-    if (enableAES.checked && window.crypto && window.crypto.subtle) {
-      const aesResult = await cipherEngine.encryptAES128(result.fullBinary, keyPassphrase.value);
-      outputAES.textContent = aesResult.ciphertextHex;
-    } else {
-      outputAES.textContent = "AES Disabled / Not Active";
-    }
-
-    renderInspector();
+    return `<button type="button" class="tile${active ? ' active' : ''}" data-char="${escapeHtml(caption)}" title="Inspect '${escapeHtml(caption === ' ' ? 'space' : caption)}'">
+      <span class="tile-grid">${cells}</span>
+      <span class="tile-cap">${caption === ' ' ? '␣' : escapeHtml(caption)}</span>
+    </button>`;
   }
 
-  btnEncrypt.addEventListener('click', performEncryption);
+  // ---------- Encryption ----------
+  const inputText = $('inputText');
+  const keyPassphrase = $('keyPassphrase');
+  const enableAES = $('enableAES');
+
+  async function performEncryption() {
+    const text = inputText.value || '';
+    if (!text) {
+      lastEncryption = null;
+      $('cipherTiles').innerHTML = '<p class="hint">Type a message to see its cipher blocks.</p>';
+      ['outputHex', 'outputAES', 'outputBinary'].forEach((id) => { $(id).textContent = '–'; });
+      $('statChars').textContent = '0';
+      $('statBits').textContent = '0';
+      $('statAES').textContent = '–';
+      $('blockCount').textContent = '0 blocks';
+      return;
+    }
+    const result = engine.encryptText(text);
+    lastEncryption = result;
+
+    $('cipherTiles').innerHTML = result.charResults
+      .map((r) => tileHtml(r.block64, r.character, r.character === selectedChar))
+      .join('');
+    $('blockCount').textContent = `${result.blocks64.length} block${result.blocks64.length === 1 ? '' : 's'}`;
+    $('statChars').textContent = String(text.length);
+    $('statBits').textContent = result.fullBinary.length.toLocaleString();
+    $('outputHex').textContent = result.hex;
+    $('outputBinary').textContent = (result.fullBinary.match(/.{1,8}/g) || []).join(' ');
+
+    $('passGroup').hidden = !enableAES.checked;
+    $('pipeAES').classList.toggle('off', !enableAES.checked);
+
+    if (enableAES.checked && window.crypto && window.crypto.subtle) {
+      const aes = await engine.encryptAES128(result.fullBinary, keyPassphrase.value);
+      $('outputAES').textContent = aes.ciphertextHex;
+      $('outputAES').classList.remove('muted');
+      $('statAES').textContent = /^[0-9A-F]+$/.test(aes.ciphertextHex) ? (aes.ciphertextHex.length / 2).toLocaleString() : '–';
+    } else {
+      $('outputAES').textContent = enableAES.checked ? 'AES is not available in this browser.' : 'AES layer is off.';
+      $('outputAES').classList.add('muted');
+      $('statAES').textContent = '–';
+    }
+  }
+
+  $('cipherTiles').addEventListener('click', (e) => {
+    const tile = e.target.closest('.tile');
+    if (!tile) return;
+    selectChar(tile.dataset.char);
+    showTab('inspector-tab');
+  });
+  $('btnEncrypt').addEventListener('click', performEncryption);
   inputText.addEventListener('input', performEncryption);
   enableAES.addEventListener('change', performEncryption);
   keyPassphrase.addEventListener('input', performEncryption);
 
-  // --- 3. Standalone Decryption Execution ---
-  decryptInputType.addEventListener('change', () => {
-    if (decryptInputType.value === 'aes') {
-      decryptPassphraseGroup.style.display = 'block';
-    } else {
-      decryptPassphraseGroup.style.display = 'none';
-    }
-  });
+  // ---------- Decryption ----------
+  const decryptInputType = $('decryptInputType');
+  const decryptInput = $('decryptCiphertextInput');
+  const segButtons = document.querySelectorAll('.segmented [data-format]');
+
+  function setFormat(fmt) {
+    decryptInputType.value = fmt;
+    segButtons.forEach((b) => b.classList.toggle('active', b.dataset.format === fmt));
+    $('decryptPassphraseGroup').hidden = fmt !== 'aes';
+    decryptInput.placeholder = fmt === 'binary' ? 'Paste 0s and 1s (64 bits per character)'
+      : fmt === 'aes' ? 'Paste the AES-128 hex output' : 'Paste the Ge\'ez cipher hex';
+  }
+  segButtons.forEach((b) => b.addEventListener('click', () => { setFormat(b.dataset.format); performDecryption(); }));
+
+  function setStatus(text, kind) {
+    const el = $('outputDecryptStatus');
+    el.textContent = text;
+    el.className = 'status' + (kind ? ' ' + kind : '');
+  }
 
   async function performDecryption() {
-    const format = decryptInputType.value;
-    const rawInput = decryptCiphertextInput.value.trim();
-
-    if (!rawInput) {
-      outputDecryptedResult.textContent = '-';
-      outputDecryptStatus.textContent = 'Please enter or paste ciphertext data.';
+    const fmt = decryptInputType.value;
+    const raw = decryptInput.value.trim();
+    const out = $('outputDecryptedResult');
+    $('decryptTiles').innerHTML = '';
+    out.classList.remove('fail');
+    if (!raw) {
+      out.textContent = '–';
+      setStatus('Paste ciphertext, or use the latest encryption.');
       return;
     }
-
     try {
-      let recoveredText = '';
-
-      if (format === 'hex') {
-        recoveredText = cipherEngine.decryptTextFromHex(rawInput);
-        outputDecryptStatus.textContent = 'Successfully decrypted from Ge\'ez RNN Hex string.';
-      } else if (format === 'binary') {
-        recoveredText = cipherEngine.decryptTextFromBinary(rawInput);
-        outputDecryptStatus.textContent = 'Successfully decrypted from Ge\'ez 64-bit binary stream.';
-      } else if (format === 'aes') {
-        const pass = decryptPassphrase.value || 'GEEZ_SECRET_KEY';
-        const aesRes = await cipherEngine.decryptAES128(rawInput, pass);
-        if (aesRes.error) {
-          outputDecryptedResult.textContent = 'DECRYPTION FAILED';
-          outputDecryptStatus.textContent = 'Error: ' + aesRes.error;
+      let binary = '';
+      if (fmt === 'hex') binary = engine.hexToBinary(raw);
+      else if (fmt === 'binary') binary = raw.replace(/[^01]/g, '');
+      else {
+        const res = await engine.decryptAES128(raw, $('decryptPassphrase').value || 'GEEZ_SECRET_KEY');
+        if (res.error) {
+          out.textContent = 'Could not decrypt';
+          out.classList.add('fail');
+          setStatus('The AES layer did not open. Check that the passphrase matches the one used to encrypt.', 'err');
           return;
         }
-        recoveredText = cipherEngine.decryptTextFromBinary(aesRes.binaryData);
-        outputDecryptStatus.textContent = 'Successfully decrypted through AES-128 CBC + Ge\'ez RNN pipeline.';
+        binary = res.binaryData;
       }
-
-      outputDecryptedResult.textContent = recoveredText || 'Unrecognized Pattern';
+      const blocks = engine.binaryToBlocks(binary);
+      if (!blocks.length) {
+        out.textContent = 'No complete blocks';
+        out.classList.add('fail');
+        setStatus('Each character needs 64 bits (16 hex digits). The input is too short or not in the selected format.', 'err');
+        return;
+      }
+      const text = engine.decryptTextFromBlocks(blocks);
+      out.textContent = text;
+      $('decryptTiles').innerHTML = blocks.map((b, i) => tileHtml(b, text[i] || '?', false)).join('');
+      const leftover = binary.length % 64;
+      const label = fmt === 'aes' ? 'AES-128 CBC, then Ge\'ez blocks' : fmt === 'binary' ? 'Ge\'ez binary blocks' : 'Ge\'ez hex blocks';
+      setStatus(`Decoded ${blocks.length} block${blocks.length === 1 ? '' : 's'} from ${label}.${leftover ? ` Ignored ${leftover} trailing bits.` : ''}`, 'ok');
     } catch (e) {
-      outputDecryptedResult.textContent = 'DECRYPTION ERROR';
-      outputDecryptStatus.textContent = 'Failed to parse ciphertext: ' + e.message;
+      out.textContent = 'Could not read input';
+      out.classList.add('fail');
+      setStatus('The input could not be parsed: ' + e.message, 'err');
     }
   }
 
-  btnDecrypt.addEventListener('click', performDecryption);
-  decryptCiphertextInput.addEventListener('input', performDecryption);
+  $('btnDecrypt').addEventListener('click', performDecryption);
+  decryptInput.addEventListener('input', performDecryption);
+  $('decryptPassphrase').addEventListener('input', performDecryption);
 
-  // --- 4. 8x8 Grid Visualizer Logic ---
-  function renderCharSelector() {
-    charSelector.innerHTML = '';
-    const groups = [
-      { label: 'Uppercase (A–Z)', chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') },
-      { label: 'Lowercase (a–z)', chars: 'abcdefghijklmnopqrstuvwxyz'.split('') },
-      { label: 'Numbers & Symbols', chars: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ',', '!', '?', '@', '#', '$', '%', '&', '*', '+', '-', '=', '_', ':', ';', "'", '"', '/', ' '] }
-    ];
+  function loadLatestIntoDecrypt() {
+    if (!lastEncryption) return;
+    const aesHex = $('outputAES').textContent.trim();
+    if (enableAES.checked && /^[0-9A-F]+$/.test(aesHex)) {
+      setFormat('aes');
+      decryptInput.value = aesHex;
+      $('decryptPassphrase').value = keyPassphrase.value;
+    } else {
+      setFormat('hex');
+      decryptInput.value = lastEncryption.hex;
+    }
+    performDecryption();
+  }
+  $('btnUseLatest').addEventListener('click', loadLatestIntoDecrypt);
+  $('btnSendToDecrypt').addEventListener('click', async () => {
+    await performEncryption();
+    loadLatestIntoDecrypt();
+    showTab('decrypt-tab');
+    window.scrollTo({ top: 0 });
+  });
 
-    groups.forEach(group => {
-      const section = document.createElement('div');
-      section.className = 'char-group-section';
-      section.innerHTML = `<div class="char-group-label">${group.label}</div>`;
-
-      const chipContainer = document.createElement('div');
-      chipContainer.className = 'char-group-chips';
-
-      group.chars.forEach(char => {
-        const chip = document.createElement('div');
-        chip.className = `char-chip ${char === selectedChar ? 'active' : ''}`;
-        chip.textContent = char === ' ' ? 'Space' : char;
-        chip.title = `Select '${char === ' ' ? 'Space' : char}'`;
-        chip.addEventListener('click', () => {
-          selectedChar = char;
-          document.querySelectorAll('.char-chip').forEach(c => c.classList.remove('active'));
-          chip.classList.add('active');
-          renderVisualizer();
-          renderEthiopicClasses();
-          renderInspector();
-          performEncryption();
-        });
-        chipContainer.appendChild(chip);
-      });
-
-      section.appendChild(chipContainer);
-      charSelector.appendChild(section);
-    });
+  // ---------- Character selection (shared) ----------
+  function selectChar(ch) {
+    selectedChar = ch;
+    document.querySelectorAll('.char-chip').forEach((c) => c.classList.toggle('active', c.dataset.char === ch));
+    document.querySelectorAll('#cipherTiles .tile').forEach((t) => t.classList.toggle('active', t.dataset.char === ch));
+    renderVisualizer();
+    renderEthiopicClasses();
+    renderInspector();
   }
 
-  let activeOrderFilter = 0; // 0 = all, 1..7 for specific orders
+  function renderCharSelector() {
+    const groups = [
+      { label: 'Uppercase', chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') },
+      { label: 'Lowercase', chars: 'abcdefghijklmnopqrstuvwxyz'.split('') },
+      { label: 'Digits and symbols', chars: '0123456789.,!?@#$%&*+-=_:;\'"/ '.split('') }
+    ];
+    $('charSelector').innerHTML = groups.map((g) => `
+      <div class="char-group-section">
+        <div class="char-group-label">${g.label}</div>
+        <div class="char-group-chips">
+          ${g.chars.map((ch) => `<button type="button" class="char-chip${ch === selectedChar ? ' active' : ''}" data-char="${escapeHtml(ch)}">${ch === ' ' ? 'Space' : escapeHtml(ch)}</button>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+  $('charSelector').addEventListener('click', (e) => {
+    const chip = e.target.closest('.char-chip');
+    if (chip) selectChar(chip.dataset.char);
+  });
 
+  // ---------- 8x8 visualizer ----------
   function renderVisualizer() {
-    selectedCharLabel.textContent = `Character '${selectedChar}'`;
-    matrixGrid.innerHTML = '';
-
+    $('selectedCharLabel').textContent = `Character '${selectedChar === ' ' ? 'space' : selectedChar}'`;
+    const grid = $('matrixGrid');
+    grid.innerHTML = '';
     const matrix = GEEZ_DATASET.getMatrixForChar(selectedChar);
     let activeBits = 0;
 
     for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 8; c++) {
-        const cell = document.createElement('div');
-        const isFlag = (c === 0 || c === 1 || r === 7);
-        const isBlack = matrix[r][c] === 1;
-        if (!isFlag && isBlack) activeBits++;
-
-        let cellClass = 'grid-cell ';
-        if (isFlag) cellClass += 'flag-cell';
-        else if (isBlack) cellClass += 'black-pixel';
-        else cellClass += 'white-pixel';
-
-        cell.className = cellClass;
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        const isFlag = c < 2 || r === 7;
+        const on = matrix[r][c] === 1;
+        if (!isFlag && on) activeBits++;
+        cell.className = 'grid-cell ' + (isFlag ? 'flag-cell' : on ? 'black-pixel' : 'white-pixel');
         cell.textContent = matrix[r][c];
-
-        // Click to toggle bit (interactive editing)
+        cell.setAttribute('aria-label', `Row ${r + 1}, column ${c + 1}: ${matrix[r][c]}${isFlag ? ' (flag bit)' : ''}`);
+        if (isFlag) cell.disabled = true;
         cell.addEventListener('click', () => {
-          if (!isFlag) {
-            matrix[r][c] = matrix[r][c] === 1 ? 0 : 1;
-            GEEZ_DATASET.cognitiveMaps[selectedChar] = matrix;
-            renderVisualizer();
-            performEncryption();
-          }
+          if (isFlag) return;
+          matrix[r][c] = matrix[r][c] === 1 ? 0 : 1;
+          GEEZ_DATASET.cognitiveMaps[selectedChar] = matrix;
+          renderVisualizer();
+          performEncryption();
         });
-
-        matrixGrid.appendChild(cell);
+        grid.appendChild(cell);
       }
     }
 
-    // Render Heritage & Astrographic Profile Card
-    const profile = GEEZ_DATASET.getCharacterProfile(selectedChar);
-    const profileGlyph = document.getElementById('profileGlyph');
-    const profileTitle = document.getElementById('profileTitle');
-    const profilePicto = document.getElementById('profilePicto');
-    const profileOrder = document.getElementById('profileOrder');
-    const profileVowel = document.getElementById('profileVowel');
-    const profileDay = document.getElementById('profileDay');
-    const profileEquinox = document.getElementById('profileEquinox');
-    const profileNumerology = document.getElementById('profileNumerology');
-    const profileActiveBits = document.getElementById('profileActiveBits');
-
-    if (profileGlyph) {
-      profileGlyph.textContent = profile.isEthiopic ? profile.char : (profile.ethiopicGlyph || profile.char);
-      profileTitle.textContent = `${profile.className} (${profile.classMeaning})`;
-      profilePicto.textContent = `Pictograph: ${profile.pictoOrigin}`;
-      profileOrder.textContent = profile.orderName;
-      profileVowel.textContent = profile.vowelSound;
-      profileDay.textContent = `${profile.dayOfWeek} (${profile.dayGeez})`;
-      profileEquinox.textContent = `Day ${profile.equinoxDay} of ${profile.totalEquinoxDays} (Equinox ${profile.equinoxDay <= 91 ? '1 / Season 1' : '1 / Season 2'})`;
-      profileNumerology.textContent = `${profile.numerologyValue}`;
-      profileActiveBits.textContent = `${activeBits} Active / 22 Flags`;
-    }
+    const p = GEEZ_DATASET.getCharacterProfile(selectedChar);
+    $('profileGlyph').textContent = p.isEthiopic ? p.char : (p.ethiopicGlyph && p.ethiopicGlyph !== '—' ? p.ethiopicGlyph : p.char);
+    $('profileTitle').textContent = `${p.className} · ${p.classMeaning}`;
+    $('profilePicto').textContent = p.pictoOrigin;
+    $('profileOrder').textContent = p.orderName;
+    $('profileVowel').textContent = p.vowelSound;
+    $('profileDay').textContent = `${p.dayOfWeek} (${p.dayGeez})`;
+    $('profileEquinox').textContent = `Day ${p.equinoxDay} of ${p.totalEquinoxDays}`;
+    $('profileNumerology').textContent = String(p.numerologyValue);
+    $('profileActiveBits').textContent = `${activeBits} of 42`;
   }
 
   function renderEthiopicClasses() {
-    ethiopicClassList.innerHTML = '';
-
-    GEEZ_DATASET.ethiopianClasses.forEach(cls => {
-      const entry = document.createElement('div');
-      entry.className = 'class-list-entry';
-
+    const list = $('ethiopicClassList');
+    list.innerHTML = GEEZ_DATASET.ethiopianClasses.map((cls) => {
       const forms = [
-        { char: cls.geez, order: 1, name: "Ge'ez" },
-        { char: cls.kaeb, order: 2, name: "Ka'eb" },
-        { char: cls.salis, order: 3, name: "Salis" },
-        { char: cls.rabe, order: 4, name: "Rab'e" },
-        { char: cls.hamis, order: 5, name: "Hamis" },
-        { char: cls.sadis, order: 6, name: "Sadis" },
-        { char: cls.sabe, order: 7, name: "Sab'e" }
-      ];
-
-      const visibleForms = activeOrderFilter === 0
-        ? forms
-        : forms.filter(f => f.order === activeOrderFilter);
-
-      const fidelBadgesHtml = visibleForms.map(f => {
-        const isActive = (selectedChar === f.char);
-        return `<span class="fidel-char-pill ${isActive ? 'active' : ''}" data-char="${f.char}" title="${cls.name} (${f.name} - Order ${f.order})">${f.char}</span>`;
-      }).join(' ');
-
-      entry.innerHTML = `
+        [cls.geez, 1, "Ge'ez"], [cls.kaeb, 2, "Ka'eb"], [cls.salis, 3, 'Salis'], [cls.rabe, 4, "Rab'e"],
+        [cls.hamis, 5, 'Hamis'], [cls.sadis, 6, 'Sadis'], [cls.sabe, 7, "Sab'e"]
+      ].filter((f) => activeOrderFilter === 0 || f[1] === activeOrderFilter);
+      return `<div class="class-list-entry">
         <div class="fidel-info">
-          <span class="fidel-name">${cls.name}</span>
-          <span class="fidel-meaning">(${cls.meaning})</span>
-          <span class="fidel-base-num">Gematria: ${cls.baseValue}</span>
+          <span class="fidel-name">${escapeHtml(cls.name)}</span>
+          <span class="fidel-meaning">${escapeHtml(cls.meaning)}</span>
+          <span class="fidel-base-num">value ${cls.baseValue}</span>
         </div>
         <div class="fidel-chars-badge">
-          ${fidelBadgesHtml}
+          ${forms.map(([ch, o, n]) => `<button type="button" class="fidel-char-pill${selectedChar === ch ? ' active' : ''}" data-char="${ch}" title="${escapeHtml(cls.name)}, order ${o} (${n})">${ch}</button>`).join('')}
         </div>
-      `;
-
-      // Attach click events to each syllograph pill
-      entry.querySelectorAll('.fidel-char-pill').forEach(pill => {
-        pill.addEventListener('click', () => {
-          const char = pill.getAttribute('data-char');
-          selectedChar = char;
-          document.querySelectorAll('.char-chip').forEach(c => c.classList.remove('active'));
-          renderVisualizer();
-          renderEthiopicClasses();
-          renderInspector();
-          performEncryption();
-        });
-      });
-
-      ethiopicClassList.appendChild(entry);
-    });
-
-    // Wire order filter buttons
-    document.querySelectorAll('.order-filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.order-filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeOrderFilter = parseInt(btn.getAttribute('data-order'), 10);
-        renderEthiopicClasses();
-      });
-    });
+      </div>`;
+    }).join('');
   }
+  $('ethiopicClassList').addEventListener('click', (e) => {
+    const pill = e.target.closest('.fidel-char-pill');
+    if (pill) selectChar(pill.dataset.char);
+  });
+  document.querySelectorAll('.order-filter-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.order-filter-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeOrderFilter = parseInt(btn.dataset.order, 10);
+      renderEthiopicClasses();
+    });
+  });
 
-  // --- 5. 8-Recursion Inspector Logic ---
+  // ---------- Inspector ----------
+  const stepDots = $('stepDots');
+  stepDots.innerHTML = Array.from({ length: 8 }, (_, i) => `<button type="button" class="step-dot" data-step="${i + 1}" aria-label="Go to step ${i + 1}">${i + 1}</button>`).join('');
+  stepDots.addEventListener('click', (e) => {
+    const d = e.target.closest('.step-dot');
+    if (!d) return;
+    inspectorStep = parseInt(d.dataset.step, 10);
+    renderInspector();
+  });
+
   function renderInspector() {
-    inspectorCharBadge.textContent = `Inspecting '${selectedChar}'`;
-    const charRes = cipherEngine.encryptCharacter(selectedChar);
-    inspectorTableBody.innerHTML = '';
+    const label = selectedChar === ' ' ? 'space' : selectedChar;
+    $('inspectorCharBadge').textContent = `Inspecting '${label}'`;
+    const res = engine.encryptCharacter(selectedChar);
 
-    charRes.traces.forEach(t => {
-      const tr = document.createElement('tr');
-      if (t.recursionStep === inspectorStep) tr.className = 'active-step';
-
-      tr.innerHTML = `
+    $('inspectorTableBody').innerHTML = res.traces.map((t) => {
+      const cls = t.recursionStep === inspectorStep ? 'active-step' : (t.recursionStep > inspectorStep ? 'future' : '');
+      return `<tr class="${cls}" data-step="${t.recursionStep}">
         <td><strong>tr${t.recursionStep}</strong></td>
         <td>${t.inputVector.join('')}</td>
         <td>${t.weightVector.join('')}</td>
-        <td>[${t.biasVector.join(', ')}]</td>
-        <td>[${t.vVector.join(', ')}]</td>
-        <td style="color: var(--accent-cyan); font-weight: bold;">${t.outputVector.join('')}</td>
-        <td>Feedback &rarr; tr${t.recursionStep < 8 ? t.recursionStep + 1 : 'Done'}</td>
-      `;
-      inspectorTableBody.appendChild(tr);
+        <td>${t.biasVector.map((b) => (b > 0 ? '+1' : '−1')).join(' ')}</td>
+        <td>${t.vVector.map((v) => (v > 0 ? '+' + v : String(v).replace('-', '−'))).join(' ')}</td>
+        <td class="out">${t.outputVector.join('')}</td>
+      </tr>`;
+    }).join('');
+
+    $('currentStepLabel').textContent = `Step tr${inspectorStep} of 8`;
+    stepDots.querySelectorAll('.step-dot').forEach((d) => {
+      const s = parseInt(d.dataset.step, 10);
+      d.classList.toggle('active', s === inspectorStep);
+      d.classList.toggle('done', s < inspectorStep);
     });
 
-    currentStepLabel.textContent = `Step tr${inspectorStep} / tr8`;
+    // Block build-up
+    let cells = '';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        if (r < inspectorStep) {
+          const on = res.block64[r][c] === 1;
+          cells += `<i class="${on ? 'on' : ''}${r === inspectorStep - 1 ? ' current' : ''}"></i>`;
+        } else {
+          cells += '<i class="pending"></i>';
+        }
+      }
+    }
+    $('buildGrid').innerHTML = cells;
+    $('buildHint').textContent = inspectorStep === 8 ? 'All 8 rows written: 64-bit block complete' : inspectorStep === 1 ? 'Row 1 written' : `Rows 1–${inspectorStep} written`;
 
-    // Render neural network connection diagram for current step (Thesis §4.2)
-    renderNNVisualizer(charRes.traces);
+    renderNNVisualizer(res.traces);
   }
-
-  btnPrevStep.addEventListener('click', () => {
-    if (inspectorStep > 1) {
-      inspectorStep--;
-      renderInspector();
-    }
+  $('inspectorTableBody').addEventListener('click', (e) => {
+    const row = e.target.closest('tr[data-step]');
+    if (!row) return;
+    inspectorStep = parseInt(row.dataset.step, 10);
+    renderInspector();
   });
 
-  btnNextStep.addEventListener('click', () => {
-    if (inspectorStep < 8) {
-      inspectorStep++;
-      renderInspector();
-    }
-  });
-
-  btnPlayStep.addEventListener('click', () => {
+  $('btnPrevStep').addEventListener('click', () => { if (inspectorStep > 1) { inspectorStep--; renderInspector(); } });
+  $('btnNextStep').addEventListener('click', () => { if (inspectorStep < 8) { inspectorStep++; renderInspector(); } });
+  $('btnPlayStep').addEventListener('click', () => {
     if (playInterval) {
       clearInterval(playInterval);
       playInterval = null;
-      btnPlayStep.textContent = '▶ Auto Play';
+      $('btnPlayStep').textContent = 'Play';
     } else {
-      btnPlayStep.textContent = '⏸ Pause';
+      $('btnPlayStep').textContent = 'Pause';
       playInterval = setInterval(() => {
         inspectorStep = (inspectorStep % 8) + 1;
         renderInspector();
@@ -381,838 +438,364 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- 6. Thesis §4.2 Connection of Neurons Drawing Engine ---
-
-  /**
-   * Helper: Draws a directed line with an arrowhead between two points, offset by node radii.
-   */
-  function drawArrow(ctx, x1, y1, x2, y2, r1, r2, color = '#64748b', width = 1.2, headLen = 6) {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const dist = Math.hypot(dx, dy);
+  // ---------- Neuron connection canvas (thesis §4.2) ----------
+  function drawArrow(ctx, x1, y1, x2, y2, r1, r2, color, width, headLen) {
+    const dx = x2 - x1, dy = y2 - y1, dist = Math.hypot(dx, dy);
     if (dist <= r1 + r2) return;
-
-    const ux = dx / dist;
-    const uy = dy / dist;
-
-    const startX = x1 + ux * r1;
-    const startY = y1 + uy * r1;
-    const endX = x2 - ux * r2;
-    const endY = y2 - uy * r2;
-
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.stroke();
-
-    // Arrow head
-    const angle = Math.atan2(dy, dx);
-    ctx.beginPath();
-    ctx.moveTo(endX, endY);
-    ctx.lineTo(
-      endX - headLen * Math.cos(angle - Math.PI / 6),
-      endY - headLen * Math.sin(angle - Math.PI / 6)
-    );
-    ctx.lineTo(
-      endX - headLen * Math.cos(angle + Math.PI / 6),
-      endY - headLen * Math.sin(angle + Math.PI / 6)
-    );
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
+    const ux = dx / dist, uy = dy / dist;
+    const sx = x1 + ux * r1, sy = y1 + uy * r1, ex = x2 - ux * r2, ey = y2 - uy * r2;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey);
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.stroke();
+    const a = Math.atan2(dy, dx);
+    ctx.beginPath(); ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - headLen * Math.cos(a - Math.PI / 6), ey - headLen * Math.sin(a - Math.PI / 6));
+    ctx.lineTo(ex - headLen * Math.cos(a + Math.PI / 6), ey - headLen * Math.sin(a + Math.PI / 6));
+    ctx.closePath(); ctx.fillStyle = color; ctx.fill();
   }
 
-  /**
-   * Helper: Draws an individual circular neuron node with glow and optional label/bit.
-   */
-  function drawNode(ctx, x, y, r, label, isPeriodic, isActive, subLabel = '') {
-    // Glow effect
-    if (isPeriodic) {
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r + 9);
-      g.addColorStop(0, 'rgba(0, 240, 255, 0.45)');
-      g.addColorStop(1, 'rgba(0, 240, 255, 0)');
-      ctx.beginPath();
-      ctx.arc(x, y, r + 9, 0, Math.PI * 2);
-      ctx.fillStyle = g;
-      ctx.fill();
-    } else if (isActive) {
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r + 6);
-      g.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
-      g.addColorStop(1, 'rgba(16, 185, 129, 0)');
-      ctx.beginPath();
-      ctx.arc(x, y, r + 6, 0, Math.PI * 2);
-      ctx.fillStyle = g;
-      ctx.fill();
-    }
-
-    // Node body
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    if (isPeriodic) {
-      ctx.fillStyle = '#00f0ff';
-    } else if (isActive) {
-      ctx.fillStyle = '#10b981';
-    } else {
-      ctx.fillStyle = '#0a101d';
-    }
+  function drawNode(ctx, T, x, y, r, label, kind, mini) {
+    // kind: 'key' (active input node), 'on' (bit 1), 'off'
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = kind === 'key' ? T.rubric : kind === 'on' ? T.ok : T.surface;
     ctx.fill();
-
-    // Node border
-    ctx.lineWidth = isPeriodic ? 2.5 : 1.5;
-    ctx.strokeStyle = isPeriodic ? '#00f0ff' : (isActive ? '#10b981' : '#334155');
+    ctx.lineWidth = mini ? 1 : 1.5;
+    ctx.strokeStyle = kind === 'key' ? T.rubric : kind === 'on' ? T.ok : T.line;
     ctx.stroke();
-
-    // Label / bit inside node
-    if (label !== undefined && label !== null && label !== '') {
-      ctx.fillStyle = (isPeriodic || isActive) ? '#020617' : '#94a3b8';
-      ctx.font = `bold ${r >= 10 ? 9.5 : (r >= 6 ? 7.5 : 6)}px monospace`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, x, y);
-    }
-
-    // Small sub-label outside
-    if (subLabel && r >= 10) {
-      ctx.fillStyle = '#475569';
-      ctx.font = '8px monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(subLabel, x, y - r - 2);
+    if (label !== '' && label !== undefined && label !== null) {
+      ctx.fillStyle = kind === 'off' ? T.muted : T.surface;
+      ctx.font = `600 ${r >= 10 ? 10 : (r >= 6 ? 7.5 : 6)}px ${T.mono}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(label), x, y + 0.5);
     }
   }
 
-  /**
-   * Draws the EXACT Thesis §4.2 connection diagram (5 Columns):
-   *   Col 1: 1 Input Node (center)
-   *   Col 2: 8 Nodes (with Node k radiating to all 8 nodes of Col 3)
-   *   Col 3: 8 Nodes (1-to-1 forward connection to Col 4)
-   *   Col 4: 8 Nodes (converging to 1 Output Node)
-   *   Col 5: 1 Output Node (center) + Feedback Loop to Col 1
-   */
-  function drawThesisNNCanvas(canvas, trace, stepIdx, isMini = false) {
-    // Base logical resolution
-    const W = isMini ? 260 : 540;
-    const H = isMini ? 165 : 340;
-
-    // Retina / Hi-DPI scaling factor
+  function drawThesisNNCanvas(canvas, trace, stepIdx, mini) {
+    const T = tokens();
+    const cw = Math.round(canvas.clientWidth || canvas.parentElement.clientWidth || 600);
+    const W = mini ? 260 : Math.max(320, Math.min(cw, 900)), H = mini ? 165 : Math.round(Math.max(260, Math.min(W * 0.5, 380)));
     const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    canvas.style.aspectRatio = `${W} / ${H}`;
-
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-
-    // Background
-    ctx.fillStyle = '#060810';
-    ctx.fillRect(0, 0, W, H);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = T.bg; ctx.fillRect(0, 0, W, H);
 
     const N = 8;
-    const activeNodeIdx = stepIdx; // 0..7 for tr1..tr8
-
-    // Proportional Column X coordinates
-    const x1 = W * 0.09; // Col 1: Input (1 node)
-    const x2 = W * 0.28; // Col 2: 8 Nodes (Fan-out)
-    const x3 = W * 0.50; // Col 3: 8 Nodes (Hidden)
-    const x4 = W * 0.72; // Col 4: 8 Nodes (Pre-output)
-    const x5 = W * 0.91; // Col 5: Output (1 node)
-
-    // Vertical spacing
-    const yTop = isMini ? 18 : 38;
-    const yBottom = isMini ? H - 24 : H - 48;
-    const yMid = (yTop + yBottom) / 2;
-    const sp = (yBottom - yTop) / (N - 1);
-    const r = isMini ? 5.5 : 11.5;
-    const rSingle = isMini ? 7.5 : 13.5;
-
-    const inputVec = trace ? trace.inputVector : Array(8).fill(0);
+    const x1 = W * 0.09, x2 = W * 0.29, x3 = W * 0.50, x4 = W * 0.71, x5 = W * 0.91;
+    const yTop = mini ? 18 : 46, yBottom = mini ? H - 26 : H - 52;
+    const yMid = (yTop + yBottom) / 2, sp = (yBottom - yTop) / (N - 1);
+    const r = mini ? 5.5 : 11.5, rS = mini ? 7.5 : 15;
+    const head = mini ? 3.5 : 6;
+    const inVec = trace ? trace.inputVector : Array(8).fill(0);
     const outVec = trace ? trace.outputVector : Array(8).fill(0);
+    const ys = Array.from({ length: N }, (_, i) => yTop + i * sp);
 
-    // Compute Y positions for 8 nodes
-    const col2Y = [];
-    const col3Y = [];
-    const col4Y = [];
-    for (let i = 0; i < N; i++) {
-      const y = yTop + i * sp;
-      col2Y.push(y);
-      col3Y.push(y);
-      col4Y.push(y);
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 1. Draw Feedback Loop: Col 5 (Output) -> Bottom Rail -> Col 1 (Input)
-    // ─────────────────────────────────────────────────────────────
-    const railY = H - (isMini ? 8 : 14);
-    const railXLeft = x1 - (isMini ? 12 : 22);
-
+    // Feedback rail
+    const railY = H - (mini ? 8 : 16), railX = x1 - (mini ? 12 : 24);
     ctx.beginPath();
-    ctx.moveTo(x5, yMid + rSingle);
-    ctx.lineTo(x5, railY);
-    ctx.lineTo(railXLeft, railY);
-    ctx.lineTo(railXLeft, yMid);
-    ctx.lineTo(x1 - rSingle, yMid);
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.85)';
-    ctx.lineWidth = isMini ? 1.0 : 1.8;
-    ctx.stroke();
-
-    // Feedback Arrow pointing into Col 1
-    const head = isMini ? 4 : 6.5;
-    ctx.beginPath();
-    ctx.moveTo(x1 - rSingle, yMid);
-    ctx.lineTo(x1 - rSingle - head, yMid - head * 0.6);
-    ctx.lineTo(x1 - rSingle - head, yMid + head * 0.6);
-    ctx.closePath();
-    ctx.fillStyle = '#3b82f6';
-    ctx.fill();
-
-    // Feedback label
-    if (!isMini) {
-      ctx.fillStyle = 'rgba(96, 165, 250, 0.9)';
-      ctx.font = 'bold 8.5px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('Feedback Loop: Output → Input (X[tr+1] = A[tr])', W / 2, railY - 3);
+    ctx.moveTo(x5, yMid + rS); ctx.lineTo(x5, railY); ctx.lineTo(railX, railY); ctx.lineTo(railX, yMid); ctx.lineTo(x1 - rS, yMid);
+    ctx.strokeStyle = T.muted; ctx.lineWidth = mini ? 1 : 1.5; ctx.setLineDash(mini ? [3, 3] : [5, 4]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x1 - rS, yMid); ctx.lineTo(x1 - rS - head, yMid - head * 0.6); ctx.lineTo(x1 - rS - head, yMid + head * 0.6); ctx.closePath();
+    ctx.fillStyle = T.muted; ctx.fill();
+    if (!mini) {
+      ctx.fillStyle = T.muted; ctx.font = `500 10px ${T.mono}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText('feedback  X[tr+1] = A[tr]', W / 2, railY - 4);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 2. Col 1 (1 Node) -> Col 2 (All 8 Nodes)
-    // ─────────────────────────────────────────────────────────────
+    // Col1 -> Col2
     for (let i = 0; i < N; i++) {
-      const isPeriodicTarget = (i === activeNodeIdx);
-      const arrowColor = isPeriodicTarget ? '#00f0ff' : 'rgba(148, 163, 184, 0.35)';
-      const arrowWidth = isPeriodicTarget ? (isMini ? 1.3 : 2.2) : (isMini ? 0.7 : 1.0);
-      drawArrow(ctx, x1, yMid, x2, col2Y[i], rSingle, r, arrowColor, arrowWidth, isMini ? 3.5 : 6);
+      const k = i === stepIdx;
+      drawArrow(ctx, x1, yMid, x2, ys[i], rS, r, k ? T.rubric : alpha(T.muted, 0.35), k ? (mini ? 1.4 : 2.2) : (mini ? 0.6 : 1), head);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // 3. Col 2 (Node k ONLY) -> Col 3 (All 8 Nodes) [Periodic Radiation]
-    // ─────────────────────────────────────────────────────────────
-    const fromY = col2Y[activeNodeIdx];
+    // Col2 (node k) -> Col3
     for (let j = 0; j < N; j++) {
-      const isOutputBit1 = (outVec[j] === 1);
-      const rayColor = isOutputBit1 ? '#00f0ff' : 'rgba(0, 240, 255, 0.6)';
-      const rayWidth = isOutputBit1 ? (isMini ? 1.3 : 2.2) : (isMini ? 0.8 : 1.3);
-      drawArrow(ctx, x2, fromY, x3, col3Y[j], r, r, rayColor, rayWidth, isMini ? 3.5 : 6);
+      const on = outVec[j] === 1;
+      drawArrow(ctx, x2, ys[stepIdx], x3, ys[j], r, r, on ? T.rubric : alpha(T.rubric, 0.3), on ? (mini ? 1.3 : 2) : (mini ? 0.6 : 1), head);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // 4. Col 3 (8 Nodes) -> Col 4 (8 Nodes) [1-to-1 Forward Parallel]
-    // ─────────────────────────────────────────────────────────────
+    // Col3 -> Col4
     for (let i = 0; i < N; i++) {
-      const isActiveBit = (outVec[i] === 1);
-      const fwdColor = isActiveBit ? '#f59e0b' : 'rgba(245, 158, 11, 0.35)';
-      const fwdWidth = isActiveBit ? (isMini ? 1.2 : 2.0) : (isMini ? 0.7 : 1.0);
-      drawArrow(ctx, x3, col3Y[i], x4, col4Y[i], r, r, fwdColor, fwdWidth, isMini ? 3.5 : 6);
+      const on = outVec[i] === 1;
+      drawArrow(ctx, x3, ys[i], x4, ys[i], r, r, on ? T.ochre : alpha(T.ochre, 0.3), on ? (mini ? 1.2 : 2) : (mini ? 0.6 : 1), head);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // 5. Col 4 (8 Nodes) -> Col 5 (1 Output Node) [Converging Fan-in]
-    // ─────────────────────────────────────────────────────────────
+    // Col4 -> Col5
     for (let i = 0; i < N; i++) {
-      const isActiveBit = (outVec[i] === 1);
-      const convColor = isActiveBit ? '#10b981' : 'rgba(16, 185, 129, 0.35)';
-      const convWidth = isActiveBit ? (isMini ? 1.2 : 2.0) : (isMini ? 0.7 : 1.0);
-      drawArrow(ctx, x4, col4Y[i], x5, yMid, r, rSingle, convColor, convWidth, isMini ? 3.5 : 6);
+      const on = outVec[i] === 1;
+      drawArrow(ctx, x4, ys[i], x5, yMid, r, rS, on ? T.ok : alpha(T.muted, 0.3), on ? (mini ? 1.2 : 2) : (mini ? 0.6 : 1), head);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 6. Render Nodes
-    // ─────────────────────────────────────────────────────────────
-    // Col 1: Single Input Node
-    drawNode(ctx, x1, yMid, rSingle, 'In', false, true, isMini ? '' : 'Col 1');
+    drawNode(ctx, T, x1, yMid, rS, mini ? '' : 'X', 'off', mini);
+    for (let i = 0; i < N; i++) drawNode(ctx, T, x2, ys[i], r, mini ? '' : inVec[i], i === stepIdx ? 'key' : 'off', mini);
+    for (let i = 0; i < N; i++) drawNode(ctx, T, x3, ys[i], r, '', outVec[i] === 1 ? 'on' : 'off', mini);
+    for (let i = 0; i < N; i++) drawNode(ctx, T, x4, ys[i], r, mini ? '' : outVec[i], outVec[i] === 1 ? 'on' : 'off', mini);
+    drawNode(ctx, T, x5, yMid, rS, mini ? '' : 'A', outVec.some((v) => v === 1) ? 'on' : 'off', mini);
 
-    // Col 2: 8 Nodes (Node k is periodic active)
-    for (let i = 0; i < N; i++) {
-      const isPeriodic = (i === activeNodeIdx);
-      const bit = inputVec[i];
-      drawNode(ctx, x2, col2Y[i], r, bit, isPeriodic, false);
-    }
-
-    // Col 3: 8 Hidden Nodes
-    for (let i = 0; i < N; i++) {
-      const active = (outVec[i] === 1);
-      drawNode(ctx, x3, col3Y[i], r, '', false, active);
-    }
-
-    // Col 4: 8 Pre-output Nodes
-    for (let i = 0; i < N; i++) {
-      const active = (outVec[i] === 1);
-      drawNode(ctx, x4, col4Y[i], r, active ? '1' : '0', false, active);
-    }
-
-    // Col 5: Single Output Node
-    const hasAnyActive = outVec.some(v => v === 1);
-    drawNode(ctx, x5, yMid, rSingle, 'Out', false, hasAnyActive);
-
-    // Column Headers & Annotations (Only on Full View)
-    if (!isMini) {
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = 'bold 9px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Input (1)', x1, yTop - 12);
-      ctx.fillText('Col 2 (8)', x2, yTop - 12);
-      ctx.fillText('Col 3 (8)', x3, yTop - 12);
-      ctx.fillText('Col 4 (8)', x4, yTop - 12);
-      ctx.fillText('Output (1)', x5, yTop - 12);
-
-      // Top Status Banner
-      ctx.fillStyle = '#00f0ff';
-      ctx.font = 'bold 10.5px monospace';
-      ctx.fillText(`Recursion tr${stepIdx + 1} — Periodic Active Node: Node ${stepIdx + 1}`, W / 2, 15);
+    if (!mini) {
+      ctx.fillStyle = T.muted; ctx.font = `600 10px ${T.ui}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      [['Input', x1], ['Input bits', x2], ['Hidden', x3], ['Output bits', x4], ['Row out', x5]].forEach(([t, x]) => ctx.fillText(t.toUpperCase(), x, yTop - 22));
     }
   }
 
-  /**
-   * Renders only the currently active step's neural network diagram (single view).
-   */
   function renderNNVisualizer(traces) {
     if (!traces || traces.length < 8) return;
-
-    const stepIdx = inspectorStep - 1; // 0-based
-    nnActiveBadge.textContent = `Active: tr${inspectorStep}`;
-
-    // Update single pane title & description
-    titleLeft.textContent = `Recursion tr${inspectorStep}`;
-    descLeft.textContent = `Node ${inspectorStep} activates & fans out to all 8 nodes of Col 3`;
-
-    // Draw single full-width canvas for the active step
-    drawThesisNNCanvas(canvasLeft, traces[stepIdx], stepIdx, false);
-
-    // Refresh gallery if it is visible
+    const idx = inspectorStep - 1;
+    $('nnActiveBadge').textContent = `tr${inspectorStep}`;
+    $('descLeft').textContent = `Step tr${inspectorStep}: input node ${inspectorStep} fires and fans out to all 8 hidden nodes`;
+    drawThesisNNCanvas($('canvasLeft'), traces[idx], idx, false);
     if (showAllSteps) renderGalleryGrid(traces);
   }
 
   function renderGalleryGrid(traces) {
-    nnGalleryGrid.innerHTML = '';
+    const grid = $('nnGalleryGrid');
+    grid.innerHTML = '';
     for (let s = 0; s < 8; s++) {
-      const card = document.createElement('div');
-      card.className = `gallery-card ${inspectorStep === s + 1 ? 'gallery-card-active' : ''}`;
-      card.innerHTML = `<div class="gallery-card-header"><span>Recursion tr${s + 1}</span><span>Step ${s + 1} / 8</span></div>`;
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = `gallery-card${inspectorStep === s + 1 ? ' gallery-card-active' : ''}`;
+      card.innerHTML = `<div class="gallery-card-header"><span>tr${s + 1}</span><span>${traces[s].outputVector.join('')}</span></div>`;
       const c = document.createElement('canvas');
       drawThesisNNCanvas(c, traces[s], s, true);
       card.appendChild(c);
-      card.addEventListener('click', () => {
-        inspectorStep = s + 1;
-        renderInspector();
-      });
-      nnGalleryGrid.appendChild(card);
+      card.addEventListener('click', () => { inspectorStep = s + 1; renderInspector(); });
+      grid.appendChild(card);
     }
   }
 
-  // Toggle All 8 Steps gallery
-  btnToggleAllPairs.addEventListener('click', () => {
+  $('btnToggleAllPairs').addEventListener('click', () => {
     showAllSteps = !showAllSteps;
-    nnAllPairsGallery.style.display = showAllSteps ? 'block' : 'none';
-    btnToggleAllPairs.textContent = showAllSteps ? 'Hide 8-Step Gallery' : 'Show All 8 Steps';
-    btnToggleAllPairs.classList.toggle('active', showAllSteps);
-    if (showAllSteps && currentEncryptionResult) {
-      const charRes = cipherEngine.encryptCharacter(selectedChar);
-      renderGalleryGrid(charRes.traces);
-    }
+    $('nnAllPairsGallery').hidden = !showAllSteps;
+    $('btnToggleAllPairs').textContent = showAllSteps ? 'Hide all steps' : 'Show all 8 steps';
+    $('btnToggleAllPairs').classList.toggle('active', showAllSteps);
+    if (showAllSteps) renderGalleryGrid(engine.encryptCharacter(selectedChar).traces);
   });
 
-  // Window Resize handling (debounced) for mobile orientation changes
-  let resizeTimeout;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      if (document.getElementById('inspector-tab').classList.contains('active')) {
-        renderInspector();
+  // ---------- Numeric wheel ----------
+  const WHEEL = 560;
+  function renderNumerologyWheel() {
+    const canvas = $('archNumerologyWheelCanvas');
+    if (!canvas) return;
+    const T = tokens();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    if (canvas.width !== Math.round(WHEEL * dpr)) { canvas.width = Math.round(WHEEL * dpr); canvas.height = Math.round(WHEEL * dpr); }
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = WHEEL, cx = w / 2, cy = w / 2;
+    const bandR = w * 0.475, outerR = w * 0.385, innerR = w * 0.115;
+    const step = (Math.PI * 2) / 26, ringW = (outerR - innerR) / 7;
+
+    ctx.clearRect(0, 0, w, w);
+    ctx.fillStyle = T.bg;
+    ctx.beginPath(); ctx.arc(cx, cy, bandR + 4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = T.line; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // Alphabet band fill
+    ctx.fillStyle = T.surface;
+    ctx.beginPath(); ctx.arc(cx, cy, bandR, 0, Math.PI * 2); ctx.arc(cx, cy, outerR, 0, Math.PI * 2, true); ctx.fill();
+
+    for (let r = 1; r <= 7; r++) {
+      ctx.strokeStyle = r === 7 ? T.ink : T.line;
+      ctx.lineWidth = r === 7 ? 1.2 : 0.8;
+      ctx.beginPath(); ctx.arc(cx, cy, innerR + ringW * r, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.strokeStyle = T.ink; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(cx, cy, bandR, 0, Math.PI * 2); ctx.stroke();
+
+    // Hub
+    ctx.fillStyle = T.rubric;
+    ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = T.surface; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `700 13px ${T.mono}`; ctx.fillText('182', cx, cy - 7);
+    ctx.font = `600 9px ${T.ui}`; ctx.fillText('DAYS', cx, cy + 9);
+
+    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    GEEZ_DATASET.ethiopianClasses.forEach((cls, i) => {
+      const a = i * step - Math.PI / 2, mid = a + step / 2;
+      const hi = i === highlightedSpokeIdx;
+      if (hi) {
+        ctx.fillStyle = alpha(T.rubric, 0.14);
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, bandR, a, a + step); ctx.closePath(); ctx.fill();
       }
-    }, 150);
-  });
+      ctx.strokeStyle = hi ? T.rubric : T.line; ctx.lineWidth = hi ? 1.6 : 0.8;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * innerR, cy + Math.sin(a) * innerR);
+      ctx.lineTo(cx + Math.cos(a) * bandR, cy + Math.sin(a) * bandR);
+      ctx.stroke();
 
-  // --- 6. Historical Infographics & Interactive Wheel Renderer ---
-  let highlightedSpokeIdx = -1;
-
-  function renderInfographicsTab() {
-    // 1. Render Syllograph Meanings Table
-    const syllTable = document.getElementById('syllographMeaningsTable');
-    if (syllTable && GEEZ_DATASET.syllographMeanings) {
-      syllTable.innerHTML = GEEZ_DATASET.syllographMeanings.map(item => `
-        <tr>
-          <td><strong style="color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.95rem;">${item.latin}</strong></td>
-          <td style="text-align: center;"><span class="infographic-glyph glyph-hieroglyph">${item.proto}</span></td>
-          <td style="text-align: center;"><span class="infographic-glyph glyph-proto-ethiopic">${item.protoEthiopic}</span></td>
-          <td style="text-align: center;"><span class="infographic-glyph glyph-classical-ethiopic">${item.classical}</span></td>
-          <td><strong style="font-size: 0.85rem; color: #fff;">${item.name}</strong></td>
-          <td class="table-desc-text">${item.description}</td>
-        </tr>
-      `).join('');
-    }
-
-    // 2. Render Ethiopic Evolution Table
-    const evoTable = document.getElementById('ethiopicEvolutionTable');
-    if (evoTable && GEEZ_DATASET.ethiopicEvolution) {
-      evoTable.innerHTML = GEEZ_DATASET.ethiopicEvolution.map(item => {
-        const parts = item.protoEthiopic.split(' ');
-        const glyph = parts[0] || '';
-        const sub = parts.slice(1).join(' ');
-        const pictoParts = item.pictograph.split(' ');
-        const emoji = pictoParts[0] || '';
-        const pictoText = pictoParts.slice(1).join(' ');
-
-        return `
-          <tr>
-            <td><span class="table-emoji">${emoji}</span> <span style="font-size: 0.82rem; color: #fff;">${pictoText}</span></td>
-            <td>
-              <span class="infographic-glyph glyph-proto-ethiopic">${glyph}</span>
-              ${sub ? `<span class="table-text-sub">${sub}</span>` : ''}
-            </td>
-            <td style="text-align: center;"><span class="infographic-glyph glyph-classical-ethiopic">${item.ethiopic}</span></td>
-            <td><span class="thesis-badge" style="padding: 0.2rem 0.5rem; font-size: 0.78rem;">${item.transcription}</span></td>
-            <td><strong style="font-size: 0.85rem; color: #fff;">${item.name}</strong></td>
-            <td class="table-desc-text">${item.meaning}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // 3. Render Comparative African Systems Matrix (Table 1.4)
-    const compTable = document.getElementById('comparativeSystemsTable');
-    if (compTable && GEEZ_DATASET.comparativeAfricanSystems) {
-      compTable.innerHTML = GEEZ_DATASET.comparativeAfricanSystems.map(item => {
-        const egyptParts = item.egyptian.split(' ');
-        const egyptGlyph = egyptParts[0] || '';
-        const egyptSub = egyptParts.slice(1).join(' ');
-
-        const protoParts = item.protoEthiopic.split(' ');
-        const protoGlyph = protoParts[0] || '';
-        const protoSub = protoParts.slice(1).join(' ');
-
-        return `
-          <tr>
-            <td style="text-align: center;"><strong style="color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.95rem;">${item.phoneme}</strong></td>
-            <td>
-              <span class="-glyph glyph-hieroglyph">${egyptGlyph}</span>
-              ${egyptSub ? `<span class="table-text-sub">${egyptSub}</span>` : ''}
-            </td>
-            <td style="text-align: center;"><span class="infographic-glyph glyph-medium">${item.meroitic || '—'}</span></td>
-            <td style="text-align: center;"><span class="infographic-glyph glyph-medium glyph-sinaitic">${item.sinaitic || '—'}</span></td>
-            <td style="text-align: center;"><span class="infographic-glyph glyph-medium" style="color: #94a3b8;">${item.cretanLinear || '—'}</span></td>
-            <td style="text-align: center;"><span class="infographic-glyph glyph-medium">${item.meroiticLinear || '—'}</span></td>
-            <td>
-              <span class="infographic-glyph glyph-proto-ethiopic">${protoGlyph}</span>
-              ${protoSub ? `<span class="table-text-sub">${protoSub}</span>` : ''}
-            </td>
-            <td style="text-align: center;"><span class="infographic-glyph glyph-classical-ethiopic" style="color: #fff;">${item.ethiopic}</span></td>
-            <td class="table-desc-text">${item.notes}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // 4. Render Ge'ez Developed Tree (Figure 1.2)
-    renderGeezTree();
+      const left = mid > Math.PI / 2 || mid < -Math.PI / 2;
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(mid);
+      for (let o = 1; o <= 7; o++) {
+        const val = String(cls.baseValue * o);
+        ctx.save(); ctx.translate(innerR + ringW * (o - 0.5), 0); if (left) ctx.rotate(Math.PI);
+        const fs = val.length >= 4 ? 8 : val.length === 3 ? 8.5 : 9.5;
+        ctx.font = `${hi ? 700 : 400} ${fs}px ${T.mono}`;
+        ctx.fillStyle = hi ? T.rubric : (o === 1 ? T.ink : T.muted);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(val, 0, 0);
+        ctx.restore();
+      }
+      ctx.save(); ctx.translate(outerR + (bandR - outerR) / 2, 0); if (left) ctx.rotate(Math.PI);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = hi ? T.rubric : T.ink;
+      ctx.font = `700 ${hi ? 20 : 18}px ${T.ethiopic}`;
+      ctx.fillText(cls.geez, 0, -4);
+      ctx.fillStyle = hi ? T.rubric : T.muted;
+      ctx.font = `600 9px ${T.mono}`;
+      ctx.fillText(latin[i], 0, 11);
+      ctx.restore();
+      ctx.restore();
+    });
   }
 
-  // --- Render Ge'ez Developed Tree (Figure 1.2) ---
+  function wheelIdxFromEvent(e) {
+    const canvas = $('archNumerologyWheelCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (WHEEL / rect.width) - WHEEL / 2;
+    const y = (e.clientY - rect.top) * (WHEEL / rect.height) - WHEEL / 2;
+    const d = Math.hypot(x, y);
+    if (d < WHEEL * 0.11 || d > WHEEL * 0.48) return -1;
+    let a = Math.atan2(y, x) + Math.PI / 2;
+    if (a < 0) a += Math.PI * 2;
+    return Math.floor(a / ((Math.PI * 2) / 26)) % 26;
+  }
+  const WHEEL_IDLE = 'Hover over a spoke to see its seven values. Click to open it in the 8×8 map.';
+  function updateWheelCard(idx) {
+    const box = $('archWhDetails');
+    if (idx < 0) { box.textContent = WHEEL_IDLE; return; }
+    const cls = GEEZ_DATASET.ethiopianClasses[idx];
+    const start = idx * 7 + 1;
+    box.innerHTML = `
+      <div class="wh-head">${cls.geez} · ${escapeHtml(cls.name)} <span class="mono" style="font-size:12px;color:var(--muted)">[${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[idx]}]</span></div>
+      <div class="hint">${escapeHtml(cls.meaning)} · base value ${cls.baseValue} · equinox days ${start}–${start + 6}</div>
+      <div class="wheel-numbers-strip">${[1, 2, 3, 4, 5, 6, 7].map((o) => `<span class="wheel-order-pill"><strong>${o}</strong> ${cls.baseValue * o}</span>`).join('')}</div>`;
+  }
+  (function setupWheel() {
+    const canvas = $('archNumerologyWheelCanvas');
+    canvas.addEventListener('mousemove', (e) => {
+      const idx = wheelIdxFromEvent(e);
+      if (idx !== highlightedSpokeIdx) { highlightedSpokeIdx = idx; renderNumerologyWheel(); updateWheelCard(idx); }
+    });
+    canvas.addEventListener('mouseleave', () => { highlightedSpokeIdx = -1; renderNumerologyWheel(); updateWheelCard(-1); });
+    canvas.addEventListener('click', (e) => {
+      const idx = wheelIdxFromEvent(e);
+      if (idx < 0) return;
+      selectChar(GEEZ_DATASET.ethiopianClasses[idx].geez);
+      showTab('visualizer-tab');
+      window.scrollTo({ top: 0 });
+    });
+  })();
+
+  // ---------- Tree (Figure 1.2) ----------
   function renderGeezTree() {
-    const svg = document.getElementById('geezTreeSvg');
-    if (!svg) return;
-
-    // Define 7 main branch clusters matching Figure 1.2 from thesis
+    const svg = $('geezTreeSvg');
     const clusters = [
-      { id: 'ha', rootFidel: 'ሀ', name: 'Hoi', color: '#38bdf8', x: 80, y: 190, leaves: ['ሁ', 'ሂ', 'ሃ', 'ሄ', 'ህ', 'ሆ'] },
-      { id: 'la', rootFidel: 'ለ', name: 'Lawi', color: '#f97316', x: 205, y: 190, leaves: ['ሉ', 'ሊ', 'ላ', 'ሌ', 'ል', 'ሎ'] },
-      { id: 'ha2', rootFidel: 'ሐ', name: 'Haut', color: '#22c55e', x: 330, y: 190, leaves: ['ሑ', 'ሒ', 'ሓ', 'ሔ', 'ሕ', 'ሖ'] },
-      { id: 'ma', rootFidel: 'መ', name: 'Mai', color: '#94a3b8', x: 460, y: 190, leaves: ['ሙ', 'ሚ', 'ማ', 'ሜ', 'ም', 'ሞ'] },
-      { id: 'sa', rootFidel: 'ሠ', name: 'Saut', color: '#a855f7', x: 590, y: 190, leaves: ['ሡ', 'ሢ', 'ሣ', 'ሤ', 'ሥ', 'ሦ'] },
-      { id: 'ra', rootFidel: 'ረ', name: 'Rees', color: '#ef4444', x: 715, y: 190, leaves: ['ሩ', 'ሪ', 'ራ', 'ሬ', 'ር', 'ሮ'] },
-      { id: 'sa2', rootFidel: 'ሰ', name: 'Sat', color: '#3b82f6', x: 840, y: 190, leaves: ['ሱ', 'ሲ', 'ሳ', 'ሴ', 'ስ', 'ሶ'] }
+      ['ሀ', 'Hoi', 80, ['ሁ', 'ሂ', 'ሃ', 'ሄ', 'ህ', 'ሆ']],
+      ['ለ', 'Lawi', 205, ['ሉ', 'ሊ', 'ላ', 'ሌ', 'ል', 'ሎ']],
+      ['ሐ', 'Haut', 330, ['ሑ', 'ሒ', 'ሓ', 'ሔ', 'ሕ', 'ሖ']],
+      ['መ', 'Mai', 460, ['ሙ', 'ሚ', 'ማ', 'ሜ', 'ም', 'ሞ']],
+      ['ሠ', 'Saut', 590, ['ሡ', 'ሢ', 'ሣ', 'ሤ', 'ሥ', 'ሦ']],
+      ['ረ', 'Rees', 715, ['ሩ', 'ሪ', 'ራ', 'ሬ', 'ር', 'ሮ']],
+      ['ሰ', 'Sat', 840, ['ሱ', 'ሲ', 'ሳ', 'ሴ', 'ስ', 'ሶ']]
     ];
-
-    const rootX = 460;
-    const rootY = 75;
-
-    let svgHtml = `
-      <!-- Definitions & Glow Filters -->
-      <defs>
-        <radialGradient id="rootGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#f87171" stop-opacity="1" />
-          <stop offset="80%" stop-color="#dc2626" stop-opacity="0.9" />
-          <stop offset="100%" stop-color="#991b1b" stop-opacity="1" />
-        </radialGradient>
-        <filter id="nodeShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.6"/>
-        </filter>
-      </defs>
-
-      <!-- Background Grid Decoration -->
-      <rect x="0" y="0" width="920" height="480" rx="14" fill="#080d1a" stroke="rgba(0, 240, 255, 0.15)" stroke-width="1.5" />
-
-      <!-- Level 1 Label: Nubare Fidel -->
-      <g text-anchor="middle">
-        <text x="${rootX}" y="28" font-family="'Noto Sans Ethiopic', serif" font-size="18" font-weight="bold" fill="#ffffff">ኑባሬ ፊደል</text>
-        <text x="${rootX}" y="48" font-family="sans-serif" font-size="13" font-weight="600" fill="#94a3b8" letter-spacing="1">Nubare Fidel</text>
-      </g>
-
-      <!-- Level 2 Label: Siriw Fidel -->
-      <g text-anchor="start">
-        <text x="24" y="110" font-family="'Noto Sans Ethiopic', serif" font-size="17" font-weight="bold" fill="#ffffff">ስርወ ፊደል</text>
-        <text x="24" y="130" font-family="sans-serif" font-size="13" font-weight="600" fill="#94a3b8" letter-spacing="1">Siriw Fidel</text>
-      </g>
-
-      <!-- Level 3 Label: Serawite Fidel -->
-      <g text-anchor="middle">
-        <text x="${rootX}" y="445" font-family="'Noto Sans Ethiopic', serif" font-size="18" font-weight="bold" fill="#ffffff">ሠራዊተ ፊደል</text>
-        <text x="${rootX}" y="465" font-family="sans-serif" font-size="13" font-weight="600" fill="#94a3b8" letter-spacing="1">Serawite Fidel</text>
-      </g>
-    `;
-
-    // 1. Draw Branches from Nubare Root to Siriw Nodes
-    clusters.forEach(c => {
-      svgHtml += `
-        <line x1="${rootX}" y1="${rootY}" x2="${c.x}" y2="${c.y}" stroke="${c.color}" stroke-width="2.5" stroke-opacity="0.85" />
-      `;
-    });
-
-    // 2. Draw Serawite Leaves and connecting lines from each Siriw Node
-    clusters.forEach(c => {
-      const leafSpread = 14;
-      const startLeafX = c.x - (5 * leafSpread) / 2;
-
-      c.leaves.forEach((fidel, lIdx) => {
-        const leafX = startLeafX + lIdx * leafSpread;
-        const leafY = 345 + (lIdx % 2 === 0 ? 0 : 22);
-
-        svgHtml += `
-          <!-- Branch Line to Serawite Leaf -->
-          <line x1="${c.x}" y1="${c.y}" x2="${leafX}" y2="${leafY}" stroke="${c.color}" stroke-width="1.8" stroke-opacity="0.75" />
-          
-          <!-- Leaf Circle Node -->
-          <circle cx="${leafX}" cy="${leafY}" r="7" fill="${c.color}" stroke="#0b1120" stroke-width="1.5" filter="url(#nodeShadow)">
-            <title>${c.rootFidel} (${c.name}) Order ${lIdx + 2}: ${fidel}</title>
-          </circle>
-          
-          <!-- Leaf Ethiopic Fidel Glyph -->
-          <text x="${leafX}" y="${leafY + (lIdx % 2 === 0 ? -11 : 17)}" font-family="'Noto Sans Ethiopic', serif" font-size="11" font-weight="bold" fill="#f8fafc" text-anchor="middle">${fidel}</text>
-        `;
+    const rootX = 460, rootY = 82, sY = 200;
+    let h = `
+      <text x="${rootX}" y="30" text-anchor="middle" class="ge" font-size="18" font-weight="700">ኑባሬ ፊደል</text>
+      <text x="${rootX}" y="50" text-anchor="middle" class="t-muted" font-size="12" font-weight="600" letter-spacing="1">NUBARE FIDEL · ROOT</text>
+      <text x="20" y="${sY - 4}" font-size="16" font-weight="700" class="ge">ስርወ ፊደል</text>
+      <text x="20" y="${sY + 14}" class="t-muted" font-size="11" font-weight="600" letter-spacing="1">SIRIW FIDEL</text>
+      <text x="${rootX}" y="448" text-anchor="middle" font-size="17" font-weight="700" class="ge">ሠራዊተ ፊደል</text>
+      <text x="${rootX}" y="466" text-anchor="middle" class="t-muted" font-size="11" font-weight="600" letter-spacing="1">SERAWITE FIDEL · DERIVED FORMS</text>`;
+    clusters.forEach(([root, name, x, leaves]) => {
+      h += `<g class="cluster"><title>${root} (${name}) and its six derived forms</title>`;
+      h += `<line class="root-branch" x1="${rootX}" y1="${rootY}" x2="${x}" y2="${sY + 40}" stroke-width="1.6"/>`;
+      leaves.forEach((f, i) => {
+        const lx = x - 45 + i * 18, ly = 352 + (i % 2 ? 26 : 0);
+        h += `<line class="branch" x1="${x}" y1="${sY + 88}" x2="${lx}" y2="${ly}" stroke-width="1.2"/>`;
+        h += `<circle class="leaf" cx="${lx}" cy="${ly}" r="6" stroke-width="1.2"/>`;
+        h += `<text x="${lx}" y="${ly + (i % 2 ? 22 : -11)}" text-anchor="middle" font-size="12" class="ge">${f}</text>`;
       });
-
-      // 3. Draw Siriw Main Class Node
-      svgHtml += `
-        <circle cx="${c.x}" cy="${c.y}" r="12" fill="${c.color}" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)">
-          <title>Siriw Fidel: ${c.rootFidel} (${c.name})</title>
-        </circle>
-        <text x="${c.x}" y="${c.y - 17}" font-family="'Noto Sans Ethiopic', serif" font-size="15" font-weight="bold" fill="#ffffff" text-anchor="middle">${c.rootFidel}</text>
-      `;
+      h += `<circle class="siriw" cx="${x}" cy="${sY + 40}" r="17" stroke-width="3"/>`;
+      h += `<text x="${x}" y="${sY + 46}" text-anchor="middle" font-size="17" font-weight="700" class="ge" style="fill: var(--surface)">${root}</text>`;
+      h += `<text x="${x}" y="${sY + 76}" text-anchor="middle" class="t-muted" font-size="11" font-weight="600">${name}</text>`;
+      h += `</g>`;
     });
-
-    // 4. Draw Root Node (Nubare Fidel) at Top
-    svgHtml += `
-      <circle cx="${rootX}" cy="${rootY}" r="14" fill="url(#rootGlow)" stroke="#ffffff" stroke-width="2.5" filter="url(#nodeShadow)">
-        <title>Nubare Fidel: The Primal Root of Ge'ez</title>
-      </circle>
-    `;
-
-    svg.innerHTML = svgHtml;
+    h += `<circle class="root" cx="${rootX}" cy="${rootY}" r="13" stroke-width="3"><title>Nubare Fidel, the root of Ge'ez</title></circle>`;
+    svg.innerHTML = h;
   }
 
-  // --- Tab 5: Architecture Tab Renderer ---
-  function renderArchitectureTab() {
-    const archTable = document.getElementById('archHomophoneTable');
-    if (archTable && GEEZ_DATASET.syllographicHomophones) {
-      archTable.innerHTML = GEEZ_DATASET.syllographicHomophones.map(item => `
+  // ---------- Static data tables ----------
+  function renderDataTables() {
+    const D = GEEZ_DATASET;
+    if (D.syllographicHomophones) {
+      $('archHomophoneTable').innerHTML = D.syllographicHomophones.map((it) => `
         <tr>
-          <td><span class="infographic-glyph glyph-classical-ethiopic" style="font-size: 1.35rem; color: var(--accent-cyan); font-weight: bold;">${item.geez}</span></td>
-          <td><span style="font-family: var(--font-ethiopic); font-size: 1.05rem; color: #fff;">${item.amharic}</span></td>
-          <td><strong style="color: #cbd5e1; font-size: 0.9rem;">${item.english}</strong></td>
-          <td style="color: var(--text-muted); font-size: 0.78rem; line-height: 1.35;">${item.optionalMeaning || '—'}</td>
-          <td><span class="thesis-badge" style="font-size: 0.72rem; padding: 0.18rem 0.5rem;">${item.pair}</span></td>
-        </tr>
-      `).join('');
+          <td class="glyph-cell" style="color: var(--rubric)">${it.geez}</td>
+          <td class="ge">${it.amharic}</td>
+          <td><strong>${escapeHtml(it.english)}</strong></td>
+          <td class="muted">${escapeHtml(it.optionalMeaning || '—')}</td>
+          <td class="ge" style="white-space:nowrap">${it.pair}</td>
+        </tr>`).join('');
     }
-
-    renderNumerologyWheel('archNumerologyWheelCanvas');
+    if (D.syllographMeanings) {
+      $('syllographMeaningsTable').innerHTML = D.syllographMeanings.map((it) => `
+        <tr>
+          <td class="code-tag">${escapeHtml(it.latin)}</td>
+          <td class="glyph-old">${it.proto}</td>
+          <td class="glyph-old">${it.protoEthiopic}</td>
+          <td class="glyph-cell">${it.classical}</td>
+          <td><strong>${escapeHtml(it.name)}</strong></td>
+          <td class="muted">${escapeHtml(it.description)}</td>
+        </tr>`).join('');
+    }
+    if (D.ethiopicEvolution) {
+      $('ethiopicEvolutionTable').innerHTML = D.ethiopicEvolution.map((it) => {
+        const pp = it.protoEthiopic.split(' ');
+        const picto = it.pictograph.replace(/^\S+\s/, '');
+        return `<tr>
+          <td>${escapeHtml(picto)}</td>
+          <td><span class="glyph-old">${pp[0]}</span>${pp.length > 1 ? `<span class="sub">${escapeHtml(pp.slice(1).join(' '))}</span>` : ''}</td>
+          <td class="glyph-cell">${it.ethiopic}</td>
+          <td class="mono">${escapeHtml(it.transcription)}</td>
+          <td><strong>${escapeHtml(it.name)}</strong></td>
+          <td class="muted">${escapeHtml(it.meaning)}</td>
+        </tr>`;
+      }).join('');
+    }
+    if (D.comparativeAfricanSystems) {
+      const split = (s) => { const p = String(s || '').split(' '); return [p[0] || '—', p.slice(1).join(' ')]; };
+      $('comparativeSystemsTable').innerHTML = D.comparativeAfricanSystems.map((it) => {
+        const [eg, egSub] = split(it.egyptian);
+        const [pe, peSub] = split(it.protoEthiopic);
+        return `<tr>
+          <td class="code-tag">${escapeHtml(it.phoneme)}</td>
+          <td><span class="glyph-old">${eg}</span>${egSub ? `<span class="sub">${escapeHtml(egSub)}</span>` : ''}</td>
+          <td class="glyph-old">${it.meroitic || '—'}</td>
+          <td class="glyph-old">${it.sinaitic || '—'}</td>
+          <td class="glyph-old">${it.cretanLinear || '—'}</td>
+          <td class="glyph-old">${it.meroiticLinear || '—'}</td>
+          <td><span class="glyph-old">${pe}</span>${peSub ? `<span class="sub">${escapeHtml(peSub)}</span>` : ''}</td>
+          <td class="glyph-cell">${it.ethiopic}</td>
+          <td class="muted">${escapeHtml(it.notes)}</td>
+        </tr>`;
+      }).join('');
+    }
   }
 
-  let showLatinOnWheel = false;
-
-  function renderNumerologyWheel(targetCanvasId = 'archNumerologyWheelCanvas') {
-    const canvasIds = targetCanvasId === 'all'
-      ? ['archNumerologyWheelCanvas']
-      : [targetCanvasId];
-
-    canvasIds.forEach(id => {
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-
-      const ctx = canvas.getContext('2d');
-      const width = canvas.width;
-      const height = canvas.height;
-      const cx = width / 2;
-      const cy = height / 2;
-
-      // Dynamic Radii based strictly on canvas size
-      const alphabetBandRadius = width * 0.475; // Fits inside canvas with margin
-      const outerRadius = width * 0.385;        // Number boundary
-      const innerRadius = width * 0.115;        // Hub boundary
-      const numClasses = 26;
-      const angleStep = (Math.PI * 2) / numClasses;
-      const ringWidth = (outerRadius - innerRadius) / 7;
-
-      ctx.clearRect(0, 0, width, height);
-
-      // Background circle
-      const bgGrad = ctx.createRadialGradient(cx, cy, innerRadius, cx, cy, alphabetBandRadius + 10);
-      bgGrad.addColorStop(0, '#0d1527');
-      bgGrad.addColorStop(0.8, '#060913');
-      bgGrad.addColorStop(1, '#020408');
-      ctx.fillStyle = bgGrad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, alphabetBandRadius + 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // 7 Concentric Number Rings (representing the 7 Orders)
-      for (let r = 1; r <= 7; r++) {
-        const radius = innerRadius + ringWidth * r;
-        ctx.strokeStyle = (r === 7) ? 'rgba(0, 240, 255, 0.6)' : 'rgba(255, 255, 255, 0.12)';
-        ctx.lineWidth = (r === 7) ? 1.5 : 0.8;
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      // Outer Alphabet Band Outer Border
-      ctx.strokeStyle = 'rgba(139, 92, 246, 0.7)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(cx, cy, alphabetBandRadius, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Center Core Hub (Equinox Origin)
-      ctx.fillStyle = '#060d1a';
-      ctx.beginPath();
-      ctx.arc(cx, cy, innerRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(0, 240, 255, 0.85)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      const hubFontSize = Math.max(9, Math.round(width * 0.02));
-      ctx.fillStyle = '#00f0ff';
-      ctx.font = `bold ${hubFontSize}px "Fira Code", monospace`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('EQUINOX', cx, cy - 8);
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = `${Math.round(hubFontSize * 0.8)}px sans-serif`;
-      ctx.fillText('182 DAYS', cx, cy + 8);
-
-      // Latin alphabet correspondence table A-Z
-      const latinLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-      // Draw all 26 Spokes with full 7 number rings & alphabet headers
-      GEEZ_DATASET.ethiopianClasses.forEach((cls, i) => {
-        const angle = i * angleStep - Math.PI / 2;
-        const nextAngle = (i + 1) * angleStep - Math.PI / 2;
-        const midAngle = angle + angleStep / 2;
-        const isHighlighted = (i === highlightedSpokeIdx);
-        const latinChar = latinLetters[i];
-
-        // Spoke Wedge Highlight
-        if (isHighlighted) {
-          ctx.fillStyle = 'rgba(0, 240, 255, 0.25)';
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
-          ctx.arc(cx, cy, alphabetBandRadius, angle, nextAngle);
-          ctx.closePath();
-          ctx.fill();
-        }
-
-        // Spoke Separator Line
-        const xLine = cx + Math.cos(angle) * alphabetBandRadius;
-        const yLine = cy + Math.sin(angle) * alphabetBandRadius;
-        ctx.strokeStyle = isHighlighted ? 'rgba(0, 240, 255, 0.95)' : 'rgba(255, 255, 255, 0.16)';
-        ctx.lineWidth = isHighlighted ? 2.5 : 1;
-        ctx.beginPath();
-        ctx.moveTo(cx + Math.cos(angle) * innerRadius, cy + Math.sin(angle) * innerRadius);
-        ctx.lineTo(xLine, yLine);
-        ctx.stroke();
-
-        // Render all 7 Numbers in concentric cells & outer alphabet label
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(midAngle);
-
-        // Draw 7 concentric numbers along the spoke
-        for (let order = 1; order <= 7; order++) {
-          const numRadius = innerRadius + ringWidth * (order - 0.5);
-          const cellValue = cls.baseValue * order;
-
-          ctx.save();
-          ctx.translate(numRadius, 0);
-
-          // Keep text readable: if on left hemisphere, rotate 180 degrees
-          const isLeftHemisphere = (midAngle > Math.PI / 2 || midAngle < -Math.PI / 2);
-          if (isLeftHemisphere) {
-            ctx.rotate(Math.PI);
-          }
-
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-
-          // Font size scales with canvas width and number length
-          const valStr = cellValue.toString();
-          let fontSize = Math.max(7.5, Math.round(width * 0.017));
-          if (valStr.length >= 4) fontSize = Math.max(6.5, Math.round(width * 0.014));
-          else if (valStr.length === 3) fontSize = Math.max(7, Math.round(width * 0.0155));
-
-          if (isHighlighted) {
-            ctx.fillStyle = '#00f0ff';
-            ctx.font = `bold ${fontSize}px "Fira Code", monospace`;
-          } else {
-            ctx.fillStyle = order === 1 ? '#94a3b8' : (order === 7 ? '#f8fafc' : '#cbd5e1');
-            ctx.font = `${fontSize}px "Fira Code", monospace`;
-          }
-
-          ctx.fillText(valStr, 0, 0);
-          ctx.restore();
-        }
-
-        // Draw Outer Alphabet Label (Ethiopic Fidel + Latin Letter)
-        const alphabetRadius = outerRadius + (alphabetBandRadius - outerRadius) / 2;
-        ctx.save();
-        ctx.translate(alphabetRadius, 0);
-
-        const isLeft = (midAngle > Math.PI / 2 || midAngle < -Math.PI / 2);
-        if (isLeft) ctx.rotate(Math.PI);
-
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        const fidelFontSize = Math.max(14, Math.round(width * 0.032));
-        const latinFontSize = Math.max(8, Math.round(width * 0.017));
-
-        if (showLatinOnWheel) {
-          ctx.fillStyle = isHighlighted ? '#00f0ff' : '#ffffff';
-          ctx.font = isHighlighted ? `bold ${fidelFontSize}px "Fira Code", monospace` : `${fidelFontSize - 2}px "Fira Code", monospace`;
-          ctx.fillText(`${latinChar}`, 0, -3);
-          ctx.fillStyle = isHighlighted ? '#f8fafc' : 'rgba(0, 240, 255, 0.85)';
-          ctx.font = `${latinFontSize}px "Noto Sans Ethiopic", serif`;
-          ctx.fillText(cls.geez, 0, 9);
-        } else {
-          ctx.fillStyle = isHighlighted ? '#00f0ff' : '#ffffff';
-          ctx.font = isHighlighted ? `bold ${fidelFontSize + 2}px "Noto Sans Ethiopic", serif` : `bold ${fidelFontSize}px "Noto Sans Ethiopic", serif`;
-          ctx.fillText(cls.geez, 0, -4);
-
-          ctx.fillStyle = isHighlighted ? '#f8fafc' : 'rgba(148, 163, 184, 0.85)';
-          ctx.font = `bold ${latinFontSize}px "Fira Code", monospace`;
-          ctx.fillText(latinChar, 0, 8);
-        }
-
-        ctx.restore();
-        ctx.restore();
-      });
-    });
+  // ---------- Re-draw canvases on theme or size change ----------
+  function redrawGraphics() {
+    if ($('inspector-tab').classList.contains('active')) renderInspector();
+    if ($('architecture-tab').classList.contains('active')) renderNumerologyWheel();
   }
+  try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redrawGraphics); } catch (e) { /* older browsers */ }
+  new MutationObserver(redrawGraphics).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  let resizeT;
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(redrawGraphics, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(redrawGraphics);
 
-  // Setup Wheel Mouse Interactions for a Canvas & Hover Card
-  function setupWheelCanvasEvents(canvasId, detailsId) {
-    const wheelCanvas = document.getElementById(canvasId);
-    const whDetails = document.getElementById(detailsId);
-    if (!wheelCanvas) return;
-
-    wheelCanvas.addEventListener('mousemove', (e) => {
-      const rect = wheelCanvas.getBoundingClientRect();
-      const scaleX = wheelCanvas.width / rect.width;
-      const scaleY = wheelCanvas.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX - wheelCanvas.width / 2;
-      const y = (e.clientY - rect.top) * scaleY - wheelCanvas.height / 2;
-      const dist = Math.sqrt(x * x + y * y);
-
-      const innerLimit = wheelCanvas.width * 0.11;
-      const outerLimit = wheelCanvas.width * 0.48;
-
-      if (dist >= innerLimit && dist <= outerLimit) {
-        let angle = Math.atan2(y, x) + Math.PI / 2;
-        if (angle < 0) angle += Math.PI * 2;
-        const spokeIdx = Math.floor(angle / ((Math.PI * 2) / 26)) % 26;
-
-        if (spokeIdx !== highlightedSpokeIdx) {
-          highlightedSpokeIdx = spokeIdx;
-          renderNumerologyWheel('all');
-
-          const cls = GEEZ_DATASET.ethiopianClasses[spokeIdx];
-          const latinChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[spokeIdx];
-          const equinoxStart = (spokeIdx * 7) + 1;
-          const equinoxEnd = equinoxStart + 6;
-          const orderNames = ["1st Ge'ez", "2nd Ka'eb", "3rd Salis", "4th Rab'e", "5th Hamis", "6th Sadis", "7th Sab'e"];
-          const numbersPills = [1, 2, 3, 4, 5, 6, 7].map(o => {
-            const val = cls.baseValue * o;
-            return `<span class="wheel-order-pill" title="${orderNames[o - 1]}"><strong>${o}:</strong> ${val}</span>`;
-          }).join(' ');
-
-          if (whDetails) {
-            whDetails.innerHTML = `
-              <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
-                <span style="font-size: 1.25rem; color: var(--accent-cyan); font-family: var(--font-ethiopic); font-weight: bold;">
-                  ${cls.geez} [${latinChar}] — ${cls.name} (${cls.meaning})
-                </span>
-                <span class="thesis-badge" style="font-size: 0.76rem;">Base Gematria: ${cls.baseValue} • Equinox Days ${equinoxStart}–${equinoxEnd}</span>
-              </div>
-              <div class="wheel-numbers-strip">
-                ${numbersPills}
-              </div>
-              <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;">
-                👉 Click this spoke to load '${cls.geez}' into the 8x8 Cognitive Map &amp; RNN Inspector.
-              </p>
-            `;
-          }
-        }
-      } else if (highlightedSpokeIdx !== -1) {
-        highlightedSpokeIdx = -1;
-        renderNumerologyWheel('all');
-        if (whDetails) {
-          whDetails.innerHTML = '26 Spoke Fidels • 7 Concentric Number Bands (1 Upto 5600)';
-        }
-      }
-    });
-
-    wheelCanvas.addEventListener('mouseleave', () => {
-      highlightedSpokeIdx = -1;
-      renderNumerologyWheel('all');
-      if (whDetails) {
-        whDetails.innerHTML = '26 Spoke Fidels • 7 Concentric Number Bands (1 Upto 5600)';
-      }
-    });
-
-    wheelCanvas.addEventListener('click', () => {
-      if (highlightedSpokeIdx >= 0) {
-        const cls = GEEZ_DATASET.ethiopianClasses[highlightedSpokeIdx];
-        selectedChar = cls.geez;
-        // Switch to visualizer tab
-        tabButtons.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-        const vizBtn = document.querySelector('[data-tab="visualizer-tab"]');
-        if (vizBtn) vizBtn.classList.add('active');
-        const vizContent = document.getElementById('visualizer-tab');
-        if (vizContent) vizContent.classList.add('active');
-
-        renderVisualizer();
-        renderEthiopicClasses();
-        renderInspector();
-        performEncryption();
-      }
-    });
-  }
-
-  // Setup wheel interaction on both canvases
-  setupWheelCanvasEvents('numerologyWheelCanvas', 'whDetails');
-  setupWheelCanvasEvents('archNumerologyWheelCanvas', 'archWhDetails');
-
-  // --- Initialize App ---
+  // ---------- Init ----------
+  setFormat('hex');
   renderCharSelector();
-  renderVisualizer();
   renderEthiopicClasses();
-  renderArchitectureTab();
-  renderInfographicsTab();
+  renderVisualizer();
+  renderDataTables();
+  renderGeezTree();
   performEncryption();
-  // Note: decryption is only triggered when user pastes/types in the decrypt tab
+  routeFromHash();
 });

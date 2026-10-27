@@ -1,1069 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ge'ez Recurrent Neural Network (RNN) Cipher Suite</title>
-  <meta name="description"
-    content="Interactive Cryptographic Application based on Biruk Tesfaye's M.Sc. Thesis on Ge'ez Recurrent Neural Network Cipher Algorithm (Dilla University, 2019).">
-  <link rel="stylesheet" href="index.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ge'ez RNN Cipher</title>
+  <meta name="description" content="Interactive companion to Biruk Tesfaye Yohannes's M.Sc. thesis on a Ge'ez-based recurrent neural network cipher (Dilla University, 2019).">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600;700&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
 </head>
-
 <body>
 
-  <!-- Header -->
-  <header>
+<header class="masthead">
+  <div class="masthead-inner">
     <div class="brand">
-      <div class="brand-icon" style="font-family: 'Noto Sans Ethiopic', serif;">ሀ</div>
-      <div class="brand-title">
-        <h1>Ge'ez RNN Cipher Suite</h1>
-        <p>Recurrent Neural Network Cryptographic Application</p>
+      <div class="brand-mark" aria-hidden="true">ሀ</div>
+      <div>
+        <h1>Ge'ez RNN Cipher</h1>
+        <p>Recurrent neural network cipher built on the Ge'ez script</p>
       </div>
     </div>
-    <div class="thesis-badge">By Biruk Tesfaye Yohannes</div>
-  </header>
+    <div class="masthead-meta">Thesis by <strong>Biruk Tesfaye Yohannes</strong><br>Dilla University, 2019</div>
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab-btn active" data-tab="encrypt-tab">Encrypt</button>
+      <button class="tab-btn" data-tab="decrypt-tab">Decrypt</button>
+      <button class="tab-btn" data-tab="visualizer-tab">8×8 Map</button>
+      <button class="tab-btn" data-tab="inspector-tab">Step Inspector</button>
+      <button class="tab-btn" data-tab="architecture-tab">Ge'ez &amp; Model</button>
+      <button class="tab-btn" data-tab="infographics-tab">Script History</button>
+    </nav>
+  </div>
+</header>
 
-  <!-- Navigation Tabs -->
-  <nav class="nav-tabs">
-    <button class="tab-btn active" data-tab="encrypt-tab">
-      <span>🔒</span> Encryption
-    </button>
-    <button class="tab-btn" data-tab="decrypt-tab">
-      <span>🔓</span> Decryption
-    </button>
-    <button class="tab-btn" data-tab="visualizer-tab">
-      <span>🧩</span> 8x8 Visualizer
-    </button>
-    <button class="tab-btn" data-tab="inspector-tab">
-      <span>🔍</span> Step Inspector
-    </button>
-    <button class="tab-btn" data-tab="architecture-tab">
-      <span>📜</span> Architecture
-    </button>
-    <button class="tab-btn" data-tab="infographics-tab">
-      <span>📊</span> Infographics &amp; Evolution
-    </button>
-  </nav>
+<main class="page">
 
-  <main>
-    <!-- TAB 1: ENCRYPTION -->
-    <section id="encrypt-tab" class="tab-content active">
-      <div class="grid-2col">
-        <!-- Input Card -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>🔒</span> Plaintext Encryption Input
-            </div>
-            <span class="thesis-badge">Ge'ez + RNN 8-Step</span>
-          </div>
+  <!-- ============ ENCRYPT ============ -->
+  <section id="encrypt-tab" class="tab-content active" aria-labelledby="h-encrypt">
+    <div class="view-head">
+      <div>
+        <div class="eyebrow">Encryption</div>
+        <h2 id="h-encrypt">Turn text into 64-bit Ge'ez blocks</h2>
+        <p>Each character runs through eight recursions of the network. Each recursion writes one 8-bit row, so every character becomes an 8×8 block.</p>
+      </div>
+    </div>
 
-          <div class="form-group">
-            <label for="inputText">Enter Plaintext String:</label>
-            <textarea id="inputText" rows="3"
-              placeholder="Enter text to encrypt (e.g. HELLOGEEZ)...">HELLOGEEZ</textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="keyPassphrase">AES-128 Passphrase (Hybrid Pipeline):</label>
-            <input type="text" id="keyPassphrase" value="GEEZ_SECRET_KEY">
-          </div>
-
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="enableAES" checked> Layer AES-128 (CBC Mode) Hybrid Encryption
-            </label>
-          </div>
-
-          <button id="btnEncrypt" class="btn">
-            <span>⚡</span> Encrypt Message
-          </button>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="field">
+          <label for="inputText">Plaintext</label>
+          <textarea id="inputText" rows="3" placeholder="Type a message, e.g. HELLOGEEZ">HELLOGEEZ</textarea>
+          <span class="hint">Letters, digits, common symbols and Ge'ez characters are supported.</span>
         </div>
 
-        <!-- Output Card -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>📊</span> Generated Cipher Output
-            </div>
-          </div>
+        <label class="toggle" for="enableAES">
+          <input type="checkbox" id="enableAES" checked>
+          <div><strong>Add an AES-128 layer</strong><span>Encrypts the Ge'ez bit stream again with AES in CBC mode, as in thesis chapter 5.</span></div>
+        </label>
 
-          <div class="form-group">
-            <label>Ge'ez RNN Hex Ciphertext:</label>
-            <div id="outputHex" class="output-box">-</div>
-          </div>
+        <div class="field" id="passGroup">
+          <label for="keyPassphrase">AES passphrase</label>
+          <input type="text" id="keyPassphrase" value="GEEZ_SECRET_KEY" autocomplete="off" spellcheck="false">
+        </div>
 
-          <div class="form-group">
-            <label>AES-128 CBC Ciphertext (Hex):</label>
-            <div id="outputAES" class="output-box">-</div>
-          </div>
+        <div class="btn-row">
+          <button id="btnEncrypt" class="btn" type="button">Encrypt</button>
+          <button id="btnSendToDecrypt" class="btn secondary" type="button">Open in Decrypt</button>
+        </div>
 
-          <div class="form-group">
-            <label>Raw Ge'ez 64-bit Binary Streams:</label>
-            <div id="outputBinary" class="output-box">Click Encrypt to generate...</div>
-          </div>
+        <div class="pipeline" aria-label="Pipeline">
+          <span class="node">Plaintext</span><span class="arrow">→</span>
+          <span class="node">ASCII bits</span><span class="arrow">→</span>
+          <span class="node">8 recursions</span><span class="arrow">→</span>
+          <span class="node">64-bit blocks</span><span class="arrow">→</span>
+          <span class="node" id="pipeAES">AES-128 CBC</span>
         </div>
       </div>
-    </section>
 
-    <!-- TAB 2: STANDALONE DECRYPTION -->
-    <section id="decrypt-tab" class="tab-content">
-      <div class="grid-2col">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>🔓</span> Ciphertext Decryption Input
-            </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3>Cipher blocks</h3>
+            <div class="sub">One 8×8 block per character. Select a block to inspect it.</div>
           </div>
+          <span class="badge" id="blockCount">0 blocks</span>
+        </div>
+        <div id="cipherTiles" class="tiles"></div>
 
-          <div class="form-group">
-            <label for="decryptInputType">Select Ciphertext Input Format:</label>
-            <select id="decryptInputType">
-              <option value="hex">Ge'ez RNN Hexadecimal String</option>
-              <option value="binary">Ge'ez RNN 64-bit Binary String</option>
-              <option value="aes">AES-128 CBC Hex (Hybrid Pipeline)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="decryptCiphertextInput">Paste Ciphertext Data:</label>
-            <textarea id="decryptCiphertextInput" rows="4"
-              placeholder="Paste Hex or Binary ciphertext here..."></textarea>
-          </div>
-
-          <div class="form-group" id="decryptPassphraseGroup" style="display: none;">
-            <label for="decryptPassphrase">AES-128 Passphrase:</label>
-            <input type="text" id="decryptPassphrase" value="GEEZ_SECRET_KEY">
-          </div>
-
-          <button id="btnDecrypt" class="btn btn-secondary">
-            <span>🔓</span> Decrypt Ciphertext
-          </button>
+        <div class="stat-row">
+          <div class="stat"><div class="k">Characters</div><div class="v" id="statChars">0</div></div>
+          <div class="stat"><div class="k">Cipher bits</div><div class="v" id="statBits">0</div></div>
+          <div class="stat"><div class="k">AES bytes</div><div class="v" id="statAES">–</div></div>
         </div>
 
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>✨</span> Decrypted Plaintext Result
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Recovered Plaintext Message:</label>
-            <div id="outputDecryptedResult" class="output-box result-success">-</div>
-          </div>
-
-          <div class="form-group">
-            <label>Decryption Status / Error Log:</label>
-            <div id="outputDecryptStatus" class="output-box" style="color: var(--text-muted);">-</div>
-          </div>
+        <div class="field">
+          <div class="label-row"><span class="label">Ge'ez cipher (hex)</span><button class="copy-btn" data-copy="outputHex" type="button">Copy</button></div>
+          <div id="outputHex" class="output">–</div>
+        </div>
+        <div class="field">
+          <div class="label-row"><span class="label">AES-128 CBC (hex)</span><button class="copy-btn" data-copy="outputAES" type="button">Copy</button></div>
+          <div id="outputAES" class="output">–</div>
+        </div>
+        <div class="field">
+          <div class="label-row"><span class="label">Binary, 8 bits per row</span><button class="copy-btn" data-copy="outputBinary" type="button">Copy</button></div>
+          <div id="outputBinary" class="output">–</div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- TAB 3: 8x8 COGNITIVE MAP VISUALIZER -->
-    <section id="visualizer-tab" class="tab-content">
-      <div class="grid-2col">
-        <!-- Interactive Matrix View & Profile -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>🧩</span> Character Cognitive Map Grid (8x8 = 64 bits)
-            </div>
-            <span id="selectedCharLabel" class="thesis-badge">Character 'A'</span>
+  <!-- ============ DECRYPT ============ -->
+  <section id="decrypt-tab" class="tab-content" aria-labelledby="h-decrypt">
+    <div class="view-head">
+      <div>
+        <div class="eyebrow">Decryption</div>
+        <h2 id="h-decrypt">Recover the plaintext</h2>
+        <p>Paste Ge'ez cipher output as hex or binary, or paste AES output together with its passphrase.</p>
+      </div>
+    </div>
+
+    <div class="grid-2 even">
+      <div class="panel">
+        <div class="field">
+          <span class="label">Input format</span>
+          <div class="segmented" role="group" aria-label="Input format">
+            <button type="button" class="active" data-format="hex">Ge'ez hex</button>
+            <button type="button" data-format="binary">Ge'ez binary</button>
+            <button type="button" data-format="aes">AES-128 hex</button>
           </div>
+          <select id="decryptInputType" hidden>
+            <option value="hex">hex</option>
+            <option value="binary">binary</option>
+            <option value="aes">aes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="decryptCiphertextInput">Ciphertext</label>
+          <textarea id="decryptCiphertextInput" rows="6" placeholder="Paste hex or binary here" spellcheck="false"></textarea>
+        </div>
+        <div class="field" id="decryptPassphraseGroup" hidden>
+          <label for="decryptPassphrase">AES passphrase</label>
+          <input type="text" id="decryptPassphrase" value="GEEZ_SECRET_KEY" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="btn-row">
+          <button id="btnDecrypt" class="btn" type="button">Decrypt</button>
+          <button id="btnUseLatest" class="btn secondary" type="button">Use latest encryption</button>
+        </div>
+      </div>
 
-          <div class="matrix-container">
-            <div id="matrixGrid" class="matrix-grid">
-              <!-- Rendered dynamically by JS -->
+      <div class="panel">
+        <div class="panel-head"><h3>Result</h3></div>
+        <div id="outputDecryptedResult" class="result-big">–</div>
+        <div id="outputDecryptStatus" class="status">Paste ciphertext, or use the latest encryption.</div>
+        <div class="field">
+          <span class="label">Decoded blocks</span>
+          <div id="decryptTiles" class="tiles"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8x8 MAP ============ -->
+  <section id="visualizer-tab" class="tab-content" aria-labelledby="h-map">
+    <div class="view-head">
+      <div>
+        <div class="eyebrow">Cognitive map</div>
+        <h2 id="h-map">The 8×8 map behind each character</h2>
+        <p>Each character's cipher block is its pixel shape. Click a data cell to flip it and the encryption updates. Columns 1–2 and row 8 are reserved flag bits.</p>
+      </div>
+      <span id="selectedCharLabel" class="badge rubric">Character 'A'</span>
+    </div>
+
+    <div class="grid-2 map">
+      <div class="panel">
+        <div class="matrix-wrap">
+          <div style="display:grid; gap:10px; justify-items:start;">
+            <div id="matrixGrid" class="matrix-grid"></div>
+            <div class="legend">
+              <span><i class="sw on"></i>Bit 1</span>
+              <span><i class="sw off"></i>Bit 0</span>
+              <span><i class="sw flag"></i>Flag bit</span>
             </div>
-            <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem;">
-              🟣 Purple border = Reserved Flag Bits (Col 1, 2 &amp; Row 8 set to 0)<br>
-              🔵 Cyan = Active Pixel (Bit 1) | Dark = White Pixel (Bit 0)
-            </p>
           </div>
-
-          <!-- Ge'ez Heritage & Astrographic Profile Card -->
-          <div id="charHeritageCard" class="heritage-profile-card">
-            <div class="heritage-header">
-              <div class="heritage-glyph-badge" id="profileGlyph">ሀ</div>
-              <div class="heritage-meta">
+          <div id="charHeritageCard" class="profile">
+            <div class="profile-head">
+              <div class="profile-glyph" id="profileGlyph">ሀ</div>
+              <div>
                 <h4 id="profileTitle">Hoi (Beginning / Lion)</h4>
-                <p id="profilePicto">Pictograph: Person standing with arms raised towards the heavens</p>
+                <p id="profilePicto">Pictograph</p>
               </div>
             </div>
-            <div class="heritage-grid">
-              <div class="heritage-item">
-                <span class="h-label">Astrographic Order:</span>
-                <span class="h-val" id="profileOrder">1st Order (Ge'ez)</span>
-              </div>
-              <div class="heritage-item">
-                <span class="h-label">Inherent Vowel:</span>
-                <span class="h-val" id="profileVowel">ä</span>
-              </div>
-              <div class="heritage-item">
-                <span class="h-label">Assigned Weekday:</span>
-                <span class="h-val" id="profileDay">Sunday (እሑድ)</span>
-              </div>
-              <div class="heritage-item">
-                <span class="h-label">Equinox Solar Day:</span>
-                <span class="h-val" id="profileEquinox">Day 1 of 182</span>
-              </div>
-              <div class="heritage-item">
-                <span class="h-label">Numerology Value:</span>
-                <span class="h-val" id="profileNumerology">1 (፩)</span>
-              </div>
-              <div class="heritage-item">
-                <span class="h-label">Cognitive Grid Bits:</span>
-                <span class="h-val" id="profileActiveBits">42 Data / 22 Flag</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Character Selection & Metadata -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <span>🔤</span> Select Alphabet Character
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Click any character to view its 8x8 Ge'ez Cognitive Map:</label>
-            <div id="charSelector" class="char-selector">
-              <!-- Generated dynamically by JS -->
-            </div>
-          </div>
-
-          <div class="card-header" style="margin-top: 1.5rem;">
-            <div class="card-title">
-              <span>🇪🇹</span> Ethiopic 182-Syllograph Explorer
-            </div>
-            <span class="thesis-badge">26 Classes × 7 Orders</span>
-          </div>
-
-          <div class="order-filter-bar">
-            <button class="order-filter-btn active" data-order="0">All 7 Orders</button>
-            <button class="order-filter-btn" data-order="1">1st (Ge'ez)</button>
-            <button class="order-filter-btn" data-order="2">2nd (Ka'eb)</button>
-            <button class="order-filter-btn" data-order="3">3rd (Salis)</button>
-            <button class="order-filter-btn" data-order="4">4th (Rab'e)</button>
-            <button class="order-filter-btn" data-order="5">5th (Hamis)</button>
-            <button class="order-filter-btn" data-order="6">6th (Sadis)</button>
-            <button class="order-filter-btn" data-order="7">7th (Sab'e)</button>
-          </div>
-
-          <div id="ethiopicClassList" class="class-list">
-            <!-- Generated dynamically -->
+            <dl class="kv">
+              <div><dt>Order</dt><dd id="profileOrder">–</dd></div>
+              <div><dt>Vowel</dt><dd id="profileVowel">–</dd></div>
+              <div><dt>Weekday</dt><dd id="profileDay">–</dd></div>
+              <div><dt>Equinox day</dt><dd id="profileEquinox">–</dd></div>
+              <div><dt>Numeric value</dt><dd id="profileNumerology">–</dd></div>
+              <div><dt>Data bits set</dt><dd id="profileActiveBits">–</dd></div>
+            </dl>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- TAB 4: 8-RECURSION EXECUTION INSPECTOR -->
-    <section id="inspector-tab" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <span>🔍</span> Step-by-Step RNN Recursion Inspector (tr1 through tr8)
-          </div>
-          <span id="inspectorCharBadge" class="thesis-badge">Inspecting 'A'</span>
+      <div class="panel">
+        <div class="panel-head"><h3>Choose a character</h3></div>
+        <div id="charSelector"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Ethiopic syllographs</h3>
+          <div class="sub">26 classes × 7 orders = 182 characters. Select any one to load its map.</div>
         </div>
+      </div>
+      <div class="order-filter-bar">
+        <button class="order-filter-btn active" data-order="0">All orders</button>
+        <button class="order-filter-btn" data-order="1">1 Ge'ez</button>
+        <button class="order-filter-btn" data-order="2">2 Ka'eb</button>
+        <button class="order-filter-btn" data-order="3">3 Salis</button>
+        <button class="order-filter-btn" data-order="4">4 Rab'e</button>
+        <button class="order-filter-btn" data-order="5">5 Hamis</button>
+        <button class="order-filter-btn" data-order="6">6 Sadis</button>
+        <button class="order-filter-btn" data-order="7">7 Sab'e</button>
+      </div>
+      <div id="ethiopicClassList" class="class-list"></div>
+    </div>
+  </section>
 
-        <div class="playback-bar">
-          <button id="btnPrevStep" class="btn btn-secondary">◀ Prev Step</button>
-          <button id="btnPlayStep" class="btn">▶ Auto Play</button>
-          <button id="btnNextStep" class="btn btn-secondary">Next Step ▶</button>
-          <span id="currentStepLabel"
-            style="font-family: var(--font-mono); font-weight: bold; color: var(--accent-cyan);">Step tr1 / tr8</span>
-        </div>
+  <!-- ============ INSPECTOR ============ -->
+  <section id="inspector-tab" class="tab-content" aria-labelledby="h-insp">
+    <div class="view-head">
+      <div>
+        <div class="eyebrow">Step inspector</div>
+        <h2 id="h-insp">Watch one character go through 8 recursions</h2>
+        <p>At each step the network computes V = W·X + B and outputs 1 where V &gt; 0. That output feeds into the next step as input.</p>
+      </div>
+      <span id="inspectorCharBadge" class="badge rubric">Inspecting 'A'</span>
+    </div>
 
-        <div class="table-scroll-hint">👈 Swipe horizontally to view full table columns 👉</div>
-        <div class="table-responsive">
+    <div class="panel">
+      <div class="playback-bar">
+        <button id="btnPrevStep" class="btn secondary small" type="button">← Prev</button>
+        <button id="btnPlayStep" class="btn small" type="button">Play</button>
+        <button id="btnNextStep" class="btn secondary small" type="button">Next →</button>
+        <span id="currentStepLabel" class="mono" style="font-weight:600;">Step tr1 of 8</span>
+        <div class="step-dots" id="stepDots"></div>
+      </div>
+
+      <div class="inspector-split">
+        <div class="table-wrap">
           <table class="step-table">
             <thead>
               <tr>
-                <th>Recursion (tr)</th>
-                <th>Input Vector X (8-bit)</th>
-                <th>Weight W (8-bit)</th>
-                <th>Bias B (8-bit)</th>
-                <th>Sum V = W·X + B</th>
-                <th>Activation Output A (8-bit)</th>
-                <th>Feedback State</th>
+                <th>Step</th>
+                <th>Input X</th>
+                <th>Weight W</th>
+                <th>Bias B</th>
+                <th>V = W·X + B</th>
+                <th>Output</th>
               </tr>
             </thead>
-            <tbody id="inspectorTableBody">
-              <!-- Dynamically populated -->
-            </tbody>
+            <tbody id="inspectorTableBody"></tbody>
           </table>
         </div>
-      </div>
-
-      <!-- 🧠 Connection of Neurons Visualizer -->
-      <div class="card nn-card">
-        <div class="card-header">
-          <div class="card-title">
-            <span>🧠</span> Neural Network Connection Architecture
-          </div>
-          <div class="nn-header-controls">
-            <span id="nnActiveBadge" class="thesis-badge">Active: Recursion tr1</span>
-            <button id="btnToggleAllPairs" class="btn btn-secondary"
-              style="font-size: 0.75rem; padding: 0.35rem 0.75rem;">
-              ▦ View All 8 Connection Patterns
-            </button>
-          </div>
-        </div>
-
-        <div class="nn-instructions">
-          <div class="nn-legend">
-            <span class="legend-item"><span class="legend-dot source-dot"></span> Source Layer (Current Output)</span>
-            <span class="legend-item"><span class="legend-dot target-dot"></span> Target Layer (Next Input)</span>
-            <span class="legend-item"><span class="legend-line active-line"></span> Active Fan-Out / Feed-Forward
-              Synapse</span>
-          </div>
-        </div>
-
-        <!-- Single Step View -->
-        <div id="nnSingleContainer" class="nn-single-container">
-          <div class="nn-single-pane pane-active" id="paneLeft">
-            <div class="pane-header">
-              <span id="titleLeft" class="pane-title">Recursion tr1</span>
-              <span id="descLeft" class="pane-desc">Node 1 activates &amp; fans out to all 8 nodes of Col 3</span>
-            </div>
-            <div class="canvas-wrapper">
-              <canvas id="canvasLeft"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Full Gallery (Collapsible / Expandable) -->
-        <div id="nnAllPairsGallery" class="nn-all-gallery" style="display: none;">
-          <div class="gallery-title">All 8 Connection Patterns</div>
-          <div id="nnGalleryGrid" class="nn-gallery-grid">
-            <!-- Dynamically populated -->
-          </div>
+        <div class="build-panel">
+          <span class="label">Block so far</span>
+          <div id="buildGrid" class="build-grid"></div>
+          <span class="hint" id="buildHint">Row 1 written</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- TAB 5: THESIS ARCHITECTURE & MATH -->
-    <section id="architecture-tab" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <span>📜</span> Mathematical Model, Cryptographic Theory &amp; Ethiopic Foundations
-          </div>
-          <span class="thesis-badge">Biruk Tesfaye Yohannes</span>
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Neuron connections (thesis §4.2)</h3>
+          <div class="sub" id="descLeft">Node 1 fires and fans out to all 8 hidden nodes</div>
         </div>
-
-        <div class="architecture-body">
-          <!-- 1. The 5 Foundational Properties of the Ge'ez System (Thesis §1.3.3 Overview) -->
-          <div class="arch-section">
-            <h3 class="arch-section-title">
-              <span>🌟</span> 1. The Five Foundational Properties of the Ge'ez Writing System (Overview)
-            </h3>
-            <p class="arch-intro">
-              As formulated in Biruk Tesfaye's (2019) thesis, Ge'ez transcends ordinary grammatical scripts by
-              synthesizing five core intellectual properties into a unified cosmological, mathematical, and linguistic
-              framework:
-            </p>
-
-            <!-- 5 Dimensions Overview Cards -->
-            <div class="dimensions-grid">
-              <div class="dimension-card">
-                <div class="dim-icon">🎨</div>
-                <div class="dim-title">1. Pictographic </div>
-                <div class="dim-desc">
-                  Derived from <em>"images drawn or adapted from nature and the peoples' relation to it"</em>. Natural
-                  prototypes evolved into stylized proto-graphs and classical fidels.
-                </div>
-              </div>
-
-              <div class="dimension-card">
-                <div class="dim-icon">💡</div>
-                <div class="dim-title">2. Ideographic</div>
-                <div class="dim-desc">
-                  Syllographs symbolize moral, philosophical, and social orders. Consonant classes convey civic and
-                  theological values (e.g. <em>Re'es</em> = leadership, <em>Bèt</em> = shelter).
-                </div>
-              </div>
-
-              <div class="dimension-card">
-                <div class="dim-icon">🌌</div>
-                <div class="dim-title">3. Astrographic </div>
-                <div class="dim-desc">
-                  Charting of the stars and the Ethiopian solar calendar: <strong>26 classes × 7 variations = 182
-                    syllographs</strong> directly model one 182-day equinox (182 + 182 = 364-day solar year).
-                </div>
-              </div>
-
-              <div class="dimension-card">
-                <div class="dim-icon">🔢</div>
-                <div class="dim-title">4. Numerological</div>
-                <div class="dim-desc">
-                  Discrete Gematria values spanning <strong>1 to 5600</strong>. The 7 concentric radial rings multiply
-                  each consonant's base value (1×B ... 7×B), encoding mathematical keys.
-                </div>
-              </div>
-
-              <div class="dimension-card">
-                <div class="dim-icon">📜</div>
-                <div class="dim-title">5. Syllagraphic </div>
-                <div class="dim-desc">
-                  Complete Abugida phonetics with innate vocalic markers combined with the <strong>Mokshe Fidelat (ሞክሼ
-                    ፊደላት)</strong> homophone disambiguation property.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. Pictographic Property (§1.3.3.1) -->
-          <div class="arch-section">
-            <h3 class="arch-section-title">
-              <span>🎨</span> 2. Pictographic Property
-            </h3>
-            <p class="arch-intro">
-              The pictographic property of Ge'ez refers to its derivation from natural imagery and ancestral
-              environmental interactions. As Scelta (2001) and Bekerie (1997) demonstrate, each graph originated as an
-              abstracted visual representation of living entities, tools, and celestial bodies:
-            </p>
-            <div class="table-responsive">
-              <table class="step-table" style="font-size: 0.85rem;">
-                <thead>
-                  <tr>
-                    <th>Natural Prototype</th>
-                    <th>Proto-Ethiopic</th>
-                    <th>Classical Ge'ez</th>
-                    <th>Ethiopic Name</th>
-                    <th>Evolutionary Description &amp; Significance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>🐮 Long-Horned Bull</td>
-                    <td><span class="infographic-glyph glyph-proto-ethiopic">𐩱</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ሀ (Hä)</span></td>
-                    <td><strong>Hoi (ሆይ)</strong></td>
-                    <td>Front of lion / Bull / First graph of the alphabet, symbolizing divine praise and primal life
-                      force.</td>
-                  </tr>
-                  <tr>
-                    <td>✊ Right Fisted Hand</td>
-                    <td><span class="infographic-glyph glyph-proto-ethiopic">𐩺</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">የ (Yä)</span></td>
-                    <td><strong>Yäman (የማን)</strong></td>
-                    <td>Right hand of truth, covenant pact, righteousness, and judicial strength.</td>
-                  </tr>
-                  <tr>
-                    <td>👁️ Human Eye</td>
-                    <td><span class="infographic-glyph glyph-proto-ethiopic">𐩲</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ዐ (A)</span></td>
-                    <td><strong>A'yn (ዐይን)</strong></td>
-                    <td>Human organ of vision, optical understanding, and spring of living water.</td>
-                  </tr>
-                  <tr>
-                    <td>🏠 House / Temple</td>
-                    <td><span class="infographic-glyph glyph-proto-ethiopic">𐩨</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">በ (Bä)</span></td>
-                    <td><strong>Bèt (ቤት)</strong></td>
-                    <td>Dwelling sanctuary, familial door, domestic order, and architectural shelter.</td>
-                  </tr>
-                  <tr>
-                    <td>🐪 Walking Camel</td>
-                    <td><span class="infographic-glyph glyph-proto-ethiopic">𐩴</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ገ (Gä)</span></td>
-                    <td><strong>Gämäl (ገመል)</strong></td>
-                    <td>Camel of endurance, cross-continental caravan trade routes, and commerce.</td>
-                  </tr>
-                  <tr>
-                    <td>🌊 Water Waves</td>
-                    <td><span class="infographic-glyph glyph-proto-ethiopic">𐩣</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">መ (Mä)</span></td>
-                    <td><strong>Mai (ማይ)</strong></td>
-                    <td>Rippling water currents, marine nourishment, and foundational cleansing.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 3. Ideographic Property (§1.3.3.2) -->
-          <div class="arch-section">
-            <h3 class="arch-section-title">
-              <span>💡</span> 3. Ideographic Property
-            </h3>
-            <p class="arch-intro">
-              Beyond representing raw sounds, Ge'ez syllographs encode philosophical, societal, and moral principles. In
-              traditional Ethiopian hermeneutics, every root consonant class reflects a civic duty, spiritual concept,
-              or ethical virtue:
-            </p>
-            <div class="table-responsive">
-              <table class="step-table" style="font-size: 0.85rem;">
-                <thead>
-                  <tr>
-                    <th>Root Fidel</th>
-                    <th>6th (Sadis) Form</th>
-                    <th>Ge'ez Root Word</th>
-                    <th>Ideographic Meaning &amp; Social Value System</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">በ (Bä)</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ብ (Bə)</span></td>
-                    <td><strong>ቤት (Bèt)</strong></td>
-                    <td>Signifies home, family cohesion, domestic sanctuary, and community dwelling.</td>
-                  </tr>
-                  <tr>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">የ (Yä)</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ይ (Yə)</span></td>
-                    <td><strong>የማን (Yäman)</strong></td>
-                    <td>Signifies the right hand of fidelity, moral truth, justice, and swearing an oath.</td>
-                  </tr>
-                  <tr>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ገ (Gä)</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ግ (Gə)</span></td>
-                    <td><strong>ገመል (Gämäl)</strong></td>
-                    <td>Signifies resilience, mutual commercial transport, trade routes, and prosperity.</td>
-                  </tr>
-                  <tr>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ነ (Nä)</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ን (Nə)</span></td>
-                    <td><strong>ነሐስ (Nahas)</strong></td>
-                    <td>Signifies bronze/copper metallurgy, wisdom, coiled serpent, and medicinal mastery.</td>
-                  </tr>
-                  <tr>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ረ (Rä)</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ር (Rə)</span></td>
-                    <td><strong>ርእስ (Re'es)</strong></td>
-                    <td>Signifies head, primary leader, governance (e.g. <em>Re'esa Mange'st</em> - Head of State).</td>
-                  </tr>
-                  <tr>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ፈ (Fä)</span></td>
-                    <td><span class="infographic-glyph glyph-classical-ethiopic">ፍ (Fə)</span></td>
-                    <td><strong>አፍ (Äf)</strong></td>
-                    <td>Signifies the human mouth, spoken truth, judicial proclamation, and divine breath.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 4. Astrographic Property & The 182-Day Equinox Solar Calendar (§1.3.3.3) -->
-          <div class="arch-section">
-            <h3 class="arch-section-title">
-              <span>🌌</span> 4. Astrographic Property; The 182-Day Equinox Solar Calendar
-            </h3>
-            <p class="arch-intro">
-              The Ge'ez Abugida functions as an astronomical solar calendar. The Ethiopian astronomical year comprises
-              two 182-day equinoctial cycles (April 1st – Sept 30th and October 1st – March 31st). The <strong>26
-                consonant classes × 7 vocalic variations = 182 unique syllographs</strong> map 1-to-1 onto each day of
-              the 182-day equinox (yielding 364 days across the two equinoxes):
-            </p>
-
-            <div class="equinox-stats-bar">
-              <div class="eq-stat">
-                <div class="eq-num">26</div>
-                <div class="eq-lbl">Root Classes (Fidels)</div>
-              </div>
-              <div class="eq-stat">
-                <div class="eq-num">7</div>
-                <div class="eq-lbl">Vocalic Orders (Days)</div>
-              </div>
-              <div class="eq-stat">
-                <div class="eq-num">182</div>
-                <div class="eq-lbl">Days per Equinox</div>
-              </div>
-              <div class="eq-stat">
-                <div class="eq-num">364</div>
-                <div class="eq-lbl">Days in Solar Cycle</div>
-              </div>
-            </div>
-
-            <!-- Equinox 1 + 2 Split Graphic -->
-            <div class="equinox-diagram-box" style="margin: 1.5rem auto; max-width: 480px;">
-              <div class="equinox-circle-diagram">
-                <div class="eq-half eq-top">
-                  <span class="eq-title">EQUINOX 1 = 182 DAYS</span>
-                  <span class="eq-dates">(April 1st – Sept 30th)</span>
-                </div>
-                <div class="eq-divider">
-                  <span class="eq-formula">1 + 2 = 364 DAYS</span>
-                </div>
-                <div class="eq-half eq-bottom">
-                  <span class="eq-title">EQUINOX 2 = 182 DAYS</span>
-                  <span class="eq-dates">(October 1st – March 31st)</span>
-                </div>
-              </div>
-              <p class="diagram-caption">The Two 182-Day Equinox Solar Partition</p>
-            </div>
-
-            <div class="table-responsive" style="margin-top: 1.5rem;">
-              <table class="step-table">
-                <thead>
-                  <tr>
-                    <th>Order #</th>
-                    <th>Ethiopic Name</th>
-                    <th>Vocalic Marker</th>
-                    <th>Associated Weekday</th>
-                    <th>Cryptographic DFA Role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td><strong>Ge'ez (ግዕዝ)</strong></td>
-                    <td>ä (innate root)</td>
-                    <td>Sunday (እሑድ)</td>
-                    <td>State Initialization &amp; Seed Vector</td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td><strong>Ka'eb (ካዕብ)</strong></td>
-                    <td>u (right loop/bar)</td>
-                    <td>Monday (ሰኑይ)</td>
-                    <td>Synaptic Weight Modulator W₁</td>
-                  </tr>
-                  <tr>
-                    <td>3</td>
-                    <td><strong>Salis (ሣልስ)</strong></td>
-                    <td>i (foot stroke)</td>
-                    <td>Tuesday (ሠሉስ)</td>
-                    <td>Bias Injection B₁</td>
-                  </tr>
-                  <tr>
-                    <td>4</td>
-                    <td><strong>Rab'e (ራብዕ)</strong></td>
-                    <td>a (left arm/elongation)</td>
-                    <td>Wednesday (ረቡዕ)</td>
-                    <td>Cross-Layer Recursion tr3-tr4</td>
-                  </tr>
-                  <tr>
-                    <td>5</td>
-                    <td><strong>Hamis (ኃምስ)</strong></td>
-                    <td>é (bottom ring/loop)</td>
-                    <td>Thursday (ሐሙስ)</td>
-                    <td>Matrix Transposition &amp; Diffusion</td>
-                  </tr>
-                  <tr>
-                    <td>6</td>
-                    <td><strong>Sadis (ሳድስ)</strong></td>
-                    <td>ə (consonantal mark)</td>
-                    <td>Friday (ዓርብ)</td>
-                    <td>Non-Linear Threshold Activation</td>
-                  </tr>
-                  <tr>
-                    <td>7</td>
-                    <td><strong>Sab'e (ሳብዕ)</strong></td>
-                    <td>o (top shortening/crown)</td>
-                    <td>Saturday (ቀዳሚት ሰንበት)</td>
-                    <td>Feedback Latch X[tr+1] = A[tr]</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 5. Numerological Property & Concentric Numerology Wheel (§1.3.3.4) -->
-          <div class="arch-section">
-            <h3 class="arch-section-title">
-              <span>🔢</span> 5. Numerological Property &amp; Concentric Numerology Wheel
-            </h3>
-            <p class="arch-intro">
-              As formulated in Biruk Tesfaye's thesis, Ge'ez possesses an innate numerological (Gematria) coding system.
-              Each root consonant is assigned an ancient base numerical value spanning from <strong>1 to 800</strong>:
-            </p>
-
-            <div class="arch-subcard" style="margin-bottom: 1.5rem;">
-              <h4 class="arch-subcard-title"><span>📐</span> Mathematical Formulation of the Concentric Gematria Rays
-              </h4>
-              <p class="arch-subcard-desc">
-                In the concentric numerology wheel, each of the 26 spoke rays corresponds to a root consonant class
-                (\(B_i\)). Across the 7 concentric circular bands (\(j \in [1..7]\)), the numerical value expands
-                linearly:
-              </p>
-              <pre class="code-math-block"><strong>Fidel Base Values (1..800):</strong>
-  [1..9]:     ሀ=1,  ለ=2,  ሐ=3,  መ=4,  ሠ=5,  ረ=6,  ሰ=7,  ቀ=8,  በ=9
-  [10..90]:   ተ=10, ኀ=20, ነ=30, አ=40, ከ=50, ወ=60, ዐ=70, ዘ=80, የ=90
-  [100..800]: ደ=100, ገ=200, ጠ=300, ጰ=400, ጸ=500, ፀ=600, ፈ=700, ፐ=800
-
-<strong>Concentric Radial Calculation:</strong>
-  Value(Fidel_i, Order_j) = Base_i × j    (for j = 1, 2, ..., 7)
-
-<strong>Discrete Numerical Range:</strong>
-  1 × 1 = 1  upto  800 × 7 = 5,600
-
-<strong>Cryptographic Entropy:</strong>
-  Injects deterministic pseudo-random weight perturbation into W[ti] and B[ti].</pre>
-            </div>
-
-            <!-- Interactive 26-Spoke Radial Numerology Wheel -->
-            <div class="wheel-interactive-box" style="margin-top: 1rem;">
-              <div class="wheel-canvas-container">
-                <canvas id="archNumerologyWheelCanvas" width="560" height="560"></canvas>
-              </div>
-              <div id="archWheelHoverInfo" class="wheel-hover-card">
-                <div class="wh-title">Hover or click a Fidel on the wheel:</div>
-                <div class="wh-val" id="archWhDetails">26 Spoke Fidels • 7 Concentric Number Bands (1 Upto 5600)</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 6. Syllagraphic Property & Mokshe Fidelat (§1.3.3.5 - Thesis Table 1.2) -->
-          <div class="arch-section">
-            <h3 class="arch-section-title">
-              <span>📜</span> 6. Syllagraphic Property &amp; Mokshe Fidelat
-            </h3>
-            <p class="arch-intro">
-              Ge'ez is a syllabic script (Abugida) where each glyph contains an innate vowel. In Ge'ez grammar and
-              linguistics, <strong>ሞክሼ ፊደላት (Mokshe Fidelat — Homophonous Letters)</strong> refer to distinct characters
-              that share similar acoustic phonetics in modern vernacular, but encode completely separate semantic,
-              theological, and morphological meanings:
-            </p>
-
-            <!-- Traditional Letter Taxonomy Breakdown Cards -->
-            <div class="mokshe-taxonomy-grid">
-              <div class="mokshe-card">
-                <div class="mokshe-card-title">1. The "H" Shifts (ሀ፣ ሐ፣ ኀ)</div>
-                <ul class="mokshe-list">
-                  <li><strong>ሀ (ሃሌታው ሀ):</strong> Named after <em>ሃሌ</em> (Hallelujah / Praise). Primal existence (e.g.
-                    <em>ሀለወ</em> - to exist).
-                  </li>
-                  <li><strong>ሐ (ሐመሩ ሐ):</strong> Named after <em>ሐመር</em> (Ship / Ark). Oceanic life and navigation.
-                  </li>
-                  <li><strong>ኀ (ብዙኃኑ ኀ / ኀርሙ ኀ):</strong> Named after <em>ብዙኃን</em> (abundance / the masses) or
-                    <em>ኀርም</em> (net).
-                  </li>
-                  <li class="mokshe-example"><strong>Example:</strong> <em>ኀለየ</em> (To praise / thank) vs. <em>ሐለየ</em>
-                    (To think / ponder).</li>
-                </ul>
-              </div>
-
-              <div class="mokshe-card">
-                <div class="mokshe-card-title">2. The "S" Shifts (ሰ፣ ሠ)</div>
-                <ul class="mokshe-list">
-                  <li><strong>ሰ (እሳቱ ሰ):</strong> Named after <em>እሳት</em> (Fire). Thermal energy and physical craft.
-                  </li>
-                  <li><strong>ሠ (ንጉሡ ሠ):</strong> Named after <em>ንጉሥ</em> (King / Royal governance). Dawn and celestial
-                    sovereignty (e.g. <em>ሠረቀ</em> - to dawn).</li>
-                  <li class="mokshe-example"><strong>Example:</strong> <em>ሰረቀ</em> (To climb / ascend) vs. <em>ሠረቀ</em>
-                    (To steal / purloin).</li>
-                </ul>
-              </div>
-
-              <div class="mokshe-card">
-                <div class="mokshe-card-title">3. The "A" Shifts (አ፣ ዐ)</div>
-                <ul class="mokshe-list">
-                  <li><strong>አ (አሌፉ አ):</strong> Named after <em>አሌፍ</em> (Alpha / Origin). Primal source and
-                    inception.</li>
-                  <li><strong>ዐ (ዓይኑ ዐ):</strong> Named after <em>ዓይን</em> (Eye / Vision). Vision, understanding, and
-                    living water springs.</li>
-                  <li class="mokshe-example"><strong>Example:</strong> <em>አመተ</em> (Female servant) vs. <em>ዐመተ</em>
-                    (Year / Century / Era).</li>
-                </ul>
-              </div>
-
-              <div class="mokshe-card">
-                <div class="mokshe-card-title">4. The "Ts" Shifts (ጸ፣ ፀ)</div>
-                <ul class="mokshe-list">
-                  <li><strong>ጸ (ጸሎቱ ጸ):</strong> Named after <em>ጸሎት</em> (Prayer / Petition). Spiritual supplication.
-                  </li>
-                  <li><strong>ፀ (ፀሐዩ ፀ):</strong> Named after <em>ፀሐይ</em> (Sun / Radiant solar body). Cosmic radiance.
-                  </li>
-                  <li class="mokshe-example"><strong>Example:</strong> <em>ፈጸመ</em> (To complete / execute) vs.
-                    <em>ፈፀመ</em> (To pluck out / strip bare).
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Complete 30-Word Master Syllagraphic Homophone Table -->
-            <div class="table-responsive" style="margin-top: 1.5rem;">
-              <table class="step-table infographic-table">
-                <thead>
-                  <tr>
-                    <th style="width: 14%;">Ge'ez Word</th>
-                    <th style="width: 20%;">Amharic Meaning</th>
-                    <th style="width: 16%;">English Meaning</th>
-                    <th style="width: 34%;">Optional / Context Meaning</th>
-                    <th style="width: 16%;">Homophone Pair</th>
-                  </tr>
-                </thead>
-                <tbody id="archHomophoneTable">
-                  <!-- Dynamically populated 30-word master dataset -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 7. RNN State Machine Formulation (DFA Model) -->
-          <div class="arch-section">
-            <h3 class="arch-section-title">
-              <span>🧠</span> 7. RNN State Machine Formulation (DFA Model)
-            </h3>
-            <p class="arch-intro">
-              Biruk Tesfaye's (2019) algorithm formulates the Ge'ez cipher as a Deterministic Finite Automaton (DFA)
-              state machine over the binary alphabet A = {0, 1}.
-              At each recursion step trₖ (for k ∈ [1..8]):
-            </p>
-            <pre class="code-math-block">
-V[ti] = (W[ti] · X[ti]) + B[ti]
-A[ti] = 1   if V[ti] &gt; 0   else   0
-State Feedback Loop: X[tr+1] = A[tr]
-Ciphertext Output: C = [A(tr1) || A(tr2) || ... || A(tr8)]</pre>
-
-            <h4 style="color: var(--accent-cyan); margin: 1.25rem 0 0.5rem;">8×8 Cognitive Mapping &amp; Flag Bits</h4>
-            <p style="color: var(--text-muted); margin-bottom: 0.75rem;">
-              Each character is represented as an 8×8 grid (64 bits). Columns 1 and 2, as well as Row 8, are
-              designated as flag bits (reserved as 0s). The remaining 42 active bits encode the character's unique
-              structural topology.
-            </p>
-
-            <h4 style="color: var(--accent-cyan); margin: 1.25rem 0 0.5rem;">Key Management &amp; Key Scalability</h4>
-            <p style="color: var(--text-muted);">
-              The symmetric key is defined by the 64-bit Weight matrix (W) and 64-bit Bias matrix (B), yielding
-              a standard 128-bit key size per character. Scalable hidden layers permit key sizes extending up to 512
-              bits.
-            </p>
-          </div>
-
-          <!-- 8. Academic References & Bibliography -->
-          <div class="arch-section" style="border-bottom: none;">
-            <h3 class="arch-section-title">
-              <span>📚</span> 8. Academic References &amp; Citations
-            </h3>
-            <div class="biblio-list">
-              <div class="biblio-entry">
-                <span class="bib-num">[1]</span>
-                <span class="bib-text"><strong>Scelta, Gabriella F.</strong> (2001). <em>The Comparative Origin and
-                    Usage of the Ge'ez Writing System of Ethiopia</em>. Department of Art History, AH 215.</span>
-              </div>
-              <div class="biblio-entry">
-                <span class="bib-num">[2]</span>
-                <span class="bib-text"><strong>Bekerie, Ayele</strong> (1997). <em>Ethiopic, An African Writing System:
-                    Its History and Principles</em>. Lawrenceville: Red Sea Press.</span>
-              </div>
-              <div class="biblio-entry">
-                <span class="bib-num">[3]</span>
-                <span class="bib-text"><strong>Tesfaye Yohannes, Biruk</strong> (2019). <em>Ge'ez Recurrent Neural
-                    Network (RNN) Cipher Algorithm Design and Implementation</em>. M.Sc. Thesis, Department of Computer
-                  Science, Dilla University, Ethiopia.</span>
-              </div>
-              <div class="biblio-entry">
-                <span class="bib-num">[4]</span>
-                <span class="bib-text"><strong>Lambdin, Thomas O.</strong> (1978). <em>Introduction to Classical
-                    Ethiopic (Ge'ez)</em>. Harvard Semitic Studies v.24, Ann Arbor: Edwards Brothers.</span>
-              </div>
-            </div>
-          </div>
+        <div class="btn-row">
+          <span id="nnActiveBadge" class="badge">tr1</span>
+          <button id="btnToggleAllPairs" class="btn secondary small" type="button">Show all 8 steps</button>
         </div>
       </div>
-    </section>
-
-    <!-- TAB 6: HISTORICAL INFOGRAPHICS & EVOLUTIONARY CHARTS -->
-    <section id="infographics-tab" class="tab-content">
-      <!-- 1. Tree Arrangement of Developed Ge'ez (Thesis Figure 1.2) -->
-      <div class="card" style="margin-bottom: 1.5rem;">
-        <div class="card-header">
-          <div class="card-title">
-            <span>🌳</span> Tree Arrangement of Developed Ge'ez
-          </div>
-          <span class="thesis-badge">Biruk Tesfaye Thesis</span>
-        </div>
-
-        <div class="infographic-intro">
-          <p>
-            The main class is called <strong>Siriw Fidel</strong> and by adding some strokes and changing the angle of
-            the shape six additional characters developed and called <strong>Serawite Fidel</strong>. In the following
-            figure
-            the ge’ez system is presented in the tree form. The root of the tree is called <strong>Nubare
-              fidel</strong>. The
-            main class of the ge’ez syllabet is found on the second level of the tree and named <strong>siriw
-              fidel</strong>.
-            The third level is named <strong>serawite fidel</strong> and contains all the characters that are generated
-            from
-            siriw fidel.
-          </p>
-        </div>
-
-        <!-- Tree SVG Diagram Container -->
-        <div class="tree-diagram-container">
-          <div class="tree-svg-wrapper">
-            <svg id="geezTreeSvg" viewBox="0 0 920 480" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
-              <!-- Dynamically populated / interactive tree diagram -->
-            </svg>
-          </div>
-          <p class="diagram-caption"
-            style="margin-top: 0.75rem; text-align: center; font-weight: 600; color: var(--accent-cyan);">
-            Figure 1. 2: Tree arrangement of developed geez
-          </p>
-        </div>
+      <div class="nn-legend">
+        <span><i class="ln k"></i>Active input node</span>
+        <span><i class="ln f"></i>Hidden → output path</span>
+        <span><i class="ln o"></i>Bit set to 1</span>
+        <span><i class="ln b"></i>Feedback loop</span>
       </div>
-
-      <!-- 2. Names and Meanings of the Syllographs -->
-      <div class="card" style="margin-bottom: 1.5rem;">
-        <div class="card-header">
-          <div class="card-title">
-            <span>📜</span> Names and Meanings of Some of the Syllographs
-          </div>
-        </div>
-
-        <p class="infographic-desc">
-          Ge'ez syllographs encode cultural, anatomical, and theological ideas. Each root consonant preserves its
-          ancient pictographic identity through millennia:
-        </p>
-
-        <div class="table-responsive">
-          <table class="step-table infographic-table">
-            <thead>
-              <tr>
-                <th>Latin Ref</th>
-                <th>Ancient / Proto</th>
-                <th>Proto-Ethiopic</th>
-                <th>Classical Ethiopic</th>
-                <th>Name &amp; Transliteration</th>
-                <th>Historical Meaning &amp; Symbolism</th>
-              </tr>
-            </thead>
-            <tbody id="syllographMeaningsTable">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
+      <div class="canvas-frame"><canvas id="canvasLeft" aria-label="Neuron connection diagram"></canvas></div>
+      <div id="nnAllPairsGallery" hidden>
+        <div id="nnGalleryGrid" class="gallery"></div>
       </div>
+    </div>
+  </section>
 
-      <!-- 2. Examples of the Evolution of Ethiopic & Beginning and End -->
-      <div class="card" style="margin-bottom: 1.5rem;">
-        <div class="card-header">
-          <div class="card-title">
-            <span>🌱</span> Examples of the Evolution of Ethiopic &amp; The Alpha-Omega Principle
+  <!-- ============ GE'EZ & MODEL ============ -->
+  <section id="architecture-tab" class="tab-content" aria-labelledby="h-arch">
+    <div class="view-head">
+      <div>
+        <div class="eyebrow">Ge'ez &amp; the model</div>
+        <h2 id="h-arch">Why Ge'ez, and how the model works</h2>
+        <p>Thesis chapter 1 argues that Ge'ez has five properties that make it suitable for computation. Chapter 3 builds the cipher model on top of them.</p>
+      </div>
+    </div>
+
+    <div class="doc">
+      <nav class="toc" aria-label="On this page">
+        <a href="#s-five">Five properties</a>
+        <a href="#s-picto">Pictographic</a>
+        <a href="#s-ideo">Ideographic</a>
+        <a href="#s-astro">Astrographic</a>
+        <a href="#s-num">Numeric</a>
+        <a href="#s-syll">Syllographic</a>
+        <a href="#s-model">The cipher model</a>
+        <a href="#s-refs">References</a>
+      </nav>
+
+      <div class="doc-body">
+        <article class="panel doc-section" id="s-five">
+          <h3>Five properties of the script</h3>
+          <p class="lead">Ge'ez is treated as more than a set of sounds. The thesis combines five properties into one framework.</p>
+          <div class="dims">
+            <div class="dim"><span class="ge">በ</span><h4>Pictographic</h4><p>Shapes drawn from nature and daily life, stylized into proto-graphs and then classical fidels.</p></div>
+            <div class="dim"><span class="ge">ረ</span><h4>Ideographic</h4><p>Consonant classes carry social and moral ideas, e.g. <em>Re'es</em> for leadership and <em>Bèt</em> for shelter.</p></div>
+            <div class="dim"><span class="ge">ፀ</span><h4>Astrographic</h4><p>26 classes × 7 orders = 182 syllographs, matched to the 182 days of one equinox.</p></div>
+            <div class="dim"><span class="ge">፲</span><h4>Numeric</h4><p>Each root carries a base value. Across seven orders the values span 1 to 5,600.</p></div>
+            <div class="dim"><span class="ge">ሀ</span><h4>Syllographic</h4><p>Every glyph joins a consonant to a vowel (an abugida), with homophone letters that keep distinct meanings.</p></div>
           </div>
-        </div>
+        </article>
 
-        <!-- The Beginning and the End in Kemetic and Ethiopic -->
-        <div class="beginning-end-container">
-          <div class="be-header">
-            <h4>The Beginning and the End in Egyptian (Kemetic) and Ethiopic</h4>
-            <span class="thesis-badge">Fig. 12</span>
+        <article class="panel doc-section" id="s-picto">
+          <h3>Pictographic property</h3>
+          <p>Following Scelta (2001) and Bekerie (1997), each graph began as an abstract picture of a living thing, a tool or a sky feature.</p>
+          <div class="table-wrap">
+            <table class="prose-table">
+              <thead><tr><th>Natural prototype</th><th>Proto-Ethiopic</th><th>Classical</th><th>Name</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td>Long-horned bull</td><td class="glyph-old">𐩱</td><td class="glyph-cell">ሀ</td><td><strong>Hoi</strong> <span class="ge">(ሆይ)</span></td><td class="muted">Front of lion or bull; first graph of the alphabet, symbol of praise and life.</td></tr>
+                <tr><td>Right fisted hand</td><td class="glyph-old">𐩺</td><td class="glyph-cell">የ</td><td><strong>Yäman</strong> <span class="ge">(የማን)</span></td><td class="muted">Right hand of truth, covenant and justice.</td></tr>
+                <tr><td>Human eye</td><td class="glyph-old">𐩲</td><td class="glyph-cell">ዐ</td><td><strong>A'yn</strong> <span class="ge">(ዐይን)</span></td><td class="muted">Vision and understanding; also a spring of water.</td></tr>
+                <tr><td>House or temple</td><td class="glyph-old">𐩨</td><td class="glyph-cell">በ</td><td><strong>Bèt</strong> <span class="ge">(ቤት)</span></td><td class="muted">Dwelling, door, family and shelter.</td></tr>
+                <tr><td>Walking camel</td><td class="glyph-old">𐩴</td><td class="glyph-cell">ገ</td><td><strong>Gämäl</strong> <span class="ge">(ገመል)</span></td><td class="muted">Endurance, caravan routes and trade.</td></tr>
+                <tr><td>Water waves</td><td class="glyph-old">𐩣</td><td class="glyph-cell">መ</td><td><strong>Mai</strong> <span class="ge">(ማይ)</span></td><td class="muted">Running water, nourishment and cleansing.</td></tr>
+              </tbody>
+            </table>
           </div>
+        </article>
 
-          <div class="be-grid">
-            <div class="be-card be-beginning">
-              <div class="be-badge">THE BEGINNING (ALPHA)</div>
-              <div class="be-symbols">
-                <div class="be-sym-col">
-                  <span class="be-col-lbl">Kemetic:</span>
-                  <span class="be-hieroglyph">𓃭</span>
-                  <span class="be-phon">HÄ</span>
-                </div>
-                <div class="be-arrow">➔</div>
-                <div class="be-sym-col">
-                  <span class="be-col-lbl">Ethiopic:</span>
-                  <span class="be-fidel">ሀ</span>
-                  <span class="be-phon">HÄ (HOI)</span>
-                </div>
-              </div>
-              <p class="be-notes">
-                Determinative sign: A person standing with arms raised to the heavens / Front-end of a lion. Correlated
-                with Psalm 68:31: <em>"Ethiopia stretches her hands unto God"</em>.
-              </p>
+        <article class="panel doc-section" id="s-ideo">
+          <h3>Ideographic property</h3>
+          <p>Beyond sound, root consonant classes are read as civic, spiritual or moral ideas in traditional Ethiopian interpretation.</p>
+          <div class="table-wrap">
+            <table class="prose-table">
+              <thead><tr><th>Root</th><th>6th form</th><th>Root word</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td class="glyph-cell">በ</td><td class="glyph-cell">ብ</td><td><span class="ge">ቤት</span> (Bèt)</td><td class="muted">Home, family and community dwelling.</td></tr>
+                <tr><td class="glyph-cell">የ</td><td class="glyph-cell">ይ</td><td><span class="ge">የማን</span> (Yäman)</td><td class="muted">Right hand of fidelity, truth, justice and oath.</td></tr>
+                <tr><td class="glyph-cell">ገ</td><td class="glyph-cell">ግ</td><td><span class="ge">ገመል</span> (Gämäl)</td><td class="muted">Resilience, trade routes and prosperity.</td></tr>
+                <tr><td class="glyph-cell">ነ</td><td class="glyph-cell">ን</td><td><span class="ge">ነሐስ</span> (Nahas)</td><td class="muted">Bronze working, wisdom and healing.</td></tr>
+                <tr><td class="glyph-cell">ረ</td><td class="glyph-cell">ር</td><td><span class="ge">ርእስ</span> (Re'es)</td><td class="muted">Head and leadership, as in <em>Re'esa Mange'st</em>, head of state.</td></tr>
+                <tr><td class="glyph-cell">ፈ</td><td class="glyph-cell">ፍ</td><td><span class="ge">አፍ</span> (Äf)</td><td class="muted">Mouth, spoken truth and proclamation.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel doc-section" id="s-astro">
+          <h3>Astrographic property</h3>
+          <p>The thesis reads the script as a solar calendar. The year has two 182-day equinox cycles, and the 182 syllographs map one-to-one onto the days of each cycle.</p>
+          <div class="figures">
+            <div><div class="n">26</div><div class="l">Root classes</div></div>
+            <div><div class="n">7</div><div class="l">Orders, one per weekday</div></div>
+            <div><div class="n">182</div><div class="l">Days per equinox</div></div>
+            <div><div class="n">364</div><div class="l">Days in the solar cycle</div></div>
+          </div>
+          <div class="equinox">
+            <div><strong>Equinox 1 · 182 days</strong><span>1 April – 30 September</span></div>
+            <div class="mid">182 + 182 = 364</div>
+            <div><strong>Equinox 2 · 182 days</strong><span>1 October – 31 March</span></div>
+          </div>
+          <div class="table-wrap">
+            <table class="prose-table">
+              <thead><tr><th>Order</th><th>Name</th><th>Vowel</th><th>Weekday</th><th>Role in the model</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">1</td><td><strong>Ge'ez</strong> <span class="ge">ግዕዝ</span></td><td>ä</td><td>Sunday <span class="ge">እሑድ</span></td><td class="muted">State initialization, seed vector</td></tr>
+                <tr><td class="mono">2</td><td><strong>Ka'eb</strong> <span class="ge">ካዕብ</span></td><td>u</td><td>Monday <span class="ge">ሰኑይ</span></td><td class="muted">Weight modulator W₁</td></tr>
+                <tr><td class="mono">3</td><td><strong>Salis</strong> <span class="ge">ሣልስ</span></td><td>i</td><td>Tuesday <span class="ge">ሠሉስ</span></td><td class="muted">Bias injection B₁</td></tr>
+                <tr><td class="mono">4</td><td><strong>Rab'e</strong> <span class="ge">ራብዕ</span></td><td>a</td><td>Wednesday <span class="ge">ረቡዕ</span></td><td class="muted">Cross-layer recursion tr3–tr4</td></tr>
+                <tr><td class="mono">5</td><td><strong>Hamis</strong> <span class="ge">ኃምስ</span></td><td>é</td><td>Thursday <span class="ge">ሐሙስ</span></td><td class="muted">Transposition and diffusion</td></tr>
+                <tr><td class="mono">6</td><td><strong>Sadis</strong> <span class="ge">ሳድስ</span></td><td>ə</td><td>Friday <span class="ge">ዓርብ</span></td><td class="muted">Threshold activation</td></tr>
+                <tr><td class="mono">7</td><td><strong>Sab'e</strong> <span class="ge">ሳብዕ</span></td><td>o</td><td>Saturday <span class="ge">ቀዳሚት ሰንበት</span></td><td class="muted">Feedback latch X[tr+1] = A[tr]</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel doc-section" id="s-num">
+          <h3>Numeric property</h3>
+          <p>Each root consonant has a base value from 1 to 800. Across the seven orders the value grows linearly, giving a range of 1 to 5,600.</p>
+<pre class="math"><b>Base values</b>
+  1–9      ሀ=1   ለ=2   ሐ=3   መ=4   ሠ=5   ረ=6   ሰ=7   ቀ=8   በ=9
+  10–90    ተ=10  ኀ=20  ነ=30  አ=40  ከ=50  ወ=60  ዐ=70  ዘ=80  የ=90
+  100–800  ደ=100 ገ=200 ጠ=300 ጰ=400 ጸ=500 ፀ=600 ፈ=700 ፐ=800
+
+<b>Value by order</b>
+  Value(fidel i, order j) = Base_i × j      j = 1 … 7
+
+<b>Range</b>
+  1 × 1 = 1   up to   800 × 7 = 5,600</pre>
+          <div class="wheel-box">
+            <canvas id="archNumerologyWheelCanvas" aria-label="Numeric wheel of the 26 Ge'ez classes"></canvas>
+            <div class="wheel-card" id="archWheelHoverInfo">
+              <div class="wh-title">Numeric wheel</div>
+              <div id="archWhDetails">Hover over a spoke to see its seven values. Click to open it in the 8×8 map.</div>
             </div>
+          </div>
+        </article>
 
-            <div class="be-card be-end">
-              <div class="be-badge">THE END (OMEGA)</div>
-              <div class="be-symbols">
-                <div class="be-sym-col">
-                  <span class="be-col-lbl">Kemetic:</span>
-                  <span class="be-hieroglyph">𓄂</span>
-                  <span class="be-phon">PEH</span>
-                </div>
-                <div class="be-arrow">➔</div>
-                <div class="be-sym-col">
-                  <span class="be-col-lbl">Ethiopic:</span>
-                  <span class="be-fidel">ፐ</span>
-                  <span class="be-phon">PÄ (PSA)</span>
-                </div>
-              </div>
-              <p class="be-notes">
-                Terminal boundary sign: Demarcates the 26th and final consonant class of the Ethiopic system.
-              </p>
+        <article class="panel doc-section" id="s-syll">
+          <h3>Syllographic property and <span class="ge">ሞክሼ ፊደላት</span></h3>
+          <p>Ge'ez is an abugida: each glyph carries its vowel. <em>Mokshe fidelat</em> are letters that sound alike in modern speech but carry different meanings.</p>
+          <div class="mokshe">
+            <div class="mokshe-card">
+              <h4>"H" letters <span class="ge">ሀ ሐ ኀ</span></h4>
+              <ul>
+                <li><span class="ge">ሀ</span> after <span class="ge">ሃሌ</span> (praise); existence, as in <span class="ge">ሀለወ</span>.</li>
+                <li><span class="ge">ሐ</span> after <span class="ge">ሐመር</span> (ship); the sea and navigation.</li>
+                <li><span class="ge">ኀ</span> after <span class="ge">ብዙኃን</span> (the many) or <span class="ge">ኀርም</span> (net).</li>
+                <li class="ex"><span class="ge">ኀለየ</span> to praise vs. <span class="ge">ሐለየ</span> to think.</li>
+              </ul>
+            </div>
+            <div class="mokshe-card">
+              <h4>"S" letters <span class="ge">ሰ ሠ</span></h4>
+              <ul>
+                <li><span class="ge">ሰ</span> after <span class="ge">እሳት</span> (fire); heat and craft.</li>
+                <li><span class="ge">ሠ</span> after <span class="ge">ንጉሥ</span> (king); dawn and rule.</li>
+                <li class="ex"><span class="ge">ሰረቀ</span> to climb vs. <span class="ge">ሠረቀ</span> to steal.</li>
+              </ul>
+            </div>
+            <div class="mokshe-card">
+              <h4>"A" letters <span class="ge">አ ዐ</span></h4>
+              <ul>
+                <li><span class="ge">አ</span> after <span class="ge">አሌፍ</span> (alpha); origin.</li>
+                <li><span class="ge">ዐ</span> after <span class="ge">ዓይን</span> (eye); vision and springs.</li>
+                <li class="ex"><span class="ge">አመተ</span> female servant vs. <span class="ge">ዐመተ</span> year.</li>
+              </ul>
+            </div>
+            <div class="mokshe-card">
+              <h4>"Ts" letters <span class="ge">ጸ ፀ</span></h4>
+              <ul>
+                <li><span class="ge">ጸ</span> after <span class="ge">ጸሎት</span> (prayer).</li>
+                <li><span class="ge">ፀ</span> after <span class="ge">ፀሐይ</span> (sun).</li>
+                <li class="ex"><span class="ge">ፈጸመ</span> to complete vs. <span class="ge">ፈፀመ</span> to strip bare.</li>
+              </ul>
             </div>
           </div>
-        </div>
-
-        <!-- Evolution of Characters Table -->
-        <h4 style="color: var(--accent-cyan); margin: 1.5rem 0 0.75rem;">Evolution from Pictograms to Classical Script
-          (Fig. 13)</h4>
-        <div class="table-responsive">
-          <table class="step-table infographic-table">
-            <thead>
-              <tr>
-                <th>Original Pictograph</th>
-                <th>Proto-Ethiopic Form</th>
-                <th>Ethiopic Glyph</th>
-                <th>Transcription</th>
-                <th>Fidel Name</th>
-                <th>Description &amp; Origin</th>
-              </tr>
-            </thead>
-            <tbody id="ethiopicEvolutionTable">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 3. Examples of Ancient African and Near-African Systems -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <span>🏺</span> Examples of Ancient African and Near-African Systems
+          <div class="table-wrap">
+            <table class="prose-table">
+              <thead><tr><th>Ge'ez word</th><th>Amharic</th><th>English</th><th>Other meaning</th><th>Homophone pair</th></tr></thead>
+              <tbody id="archHomophoneTable"></tbody>
+            </table>
           </div>
-        </div>
+        </article>
 
-        <p class="infographic-desc">
-          Comparative analysis refuting the Eurocentric external paradigm, demonstrating that Ge'ez is rooted directly
-          in African writing traditions (Egyptian Hieroglyphs, Meroitic of Sudan, and Proto-Ethiopic):
-        </p>
+        <article class="panel doc-section" id="s-model">
+          <h3>The cipher model</h3>
+          <p>The thesis describes the cipher as a deterministic finite automaton over the binary alphabet {0, 1}. At each recursion trₖ, k = 1 … 8:</p>
+<pre class="math">V[i]   = W[i] · X[i] + B[i]
+A[i]   = 1  if V[i] &gt; 0,  else 0
+X[k+1] = A[k]                              <b>feedback</b>
+C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
+          <p>Each character is an 8×8 grid. Columns 1–2 and row 8 are flag bits, set to 0. The remaining 42 bits hold the character's shape.</p>
+          <p>The thesis proposes the 64-bit weight matrix W and 64-bit bias matrix B as the key, for 128 bits per character, and suggests extending it to 512 bits by adding hidden layers.</p>
+        </article>
 
-        <div class="table-responsive">
-          <table class="step-table comparative-matrix-table">
-            <thead>
-              <tr>
-                <th>Sound / Class</th>
-                <th>Egyptian Hieroglyphic</th>
-                <th>Meroitic</th>
-                <th>Sinaitic</th>
-                <th>Cretan Linear</th>
-                <th>Meroitic Linear</th>
-                <th>Proto-Ethiopic</th>
-                <th>Classical Ethiopic</th>
-                <th>Etymology</th>
-              </tr>
-            </thead>
-            <tbody id="comparativeSystemsTable">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
+        <article class="panel doc-section" id="s-refs">
+          <h3>References</h3>
+          <ol class="refs">
+            <li><span><strong>Scelta, G. F.</strong> (2001). <em>The Comparative Origin and Usage of the Ge'ez Writing System of Ethiopia.</em> Arts of Africa, AH 215.</span></li>
+            <li><span><strong>Bekerie, A.</strong> (1997). <em>Ethiopic, An African Writing System: Its History and Principles.</em> Lawrenceville: Red Sea Press.</span></li>
+            <li><span><strong>Tesfaye Yohannes, B.</strong> (2019). <em>Modeling Ge'ez based Recurrent Neural Network Cipher Algorithm.</em> M.Sc. thesis, Dilla University.</span></li>
+            <li><span><strong>Lambdin, T. O.</strong> (1978). <em>Introduction to Classical Ethiopic (Ge'ez).</em> Harvard Semitic Studies 24.</span></li>
+          </ol>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCRIPT HISTORY ============ -->
+  <section id="infographics-tab" class="tab-content" aria-labelledby="h-hist">
+    <div class="view-head">
+      <div>
+        <div class="eyebrow">Script history</div>
+        <h2 id="h-hist">Where the Ge'ez script comes from</h2>
+        <p>The thesis's view of how the script developed, from its root form to the full syllabary, and how it compares with other African writing systems.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Tree of the developed script (Figure 1.2)</h3>
+          <div class="sub">The root is <span class="ge">ኑባሬ ፊደል</span> (Nubare Fidel). The main classes are <span class="ge">ስርወ ፊደል</span> (Siriw Fidel), and the six derived forms of each are <span class="ge">ሠራዊተ ፊደል</span> (Serawite Fidel).</div>
         </div>
       </div>
-    </section>
+      <div class="tree-frame"><svg id="geezTreeSvg" viewBox="0 0 920 480" role="img" aria-label="Tree of Ge'ez classes"></svg></div>
+    </div>
 
-    <!-- Footer -->
-    <footer>
-      <p>Ge'ez RNN Cipher Suite &copy; 2026 | Based on Biruk Tesfaye Yohannes' Master's Thesis</p>
-    </footer>
+    <div class="panel">
+      <div class="panel-head"><h3>The beginning and the end</h3><span class="badge">Fig. 1.1</span></div>
+      <div class="alpha-omega">
+        <div class="ao-card">
+          <div class="eyebrow">The beginning</div>
+          <div class="ao-symbols">
+            <div class="ao-sym"><small>Egyptian</small><span class="big glyph-old">𓃭</span><span class="ph">HÄ</span></div>
+            <span aria-hidden="true">→</span>
+            <div class="ao-sym"><small>Ethiopic</small><span class="big ge">ሀ</span><span class="ph">HÄ (HOI)</span></div>
+          </div>
+          <p>A person standing with arms raised, or the front of a lion. Linked with Psalm 68:31, "Ethiopia stretches her hands unto God".</p>
+        </div>
+        <div class="ao-card">
+          <div class="eyebrow">The end</div>
+          <div class="ao-symbols">
+            <div class="ao-sym"><small>Egyptian</small><span class="big glyph-old">𓄂</span><span class="ph">PEH</span></div>
+            <span aria-hidden="true">→</span>
+            <div class="ao-sym"><small>Ethiopic</small><span class="big ge">ፐ</span><span class="ph">PÄ (PSA)</span></div>
+          </div>
+          <p>Marks the 26th and final consonant class of the Ethiopic system.</p>
+        </div>
+      </div>
+    </div>
 
-    <script src="geez_dataset.js"></script>
-    <script src="geez_rnn_engine.js"></script>
-    <script src="app.js"></script>
+    <div class="panel">
+      <div class="panel-head"><h3>Names and meanings of some syllographs</h3></div>
+      <div class="table-wrap">
+        <table class="prose-table">
+          <thead><tr><th>Latin</th><th>Ancient</th><th>Proto-Ethiopic</th><th>Classical</th><th>Name</th><th>Meaning</th></tr></thead>
+          <tbody id="syllographMeaningsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>From pictograph to classical script</h3></div>
+      <div class="table-wrap">
+        <table class="prose-table">
+          <thead><tr><th>Pictograph</th><th>Proto-Ethiopic</th><th>Ethiopic</th><th>Sound</th><th>Name</th><th>Origin</th></tr></thead>
+          <tbody id="ethiopicEvolutionTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Ancient African and neighboring scripts</h3>
+          <div class="sub">How Ge'ez compares with Egyptian, Meroitic, Sinaitic and Proto-Ethiopic forms.</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="prose-table">
+          <thead><tr><th>Sound</th><th>Egyptian</th><th>Meroitic</th><th>Sinaitic</th><th>Cretan linear</th><th>Meroitic linear</th><th>Proto-Ethiopic</th><th>Ethiopic</th><th>Notes</th></tr></thead>
+          <tbody id="comparativeSystemsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Ge'ez RNN Cipher · based on the M.Sc. thesis of <strong>Biruk Tesfaye Yohannes</strong>, Dilla University (2019)</span>
+    <span>Research prototype. Not for protecting real data.</span>
+  </footer>
+</main>
+
+<script src="geez_dataset.js"></script>
+<script src="geez_rnn_engine.js"></script>
+<script src="app.js"></script>
 </body>
-
 </html>
