@@ -1,0 +1,7 @@
+# Ask browsers and the Hostinger CDN to revalidate app files on each load,
+# so a new deploy never mixes fresh HTML with stale JS/CSS.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>

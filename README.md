@@ -25,3 +25,7 @@ Then open http://localhost:8080.
 | `geez_dataset.js` | 8×8 character maps and Ge'ez reference data |
 
 > Research prototype. Not for protecting real data.
+
+## Deploying
+
+`main` deploys automatically to Hostinger. When you change `app.js`, `index.css` or the other scripts, bump the `?v=` value on their tags in `index.html` so the CDN serves the new files.
