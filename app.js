@@ -65,7 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
     tabButtons.forEach((b) => {
       const on = b.dataset.tab === tabId;
       b.classList.toggle('active', on);
-      b.setAttribute('aria-current', on ? 'page' : 'false');
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;
+      if (on && b.scrollIntoView && window.innerWidth > 720) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     });
     tabContents.forEach((c) => c.classList.toggle('active', c.id === tabId));
     if (tabId === 'visualizer-tab') renderVisualizer();
@@ -83,6 +85,21 @@ document.addEventListener('DOMContentLoaded', () => {
     showTab(btn.dataset.tab);
     window.scrollTo({ top: 0 });
   }));
+  // Arrow keys move between sections (standard tablist behavior)
+  document.querySelector('.tabs').addEventListener('keydown', (e) => {
+    const list = [...tabButtons];
+    const i = list.indexOf(document.activeElement);
+    if (i < 0) return;
+    let n = -1;
+    if (e.key === 'ArrowRight') n = (i + 1) % list.length;
+    else if (e.key === 'ArrowLeft') n = (i - 1 + list.length) % list.length;
+    else if (e.key === 'Home') n = 0;
+    else if (e.key === 'End') n = list.length - 1;
+    if (n < 0) return;
+    e.preventDefault();
+    list[n].focus();
+    showTab(list[n].dataset.tab);
+  });
   function routeFromHash() {
     const key = (location.hash || '').replace('#', '');
     if (ROUTES[key]) showTab(ROUTES[key], false);

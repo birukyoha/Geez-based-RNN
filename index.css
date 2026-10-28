@@ -144,30 +144,74 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .tabs {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 4px 6px;
+  flex-basis: 100%;
+  margin-top: 8px;
+  padding-block: 0 10px;
   overflow-x: auto;
   scrollbar-width: none;
-  flex-basis: 100%;
-  margin-top: 6px;
 }
 .tabs::-webkit-scrollbar { display: none; }
+.tab-group { display: flex; align-items: center; gap: 2px; flex: none; }
+.tab-group + .tab-group { padding-left: 10px; margin-left: 4px; border-left: 1px solid var(--line); }
+.tab-group-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); opacity: 0.8; padding: 0 6px 0 2px;
+}
 .tab-btn {
   appearance: none;
-  border: 0;
+  border: 1px solid transparent;
   background: none;
-  padding: 10px 12px 11px;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 12px;
+  border-radius: 999px;
   font-size: var(--step--1);
   font-weight: 600;
   color: var(--muted);
   white-space: nowrap;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  display: inline-flex; align-items: center; gap: 8px;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.tab-btn .tab-ge { font-family: var(--font-ethiopic); font-size: 15px; opacity: 0.7; }
-.tab-btn:hover { color: var(--ink); }
-.tab-btn.active { color: var(--ink); border-bottom-color: var(--rubric); }
-.tab-btn.active .tab-ge { color: var(--rubric); opacity: 1; }
+.tab-ico { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tab-btn .lbl-short { display: none; }
+@media (max-width: 1100px) and (min-width: 721px) { .tab-group-label { display: none; } .tab-btn { padding: 7px 10px; } }
+.tab-btn:hover { color: var(--ink); background: var(--surface-2); }
+.tab-btn.active { color: var(--rubric); background: var(--rubric-soft); border-color: color-mix(in srgb, var(--rubric) 35%, transparent); }
+.tab-btn.active .tab-ico { stroke-width: 2.1; }
+
+/* Phones: the menu becomes a bottom tab bar so every section stays in reach */
+@media (max-width: 720px) {
+  .tabs {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 20;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0;
+    overflow: visible;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -8px 24px -18px rgba(0, 0, 0, 0.45);
+    padding: 6px max(6px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px));
+  }
+  .tab-group, .tab-group + .tab-group { display: contents; }
+  .tab-group-label { display: none; }
+  .tab-btn {
+    flex-direction: column; gap: 3px;
+    padding: 6px 2px;
+    border-radius: 10px;
+    font-size: 10.5px;
+    min-width: 0;
+  }
+  .tab-ico { width: 20px; height: 20px; }
+  .tab-btn .lbl-full { display: none; }
+  .tab-btn .lbl-short { display: block; }
+  .tab-btn.active { border-color: transparent; }
+  .page { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .masthead-inner { padding-block: 10px; }
+}
 
 /* ---------- Page ---------- */
 .page { padding-block: 24px 48px; }
