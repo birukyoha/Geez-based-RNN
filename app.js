@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
       b.classList.toggle('active', on);
       b.setAttribute('aria-selected', String(on));
       b.tabIndex = on ? 0 : -1;
-      if (on && b.scrollIntoView && window.innerWidth > 720) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     });
     tabContents.forEach((c) => c.classList.toggle('active', c.id === tabId));
+    moveDock();
     if (tabId === 'visualizer-tab') renderVisualizer();
     if (tabId === 'inspector-tab') renderInspector();
     if (tabId === 'architecture-tab') renderNumerologyWheel();
@@ -81,6 +81,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
+  // Slide the dock's bump and colored bubble under the active section
+  const dock = document.querySelector('.dock');
+  function moveDock(instant) {
+    const btn = document.querySelector('.tab-btn.active');
+    if (!dock || !btn) return;
+    if (instant) dock.classList.add('no-anim');
+    const center = btn.offsetLeft + btn.offsetWidth / 2;
+    const bump = dock.querySelector('.dock-bump');
+    const bubble = dock.querySelector('.dock-bubble');
+    bump.style.transform = `translateX(${center - bump.getBoundingClientRect().width / 2}px)`;
+    bubble.style.transform = `translateX(${center - bubble.getBoundingClientRect().width / 2}px)`;
+    dock.style.setProperty('--bubble-color', btn.style.getPropertyValue('--accent'));
+    if (instant) requestAnimationFrame(() => requestAnimationFrame(() => dock.classList.remove('no-anim')));
+  }
+  window.addEventListener('resize', () => moveDock(true));
+
   tabButtons.forEach((btn) => btn.addEventListener('click', () => {
     showTab(btn.dataset.tab);
     window.scrollTo({ top: 0 });
@@ -849,4 +865,5 @@ document.addEventListener('DOMContentLoaded', () => {
   renderGeezTree();
   performEncryption();
   routeFromHash();
+  moveDock(true);
 });
