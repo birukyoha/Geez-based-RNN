@@ -102,6 +102,21 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', () => moveDock(true));
   if (window.ResizeObserver && dock) new ResizeObserver(() => moveDock(true)).observe(dock);
 
+  // Desktop: once the header scrolls away, the menu floats at the top of the window
+  const dockSlot = document.querySelector('.dock-slot');
+  const wide = window.matchMedia('(min-width: 1024px)');
+  function updateFloating() {
+    if (!dock || !dockSlot) return;
+    const shouldFloat = wide.matches && dockSlot.getBoundingClientRect().bottom < 0;
+    if (shouldFloat === dock.classList.contains('floating')) return;
+    if (shouldFloat) dock.style.setProperty('--float-w', dockSlot.getBoundingClientRect().width + 'px');
+    dock.classList.toggle('floating', shouldFloat);
+    moveDock(true);
+  }
+  window.addEventListener('scroll', updateFloating, { passive: true });
+  window.addEventListener('resize', updateFloating);
+  try { wide.addEventListener('change', updateFloating); } catch (e) { /* older browsers */ }
+
   tabButtons.forEach((btn) => btn.addEventListener('click', () => {
     showTab(btn.dataset.tab);
     window.scrollTo({ top: 0 });

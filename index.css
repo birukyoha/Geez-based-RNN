@@ -128,8 +128,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* ---------- Masthead ---------- */
 .masthead {
-  position: sticky;
-  top: env(safe-area-inset-top, 0px);
+  position: relative;
   z-index: 5;
   background: var(--surface);
   border-bottom: 1px solid var(--line);
@@ -161,8 +160,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .brand h1 { font-size: var(--step-1); letter-spacing: -0.01em; }
 .brand p { font-size: var(--step--1); color: var(--muted); }
-.masthead-meta { font-size: var(--step--1); color: var(--muted); text-align: right; }
-@media (max-width: 640px) { .masthead-meta { display: none; } }
 .theme-switch { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--bg); flex: none; }
 .theme-switch button {
   appearance: none; border: 0; background: none; cursor: pointer;
@@ -171,7 +168,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .theme-switch button:hover { color: var(--ink); }
 .theme-switch button[aria-checked="true"] { background: var(--ink); color: var(--surface); }
-.masthead-meta strong { color: var(--ink); font-weight: 600; }
 
 /* ---------- Dock navigation (sliding bump + bubble) ---------- */
 .dock {
@@ -259,15 +255,34 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .tab-btn { justify-content: flex-start; padding-top: 4px; gap: 3px; color: var(--muted); border-radius: 12px; transition: color 0.3s ease; }
   .tab-btn:hover { color: var(--ink); }
   .tab-ico { margin-block: 9px 7px; }
-  .brand p { display: none; }
-  .masthead-meta { white-space: nowrap; }
+  .brand p { white-space: nowrap; }
   .tab-btn.active { color: #fff; }
   .tab-btn.active .tab-ico { transform: none; }
   .tab-btn.active .tab-lbl { color: var(--section, var(--ink)); font-weight: 700; }
   .page { padding-bottom: 48px; }
+  .dock-slot { flex: 1 1 560px; max-width: 640px; margin-inline: auto; height: 66px; display: flex; }
+  .dock-slot .dock { flex: 1 1 auto; max-width: none; margin: 0; }
+
+  /* Scrolled past the header: the menu floats, pinned to the top of the window */
+  .dock.floating {
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--float-w, 640px);
+    z-index: 30;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: 0 0 0 1px var(--line), 0 18px 40px -20px rgba(10, 12, 16, 0.45), inset 0 -3px 0 var(--section, var(--rubric));
+    animation: dock-drop 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
 }
+@keyframes dock-drop { from { opacity: 0; transform: translate(-50%, -14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (max-width: 1023px) { .dock-slot { display: contents; } }
 @media (min-width: 1024px) and (max-width: 1240px) {
-  .masthead-meta { display: none; }
+  .brand p { display: none; }
 }
 
 /* ---------- Page ---------- */
@@ -600,11 +615,11 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; 
 /* ---------- Script (architecture) ---------- */
 .doc { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
 @media (max-width: 860px) { .doc { grid-template-columns: minmax(0, 1fr); } .toc { display: none; } }
-.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 110px); display: grid; gap: 2px; font-size: var(--step--1); }
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); display: grid; gap: 2px; font-size: var(--step--1); }
 .toc a { color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--line); }
 .toc a:hover { color: var(--ink); border-left-color: var(--ink); }
 .doc-body { display: grid; gap: 20px; min-width: 0; }
-.doc-section { display: grid; gap: 14px; scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 110px); }
+.doc-section { display: grid; gap: 14px; scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 96px); }
 .doc-section h3 { font-size: var(--step-2); letter-spacing: -0.01em; display: flex; gap: 10px; align-items: baseline; }
 .doc-section h3 .ge { color: var(--rubric); font-size: 0.9em; }
 .doc-section > p { max-width: 70ch; color: var(--ink); }

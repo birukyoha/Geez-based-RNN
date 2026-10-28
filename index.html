@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261028e">
+  <link rel="stylesheet" href="index.css?v=20261028f">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -25,6 +25,7 @@
         <p>Recurrent neural network cipher built on the Ge'ez script</p>
       </div>
     </div>
+    <div class="dock-slot">
     <nav class="tabs dock" aria-label="Sections" role="tablist">
       <svg class="dock-bump" viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true"><path d="M0 26C26 26 32 1 60 1S94 26 120 26Z"/></svg>
       <span class="dock-bubble" aria-hidden="true"></span>
@@ -55,7 +56,7 @@
         </button>
       </div>
     </nav>
-    <div class="masthead-meta">Thesis by <strong>Biruk Tesfaye Yohannes</strong><br>Dilla University, 2019</div>
+    </div>
     <div class="theme-switch" role="radiogroup" aria-label="Color theme">
       <button type="button" role="radio" data-theme-choice="auto" title="Follow device setting">Auto</button>
       <button type="button" role="radio" data-theme-choice="light" title="Light theme">Light</button>
@@ -612,8 +613,8 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261028e"></script>
-<script src="geez_rnn_engine.js?v=20261028e"></script>
-<script src="app.js?v=20261028e"></script>
+<script src="geez_dataset.js?v=20261028f"></script>
+<script src="geez_rnn_engine.js?v=20261028f"></script>
+<script src="app.js?v=20261028f"></script>
 </body>
 </html>
