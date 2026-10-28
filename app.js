@@ -359,13 +359,29 @@ document.addEventListener('DOMContentLoaded', () => {
     $('profileOrder').textContent = p.orderName;
     $('profileVowel').textContent = p.vowelSound;
     $('profileDay').textContent = `${p.dayOfWeek} (${p.dayGeez})`;
-    $('profileEquinox').textContent = `Day ${p.equinoxDay} of ${p.totalEquinoxDays}`;
+    $('profileEquinox').textContent = p.equinoxDay ? `Day ${p.equinoxDay} of ${p.totalEquinoxDays}` : 'Not in the 182';
     $('profileNumerology').textContent = String(p.numerologyValue);
     $('profileActiveBits').textContent = `${activeBits} of 42`;
   }
 
   function renderEthiopicClasses() {
     const list = $('ethiopicClassList');
+    const amh = GEEZ_DATASET.amharicClasses || [];
+    const amhRows = amh.map((cls) => {
+      const forms = [
+        [cls.geez, 1, "Ge'ez"], [cls.kaeb, 2, "Ka'eb"], [cls.salis, 3, 'Salis'], [cls.rabe, 4, "Rab'e"],
+        [cls.hamis, 5, 'Hamis'], [cls.sadis, 6, 'Sadis'], [cls.sabe, 7, "Sab'e"]
+      ].filter((f) => activeOrderFilter === 0 || f[1] === activeOrderFilter);
+      return `<div class="class-list-entry">
+        <div class="fidel-info">
+          <span class="fidel-name">${escapeHtml(cls.name)}</span>
+          <span class="fidel-meaning">from <span class="ge">${cls.from}</span></span>
+        </div>
+        <div class="fidel-chars-badge">
+          ${forms.map(([ch, o, n]) => `<button type="button" class="fidel-char-pill${selectedChar === ch ? ' active' : ''}" data-char="${ch}" title="${escapeHtml(cls.name)}, order ${o} (${n})">${ch}</button>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
     list.innerHTML = GEEZ_DATASET.ethiopianClasses.map((cls) => {
       const forms = [
         [cls.geez, 1, "Ge'ez"], [cls.kaeb, 2, "Ka'eb"], [cls.salis, 3, 'Salis'], [cls.rabe, 4, "Rab'e"],
@@ -381,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${forms.map(([ch, o, n]) => `<button type="button" class="fidel-char-pill${selectedChar === ch ? ' active' : ''}" data-char="${ch}" title="${escapeHtml(cls.name)}, order ${o} (${n})">${ch}</button>`).join('')}
         </div>
       </div>`;
-    }).join('');
+    }).join('') + (amhRows ? `<div class="class-list-sub">Amharic additions <span>not among the 26 Ge'ez classes</span></div>` + amhRows : '');
   }
   $('ethiopicClassList').addEventListener('click', (e) => {
     const pill = e.target.closest('.fidel-char-pill');

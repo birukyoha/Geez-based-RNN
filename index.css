@@ -460,6 +460,8 @@ textarea:focus, input[type="text"]:focus, select:focus { border-color: var(--rub
 .class-list { display: grid; gap: 0; max-height: 420px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; }
 .class-list-entry { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); }
 .class-list-entry:last-child { border-bottom: 0; }
+.class-list-sub { padding: 10px 12px 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rubric); background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.class-list-sub span { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--muted); margin-left: 6px; }
 @media (max-width: 560px) { .class-list-entry { grid-template-columns: minmax(0, 1fr); } }
 .fidel-info { display: grid; gap: 0; min-width: 0; }
 .fidel-name { font-weight: 650; font-size: var(--step--1); }

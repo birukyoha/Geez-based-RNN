@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261028a">
+  <link rel="stylesheet" href="index.css?v=20261028b">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -202,7 +202,7 @@
       <div>
         <div class="eyebrow">Cognitive map</div>
         <h2 id="h-map">The 8×8 map behind each character</h2>
-        <p>Each character's cipher block is its pixel shape. Click a data cell to flip it and the encryption updates. Columns 1–2 and row 8 are reserved flag bits.</p>
+        <p>Each character's cipher block is its pixel shape, for English and Ge'ez letters alike. Click a data cell to flip it and the encryption updates. Columns 1–2 and row 8 are reserved flag bits.</p>
       </div>
       <span id="selectedCharLabel" class="badge rubric">Character 'A'</span>
     </div>
@@ -248,7 +248,7 @@
       <div class="panel-head">
         <div>
           <h3>Ethiopic syllographs</h3>
-          <div class="sub">26 classes × 7 orders = 182 characters. Select any one to load its map.</div>
+          <div class="sub">26 Ge'ez classes × 7 orders = 182 characters, plus 8 Amharic classes. Select any one to load its map.</div>
         </div>
       </div>
       <div class="order-filter-bar">
@@ -617,8 +617,8 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261028a"></script>
-<script src="geez_rnn_engine.js?v=20261028a"></script>
-<script src="app.js?v=20261028a"></script>
+<script src="geez_dataset.js?v=20261028b"></script>
+<script src="geez_rnn_engine.js?v=20261028b"></script>
+<script src="app.js?v=20261028b"></script>
 </body>
 </html>

@@ -29,3 +29,7 @@ Then open http://localhost:8080.
 ## Deploying
 
 `main` deploys automatically to Hostinger. When you change `app.js`, `index.css` or the other scripts, bump the `?v=` value on their tags in `index.html` so the CDN serves the new files.
+
+## Ge'ez and Amharic 8×8 maps
+
+Every Ethiopic character uses the same principle as the English letters: the glyph's black/white pixel shape fills the 6×7 data area (columns 3–8, rows 1–7), and columns 1–2 and row 8 are flag bits. The 238 maps (26 Ge'ez classes and 8 Amharic classes, 7 orders each) were rasterized from Noto Sans Ethiopic Bold at a 0.42 coverage threshold. Every map in the dataset (322 including Latin, digits and symbols) is unique, so every character decrypts back to itself.
