@@ -94,7 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxLeft = dock.clientWidth - bw - 6;
     bump.style.transform = `translateX(${Math.min(Math.max(center - bw / 2, 6), maxLeft)}px)`;
     bubble.style.transform = `translateX(${center - bubble.getBoundingClientRect().width / 2}px)`;
-    dock.style.setProperty('--bubble-color', btn.style.getPropertyValue('--accent'));
+    const accent = btn.style.getPropertyValue('--accent');
+    dock.style.setProperty('--bubble-color', accent);
+    document.documentElement.style.setProperty('--section', accent);
     if (instant) requestAnimationFrame(() => requestAnimationFrame(() => dock.classList.remove('no-anim')));
   }
   window.addEventListener('resize', () => moveDock(true));
