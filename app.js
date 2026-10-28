@@ -90,12 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const center = btn.offsetLeft + btn.offsetWidth / 2;
     const bump = dock.querySelector('.dock-bump');
     const bubble = dock.querySelector('.dock-bubble');
-    bump.style.transform = `translateX(${center - bump.getBoundingClientRect().width / 2}px)`;
+    const bw = bump.getBoundingClientRect().width;
+    const maxLeft = dock.clientWidth - bw - 6;
+    bump.style.transform = `translateX(${Math.min(Math.max(center - bw / 2, 6), maxLeft)}px)`;
     bubble.style.transform = `translateX(${center - bubble.getBoundingClientRect().width / 2}px)`;
     dock.style.setProperty('--bubble-color', btn.style.getPropertyValue('--accent'));
     if (instant) requestAnimationFrame(() => requestAnimationFrame(() => dock.classList.remove('no-anim')));
   }
   window.addEventListener('resize', () => moveDock(true));
+  if (window.ResizeObserver && dock) new ResizeObserver(() => moveDock(true)).observe(dock);
 
   tabButtons.forEach((btn) => btn.addEventListener('click', () => {
     showTab(btn.dataset.tab);

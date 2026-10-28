@@ -233,6 +233,37 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .page { padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); }
 @media (max-width: 420px) { .tab-btn { font-size: 10px; } .dock { --bubble: 46px; } }
 
+/* Desktop: the dock sits in the header; bump and bubble hang below the bar */
+@media (min-width: 1024px) {
+  .masthead { z-index: 20; }
+  .masthead-inner { flex-wrap: nowrap; gap: 20px; padding-block: 10px; }
+  .brand { flex: 0 1 auto; }
+  .dock {
+    --dock-h: 56px;
+    --bubble: 44px;
+    position: relative;
+    left: auto; bottom: auto; transform: none;
+    flex: 1 1 520px;
+    width: auto;
+    max-width: 600px;
+    margin-inline: auto;
+    border-radius: 16px;
+    box-shadow: 0 0 0 1px var(--dock-edge);
+  }
+  .dock-bump { top: auto; bottom: -20px; width: 96px; height: 22px; scale: 1 -1; }
+  .brand p { display: none; }
+  .masthead-meta { white-space: nowrap; }
+  .dock-bubble { top: calc(var(--dock-h) - var(--bubble) / 2 + 6px); }
+  .tab-btn { transition: color 0.3s ease; }
+  .tab-btn .tab-lbl { transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1), color 0.3s ease; }
+  .tab-btn.active .tab-ico { transform: translateY(38px); }
+  .tab-btn.active .tab-lbl { transform: translateY(-9px); }
+  .page { padding-bottom: 48px; padding-top: 40px; }
+}
+@media (min-width: 1024px) and (max-width: 1240px) {
+  .masthead-meta { display: none; }
+}
+
 /* ---------- Page ---------- */
 .page { padding-block: 24px 48px; }
 .tab-content { display: none; }
