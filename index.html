@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029m">
+  <link rel="stylesheet" href="index.css?v=20261029n">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -95,6 +95,21 @@
       </button>
     </div>
 
+
+    <div class="home-glance">
+      <div class="home-glance-text">
+        <h3>Ge'ez at a glance</h3>
+        <p><span class="ge">ግዕዝ</span> is the classical language of Ethiopia and Eritrea, and the script it was written in. The language lives on in the liturgy of the Orthodox Tewahedo churches. The script lives on in Amharic, Tigrinya, Tigre and other languages, each adding letters for its own sounds.</p>
+      </div>
+      <div class="figures home-figures">
+        <div><div class="n">26</div><div class="l">Letter classes</div></div>
+        <div><div class="n">7</div><div class="l">Vowel orders each</div></div>
+        <div><div class="n">182</div><div class="l">Syllables, one per equinox day</div></div>
+        <div><div class="n">364</div><div class="l">Days in the fidel calendar</div></div>
+        <div><div class="n">20</div><div class="l">Number signs, no zero</div></div>
+        <div><div class="n">4th c.</div><div class="l">First fully vowel-marked texts</div></div>
+      </div>
+    </div>
     <div class="home-props">
       <button type="button" class="home-prop" data-home-go="model:pictographic"><span class="ge">በ</span><b>Pictographic</b><span>Watch pictures become letters, and follow every letter's family.</span></button>
       <button type="button" class="home-prop" data-home-go="model:ideographic"><span class="ge">ረ</span><b>Ideographic</b><span>Group the 26 letters by the ideas they carry.</span></button>
@@ -103,6 +118,45 @@
       <button type="button" class="home-prop" data-home-go="model:syllographic"><span class="ge">ሀ</span><b>Syllographic</b><span>Explore the 26 × 7 grid, its homophones and Amharic letters.</span></button>
     </div>
 
+
+    <div class="panel home-cipher">
+      <div class="panel-head"><div><h3>How the cipher works</h3><div class="sub">Running live on today's letter, <span class="ge" id="hcLetterInline">ሀ</span>.</div></div>
+        <button type="button" class="btn secondary small" data-home-tab="inspector-tab">Watch every step →</button></div>
+      <div class="hc-flow">
+        <div class="hc-step"><span class="hc-n">1</span><b>A letter</b><span class="hc-big ge" id="hcLetter">ሀ</span><span class="hint">One of the 182 syllographs, or any typed character.</span></div>
+        <span class="hc-arrow" aria-hidden="true">→</span>
+        <div class="hc-step"><span class="hc-n">2</span><b>Its 8×8 map</b><div class="hc-grid" id="hcMap"></div><span class="hint">The glyph's shape as 64 bits: 6×7 of drawing, plus flag bits.</span></div>
+        <span class="hc-arrow" aria-hidden="true">→</span>
+        <div class="hc-step"><span class="hc-n">3</span><b>Eight recursions</b><div class="hc-rec" id="hcRec"></div><span class="hint">A recurrent network writes one row per step, each step feeding the next.</span></div>
+        <span class="hc-arrow" aria-hidden="true">→</span>
+        <div class="hc-step"><span class="hc-n">4</span><b>A 64-bit block</b><div class="hc-grid out" id="hcBlock"></div><span class="mono hc-hex" id="hcHex"></span><span class="hint">The network's output, written as 16 hex digits.</span></div>
+      </div>
+      <p class="hint">An optional AES-128 layer can encrypt the blocks again with a passphrase. Decryption runs the network backwards and recovers the exact letter.</p>
+    </div>
+
+    <div class="home-two">
+      <div class="home-found">
+        <h3>What the thesis found</h3>
+        <ul>
+          <li>The structure of Ge'ez can be modelled as the behaviour of a recurrent neural network that turns each character into a 64-bit block.</li>
+          <li>The model was tested on binary inputs and truth tables and analysed alongside AES-128.</li>
+          <li>It was evaluated on cipher technique, key size, key type, key management and bit-level operation.</li>
+          <li>The thesis reports the Ge'ez-based cipher as strong and robust to attacks, and suited to use together with other cryptographic algorithms.</li>
+        </ul>
+        <p class="hint">Findings as stated in the thesis. This site is a research prototype, not a tool for protecting real data.</p>
+      </div>
+      <div class="home-facts">
+        <h3>Did you know?</h3>
+        <div class="home-fact-list">
+          <button type="button" data-home-go="model:numeric"><span class="ge">፲፱፻፳፪</span><span>Ge'ez numerals have no zero. ፻ and ፼ do the work of place value.</span></button>
+          <button type="button" data-home-go="model:syllographic"><span class="ge">ሀ ሐ ኀ</span><span>These sound the same in Amharic, but in Ge'ez they were three different sounds.</span></button>
+          <button type="button" data-home-go="astrographic:s-dial"><span class="ge">፴</span><span>Every Ethiopian month has 30 days, so each month begins two weekdays after the last.</span></button>
+          <button type="button" data-home-go="pictographic:famGrid"><span class="ge">በ</span><span>በ began as a picture of a house, the same ancestor as the Latin letter B.</span></button>
+          <button type="button" data-home-go="pictographic:abWord"><span class="ge">ንጉሠ</span><span>King Ezana's 4th-century inscriptions are the first with every vowel written.</span></button>
+          <div class="home-fact-static"><span class="ge">ሄኖክ</span><span>The Book of Enoch survives complete only in Ge'ez.</span></div>
+        </div>
+      </div>
+    </div>
     <div class="panel">
       <div class="panel-head"><div><h3>A path through the site</h3><div class="sub">From the script to the cipher, in order.</div></div></div>
       <ol class="home-path">
@@ -1009,17 +1063,17 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029m"></script>
-<script src="geez_rnn_engine.js?v=20261029m"></script>
-<script src="geez_cube.js?v=20261029m"></script>
-<script src="geez_numbers.js?v=20261029m"></script>
-<script src="geez_picto.js?v=20261029m"></script>
-<script src="geez_family.js?v=20261029m"></script>
-<script src="geez_syllo.js?v=20261029m"></script>
-<script src="geez_ideo.js?v=20261029m"></script>
-<script src="geez_home.js?v=20261029m"></script>
-<script src="geez_astro.js?v=20261029m"></script>
-<script src="geez_calendar.js?v=20261029m"></script>
-<script src="app.js?v=20261029m"></script>
+<script src="geez_dataset.js?v=20261029n"></script>
+<script src="geez_rnn_engine.js?v=20261029n"></script>
+<script src="geez_cube.js?v=20261029n"></script>
+<script src="geez_numbers.js?v=20261029n"></script>
+<script src="geez_picto.js?v=20261029n"></script>
+<script src="geez_family.js?v=20261029n"></script>
+<script src="geez_syllo.js?v=20261029n"></script>
+<script src="geez_ideo.js?v=20261029n"></script>
+<script src="geez_home.js?v=20261029n"></script>
+<script src="geez_astro.js?v=20261029n"></script>
+<script src="geez_calendar.js?v=20261029n"></script>
+<script src="app.js?v=20261029n"></script>
 </body>
 </html>

@@ -1077,6 +1077,46 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .home-about { display: grid; gap: 8px; max-width: 75ch; }
 .home-about h3 { font-size: var(--step-1); }
 
+/* Home: richer information */
+.home-glance { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 20px; align-items: center; }
+@media (max-width: 960px) { .home-glance { grid-template-columns: minmax(0, 1fr); } }
+.home-glance-text { display: grid; gap: 8px; }
+.home-glance-text h3 { font-size: var(--step-1); }
+.home-glance-text p { color: var(--muted); }
+.home-figures { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.home-figures .n { font-size: var(--step-2); }
+.hc-flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 6px; align-items: stretch; }
+.hc-flow { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); }
+@media (max-width: 860px) { .hc-flow { grid-template-columns: minmax(0, 1fr); gap: 8px; } .hc-arrow { transform: rotate(90deg); justify-self: center; } }
+.hc-arrow { align-self: center; color: var(--muted); font-size: 18px; }
+.hc-step { display: grid; gap: 6px; justify-items: center; align-content: start; text-align: center; padding: 14px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.hc-step b { font-size: var(--step--1); }
+.hc-step .hint { font-size: 12px; }
+.hc-n { font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--surface); }
+.hc-big { font-size: 64px; line-height: 1.05; color: var(--rubric); }
+.hc-grid { display: grid; grid-template-columns: repeat(8, 9px); grid-template-rows: repeat(8, 9px); gap: 1px; padding: 4px; background: var(--line); border-radius: 4px; }
+.hc-grid span { background: var(--bit-off); }
+.hc-grid span.on { background: var(--bit-on); }
+.hc-grid.out span.on { background: var(--rubric); }
+.hc-rec { display: grid; gap: 3px; width: 100%; max-width: 150px; }
+.hc-rec span { display: grid; grid-template-columns: 26px 1fr; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.hc-rec i { display: block; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; position: relative; }
+.hc-rec i::after { content: ""; position: absolute; inset: 0; width: var(--w, 50%); background: var(--c-inspector); border-radius: 3px; animation: hc-fill 0.6s ease both; animation-delay: var(--d, 0s); }
+@keyframes hc-fill { from { width: 0; } }
+.hc-hex { font-size: 12px; letter-spacing: 0.06em; word-break: break-all; }
+.home-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; align-items: start; }
+@media (max-width: 960px) { .home-two { grid-template-columns: minmax(0, 1fr); } }
+.home-found, .home-facts { display: grid; gap: 10px; }
+.home-found h3, .home-facts h3 { font-size: var(--step-1); }
+.home-found ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.home-fact-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .home-fact-list { grid-template-columns: minmax(0, 1fr); } }
+.home-fact-list > button, .home-fact-static { appearance: none; font: inherit; color: var(--ink); text-align: left; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-size: var(--step--1); }
+.home-fact-list > button { cursor: pointer; }
+.home-fact-list > button:hover { border-color: var(--rubric); }
+.home-fact-list .ge { font-size: 20px; color: var(--rubric); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .hc-rec i::after { animation: none; } }
+
 /* ---------- Syllographic: the living grid ---------- */
 .sy-box, .id-box { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
 .sy-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
