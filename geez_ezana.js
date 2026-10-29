@@ -1,15 +1,14 @@
 /**
  * Ge'ez RNN Cipher — The Ezana Stone (Home)
- * A 3D model of the stele in Aksum, shaped after photographs: a tall granite slab with a flat top,
- * Ge'ez on one broad face, Greek on the other, more lines down one narrow side, the other side rough.
- *   Ge'ez face   the royal titles as carved, consonants only (each letter in its base form);
- *                "Add the vowels" re-carves them as Ge'ez is read today, so the abjad → abugida step is
- *                generated, not pictured
- *   Greek face   the Greek titles in scriptio continua with the rounded letters seen on the stone (Ϲ Є ω)
- *   narrow side  the same Ge'ez words in South Arabian (Musnad) letters, right to left, each letter
- *                swapped for the one it grew from
- * The rest of each face is shown as worn rows. A raking light, name matching across faces and a close
- * look make it readable. Two coins show the change at his baptism: crescent and disc, then the cross.
+ * A 3D model of the stele in Aksum: a tall granite slab with a flat top and a worn shoulder, after
+ * photographs. Its faces carry the royal titles four ways, in the stone's Ge'ez order:
+ *   front        Ge'ez, vocalized (every letter carries its vowel: the fidel in full)
+ *   right side   Ge'ez, unvocalized (the same words, each letter in its base form, as before c. AD 350)
+ *   left side    the same Ge'ez in South Arabian (Musnad) letters, right to left
+ *   back         Greek, in scriptio continua with the rounded letters seen on the stone (Ϲ Є ω)
+ * The unvocalized and Musnad faces are generated from the vocalized text, letter by letter, so the
+ * abjad → abugida step is computed rather than pictured. Raking light, name matching across faces and
+ * a close look make it readable. Two coins show the change at his baptism: crescent and disc, then the cross.
  * Three.js (vendor/three.min.js, r128) is loaded only when the panel scrolls into view.
  */
 (function () {
@@ -56,49 +55,44 @@
 
   // mat: BoxGeometry material slot (0 +x right, 1 −x left, 4 +z front, 5 −z back); angle: stone rotation that brings it to the viewer
   const FACES = [
-    { id: 'ge', label: "Ge'ez face", mat: 4, angle: 0, font: ETH, dir: 'ltr', sep: '፡', cpl: 15, sample: 'ሀ' },
-    { id: 'grk', label: 'Greek face', mat: 5, angle: Math.PI, font: GRK, dir: 'ltr', sep: '', cpl: 22, sample: 'Α', stream: true },
-    { id: 'osa', label: 'Narrow side', mat: 0, angle: -Math.PI / 2, font: OSA, dir: 'rtl', sep: '|', cpl: 7, sample: '𐩠' },
-    { id: 'rough', label: 'Rough side', mat: 1, angle: Math.PI / 2 }
+    { id: 'voc', label: "Ge'ez, vocalized", mat: 4, angle: 0, font: ETH, dir: 'ltr', sep: '፡' },
+    { id: 'unv', label: "Ge'ez, unvocalized", mat: 0, angle: -Math.PI / 2, font: ETH, dir: 'ltr', sep: '፡' },
+    { id: 'osa', label: 'South Arabian letters', mat: 1, angle: Math.PI / 2, font: OSA, dir: 'rtl', sep: '|' },
+    { id: 'grk', label: 'Greek', mat: 5, angle: Math.PI, font: GRK, dir: 'ltr', sep: '', stream: true }
   ];
   const $ = (id) => document.getElementById(id);
-  let face = 0, vocal = false, lit = new Set(), api = null;
+  let face = 0, lit = new Set(), api = null;
 
   function wordsOf(f) {
-    if (f.id === 'ge') return GEEZ.map(([t, en, k]) => ({ t: vocal ? t : base(t), en, k, from: t }));
+    if (f.id === 'voc') return GEEZ.map(([t, en, k]) => ({ t, en, k, from: t }));
+    if (f.id === 'unv') return GEEZ.map(([t, en, k]) => ({ t: base(t), en, k, from: t }));
     if (f.id === 'osa') return GEEZ.map(([t, en, k]) => ({ t: musnad(t), en, k, from: t }));
-    if (f.id === 'grk') return GREEK.map(([t, en, k]) => ({ t, en, k }));
-    return [];
+    return GREEK.map(([t, en, k]) => ({ t, en, k }));
   }
   const TEXT = {
-    ge: () => vocal
-      ? "Now with the vowels, as Ge'ez is read today: ዔ is ዐ in its 5th order, ሱ is ሰ in its 2nd. Writing every vowel became the rule in Ezana's own time; his later inscriptions are the first known texts written this way."
-      : 'As carved: consonants only, every letter in its base form, divided by ፡. The reader supplied the vowels, as in Hebrew or Arabic without points. Tap "Add the vowels" to re-carve the face the modern way.',
-    grk: () => 'Greek, the language of Red Sea trade, in the same order of titles. On the stone the letters run on with no spaces, in the rounded forms Ϲ Є ω; here the words are spaced to read. Where the Ge\'ez says "by the power of the Lord of Heaven", the Greek calls him son of the unconquered god Ares.',
-    osa: () => "The same Ge'ez words in Musnad, the script of South Arabia, read right to left. Each Ge'ez letter is swapped for the Musnad letter it grew from. Scholars call this version pseudo-Sabaic: Ge'ez language in borrowed letters.",
-    rough: () => 'One narrow side is left rough and pitted, as in the photographs of the stone in its shelter.'
+    voc: "Every letter carries its vowel: ዔ is ዐ in its 5th order, ሱ is ሰ in its 2nd. This is the fidel in full, as Ge'ez is read today. Writing every vowel became the rule in Ezana's own time; his later inscriptions are the first known texts written this way.",
+    unv: "The same words with every letter in its base form, divided by ፡. The reader supplied the vowels, as in Hebrew or Arabic without points. Ge'ez was written like this until about AD 350.",
+    osa: "The same Ge'ez words in Musnad, the script of South Arabia, read right to left. Each Ge'ez letter is swapped for the Musnad letter it grew from. Scholars call this version pseudo-Sabaic: Ge'ez language in borrowed letters.",
+    grk: "Greek, the language of Red Sea trade, in the same titles. On the stone the letters run on with no spaces, in the rounded forms Ϲ Є ω; here the words are spaced to read. Where the Ge'ez says \"by the power of the Lord of Heaven\", the Greek calls him son of the unconquered god Ares."
   };
 
   // ---------- Reading panel ----------
   function letterButtons(word, f) {
     if (f.id === 'grk') return word.t;
-    const src = [...word.from], shown = f.id === 'osa' ? [...word.t] : [...word.t];
+    const src = [...word.from], shown = [...word.t];
     return src.map((ch, i) => {
       const p = POS[ch];
       if (!p) return shown[i] || '';
-      const o = f.id === 'ge' && vocal ? p[1] : 0;
+      const o = f.id === 'voc' ? p[1] : 0;
       return `<button type="button" class="ez-l" data-letter="${p[0]},${o}" aria-label="Letter profile ${CLASSES[p[0]][FORMS[o]]}">${shown[i] || ''}</button>`;
     }).join('');
   }
   function renderRead() {
     const f = FACES[face];
     document.querySelectorAll('#ezFaces button').forEach((b, i) => b.setAttribute('aria-selected', String(i === face)));
-    $('ezVowels').hidden = f.id !== 'ge';
-    $('ezVowels').setAttribute('aria-pressed', String(vocal));
-    $('ezVowels').textContent = vocal ? 'Show as carved' : 'Add the vowels';
     const ws = wordsOf(f);
     $('ezRead').innerHTML =
-      `<div class="ez-read-head"><b>${f.id === 'osa' ? 'Narrow side: South Arabian letters' : f.label}</b><span>${TEXT[f.id]()}</span></div>` +
+      `<div class="ez-read-head"><b>${f.label}</b><span>${TEXT[f.id]}</span></div>` +
       (ws.length ? `<div class="ez-line ${f.id === 'grk' ? 'grk' : f.id === 'osa' ? 'osa' : 'ge'}" dir="${f.dir}">` +
         ws.map((w) => `<span class="ez-w${w.k && lit.has(w.k) ? ' hl' : ''}"><span class="ez-t">${letterButtons(w, f)}</span><span class="ez-en" dir="ltr">${w.en}</span></span>`).join('') +
         `</div>` : '');
@@ -111,7 +105,7 @@
     const col = document.createElement('canvas'), bump = document.createElement('canvas');
     col.width = bump.width = w; col.height = bump.height = h;
     const a = col.getContext('2d'), b = bump.getContext('2d');
-    a.fillStyle = '#86847f'; a.fillRect(0, 0, w, h);
+    a.fillStyle = '#9b978f'; a.fillRect(0, 0, w, h);
     b.fillStyle = '#d6d6d6'; b.fillRect(0, 0, w, h);
     for (let i = 0; i < 22; i++) {                     // broad tonal patches
       const x = r() * w, y = r() * h, rad = (0.15 + r() * 0.4) * Math.max(w, h * 0.3);
@@ -137,54 +131,52 @@
     return { col, bump, a, b, r };
   }
 
-  const PX = 520, W = 1.0, H = 2.9, DEP = 0.42, TOP = 0.2, BOT = 0.14;
+  const PX = 540, W = 1.0, H = 2.6, DEP = 0.46, TOP = 0.2, BOT = 0.18;
   function carveFace(f, idx) {
     const wu = (f.mat === 0 || f.mat === 1) ? DEP : W;
     const cw = Math.round(wu * PX), ch = Math.round(H * PX);
-    const s = granite(cw, ch, 101 + idx * 17, f.id === 'rough');
-    if (f.id === 'rough') return s;
+    const s = granite(cw, ch, 101 + idx * 17, false);
     const { a, b, r } = s;
-    const mx = cw * 0.07, top = TOP * PX, bottom = ch - BOT * PX, inner = cw - 2 * mx;
-    // Letter size from the stone's density: about f.cpl letters to a line
-    a.font = `600 100px ${f.font}`;
-    const size = Math.max(10, Math.floor(inner / f.cpl / (a.measureText(f.sample).width / 100)));
-    a.font = b.font = `600 ${size}px ${f.font}`;
+    const mx = cw * 0.08, top = TOP * PX, bottom = ch - BOT * PX, inner = cw - 2 * mx;
     const toks = [];
     const ws = wordsOf(f);
     if (f.stream) ws.forEach((w) => [...uncial(w.t)].forEach((c) => toks.push({ t: c, k: w.k })));          // scriptio continua
     else ws.forEach((w, i) => { toks.push({ t: w.t, k: w.k }); if (i < ws.length - 1) toks.push({ t: f.sep, sep: true }); });
-    const gap = f.stream ? size * 0.04 : size * 0.12;
-    const lines = [[]]; let x = 0;
-    toks.forEach((t) => {
-      t.w = a.measureText(t.t).width;
-      if (x > 0 && x + t.w > inner && !t.sep) { lines.push([]); x = 0; }
-      lines[lines.length - 1].push(t); x += t.w + gap;
-    });
-    const lh = size * 1.36;
+    // The largest letters at which the text wraps inside the face
+    const avail = bottom - top;
+    const layout = (sz) => {
+      a.font = `600 ${sz}px ${f.font}`;
+      const gap = f.stream ? sz * 0.04 : sz * 0.14;
+      const out = [[]]; let x = 0;
+      toks.forEach((t) => {
+        t.w = a.measureText(t.t).width;
+        if (x > 0 && x + t.w > inner && !t.sep) { out.push([]); x = 0; }
+        out[out.length - 1].push({ ...t }); x += t.w + gap;
+      });
+      return { out, gap };
+    };
+    let size = 96, L;
+    for (; size > 12; size -= 2) {
+      L = layout(size);
+      if (!L.out.some((ln) => ln.some((t) => t.w > inner)) && L.out.length * size * 1.42 <= avail) break;
+    }
+    a.font = b.font = `600 ${size}px ${f.font}`;
+    const lh = size * 1.42, gap = L.gap;
     a.textBaseline = b.textBaseline = 'alphabetic'; a.textAlign = b.textAlign = 'left';
     try { b.filter = `blur(${Math.max(0.6, size / 34)}px)`; } catch (e) { /* no canvas filter */ }
     let y = top + size;
-    lines.forEach((ln) => {
+    L.out.forEach((ln) => {
       let cx = f.dir === 'rtl' ? cw - mx : mx;
       ln.forEach((t) => {
         const px = f.dir === 'rtl' ? cx - t.w : cx, hl = t.k && lit.has(t.k);
         a.direction = b.direction = f.dir;
-        a.fillStyle = 'rgba(250,246,236,0.10)'; a.fillText(t.t, px + size * 0.03, y + size * 0.03);
-        a.fillStyle = hl ? 'rgba(176,60,28,0.95)' : 'rgba(44,42,38,0.24)'; a.fillText(t.t, px, y);
+        a.fillStyle = 'rgba(250,246,236,0.12)'; a.fillText(t.t, px + size * 0.03, y + size * 0.03);
+        a.fillStyle = hl ? 'rgba(176,60,28,0.95)' : 'rgba(44,42,38,0.30)'; a.fillText(t.t, px, y);
         b.fillStyle = '#000'; b.fillText(t.t, px, y);
         cx += (f.dir === 'rtl' ? -1 : 1) * (t.w + gap);
       });
       y += lh;
     });
-    // The rest of the face: the long account of his campaigns, shown worn rather than invented
-    for (; y < bottom; y += lh) {
-      for (let px = mx; px < cw - mx; px += size * (0.5 + r() * 0.5)) {
-        if (r() < 0.45) continue;
-        const rx = size * (0.08 + r() * 0.18), ry = size * (0.15 + r() * 0.3), cy = y - size * (0.2 + r() * 0.5);
-        b.fillStyle = `rgba(0,0,0,${0.18 + r() * 0.3})`; b.beginPath(); b.ellipse(px, cy, rx, ry, r() * 3, 0, 7); b.fill();
-        a.fillStyle = `rgba(40,38,34,${0.06 + r() * 0.08})`; a.beginPath(); a.ellipse(px, cy, rx, ry, r() * 3, 0, 7); a.fill();
-      }
-    }
     try { b.filter = 'none'; } catch (e) { /* ignore */ }
     for (let i = 0; i < 10; i++) {                      // weathering: soft losses
       const wx = r() * cw, wy = top + r() * (bottom - top), rad = (0.05 + r() * 0.1) * cw * (wu === W ? 1 : 2);
@@ -274,7 +266,7 @@
     };
 
     // Camera: whole stone, or a close look at the top of the facing side
-    const FAR = { y: 0.15, z: 7.2, ly: 0 }, NEAR = { y: H / 2 - 0.42, z: 2.3, ly: H / 2 - 0.5 };
+    const FAR = { y: 0.2, z: 6.6, ly: 0 }, NEAR = { y: H / 2 - 0.42, z: 2.3, ly: H / 2 - 0.5 };
     let cam = { ...FAR }, camT = FAR, close = false;
     let rot = 0, target = 0, raf = 0, drag = null;
     function need() { if (!raf) raf = requestAnimationFrame(frame); }
@@ -387,7 +379,6 @@
       face = Number(b.dataset.f); renderRead();
       if (api) api.turnTo(face);
     });
-    $('ezVowels').addEventListener('click', () => { vocal = !vocal; renderRead(); if (api) api.recarve(); });
     $('ezZoom').addEventListener('click', () => {
       if (!api) return;
       api.zoom(!api.isClose());

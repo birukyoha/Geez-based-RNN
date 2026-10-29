@@ -1447,3 +1447,10 @@ html.lp-open { overflow: hidden; }
 .ez-coins.spot .coin-sym { animation: ez-spot 1.6s ease-in-out 2; }
 @keyframes ez-spot { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.5); filter: drop-shadow(0 0 4px var(--rubric)); } }
 @media (prefers-reduced-motion: reduce) { .ez-coins.spot .coin-sym { animation: none; } }
+
+.ez-photos { display: grid; gap: 8px; }
+.ez-photo-row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: end; }
+@media (max-width: 560px) { .ez-photo-row { grid-template-columns: minmax(0, 1fr); } }
+.ez-photo-row figure { margin: 0; display: grid; gap: 6px; }
+.ez-photo-row img { width: 100%; height: auto; border-radius: 10px; background: #fff; border: 1px solid var(--line); }
+.ez-photo-row figcaption { font-size: var(--step--1); color: var(--muted); }
