@@ -710,6 +710,8 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .ao-sym .ph { font-family: var(--font-mono); font-size: 12px; }
 .ao-card p { font-size: var(--step--1); color: var(--muted); }
 
+.wheel-open { margin-top: 10px; }
+
 /* ---------- Fidel cube ---------- */
 .cube-axes { display: flex; flex-wrap: wrap; gap: 6px; }
 .cube-axes b { color: var(--ink); font-family: var(--font-mono); }
@@ -718,7 +720,7 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .cube-stage { overflow: hidden; }
 .cube-scene {
   height: 520px; perspective: 2600px; display: grid; place-items: center;
-  cursor: grab; touch-action: none; user-select: none;
+  cursor: grab; touch-action: pan-y; user-select: none;
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
 }
 .cube-scene:active { cursor: grabbing; }

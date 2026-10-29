@@ -743,31 +743,60 @@ document.addEventListener('DOMContentLoaded', () => {
     if (a < 0) a += Math.PI * 2;
     return Math.floor(a / ((Math.PI * 2) / 26)) % 26;
   }
-  const WHEEL_IDLE = 'Hover over a spoke to see its seven values. Click to open it in the 8×8 map.';
+  // Touch screens have no hover: a tap selects a spoke and the card offers the 8×8 map link instead
+  const canHover = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : { matches: true };
+  const wheelIdle = () => canHover.matches
+    ? 'Hover over a spoke to see its seven values. Click to open it in the 8×8 map.'
+    : 'Tap a spoke to see its seven values.';
+  let pinnedSpokeIdx = -1;
   function updateWheelCard(idx) {
     const box = $('archWhDetails');
-    if (idx < 0) { box.textContent = WHEEL_IDLE; return; }
+    if (idx < 0) { box.textContent = wheelIdle(); return; }
     const cls = GEEZ_DATASET.ethiopianClasses[idx];
     const start = idx * 7 + 1;
     box.innerHTML = `
       <div class="wh-head">${cls.geez} · ${escapeHtml(cls.name)} <span class="mono" style="font-size:12px;color:var(--muted)">[${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[idx]}]</span></div>
       <div class="hint">${escapeHtml(cls.meaning)} · base value ${cls.baseValue} · equinox days ${start}–${start + 6}</div>
-      <div class="wheel-numbers-strip">${[1, 2, 3, 4, 5, 6, 7].map((o) => `<span class="wheel-order-pill"><strong>${o}</strong> ${cls.baseValue * o}</span>`).join('')}</div>`;
+      <div class="wheel-numbers-strip">${[1, 2, 3, 4, 5, 6, 7].map((o) => `<span class="wheel-order-pill"><strong>${o}</strong> ${cls.baseValue * o}</span>`).join('')}</div>
+      ${idx === pinnedSpokeIdx ? `<button type="button" class="btn secondary small wheel-open" data-idx="${idx}">Open ${cls.geez} in the 8×8 map</button>` : ''}`;
+  }
+  function openSpokeInMap(idx) {
+    selectChar(GEEZ_DATASET.ethiopianClasses[idx].geez);
+    showTab('visualizer-tab');
+    window.scrollTo({ top: 0 });
+  }
+  function showSpoke(idx) {
+    highlightedSpokeIdx = idx;
+    renderNumerologyWheel();
+    updateWheelCard(idx);
   }
   (function setupWheel() {
     const canvas = $('archNumerologyWheelCanvas');
-    canvas.addEventListener('mousemove', (e) => {
+    let lastPointer = 'mouse';
+    canvas.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType || 'mouse'; });
+    // Mouse: hover previews a spoke, leaving returns to the tapped one (if any)
+    canvas.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
       const idx = wheelIdxFromEvent(e);
-      if (idx !== highlightedSpokeIdx) { highlightedSpokeIdx = idx; renderNumerologyWheel(); updateWheelCard(idx); }
+      if (idx !== highlightedSpokeIdx) showSpoke(idx >= 0 ? idx : pinnedSpokeIdx);
     });
-    canvas.addEventListener('mouseleave', () => { highlightedSpokeIdx = -1; renderNumerologyWheel(); updateWheelCard(-1); });
+    canvas.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse') showSpoke(pinnedSpokeIdx);
+    });
     canvas.addEventListener('click', (e) => {
       const idx = wheelIdxFromEvent(e);
-      if (idx < 0) return;
-      selectChar(GEEZ_DATASET.ethiopianClasses[idx].geez);
-      showTab('visualizer-tab');
-      window.scrollTo({ top: 0 });
+      if (lastPointer === 'mouse') {           // mouse: click opens the map, as before
+        if (idx >= 0) openSpokeInMap(idx);
+        return;
+      }
+      pinnedSpokeIdx = idx === pinnedSpokeIdx ? -1 : idx;   // touch/pen: tap selects, tap again clears
+      showSpoke(pinnedSpokeIdx);
     });
+    $('archWhDetails').addEventListener('click', (e) => {
+      const b = e.target.closest('.wheel-open');
+      if (b) openSpokeInMap(Number(b.dataset.idx));
+    });
+    updateWheelCard(-1);
   })();
 
   // ---------- Tree (Figure 1.2) ----------
