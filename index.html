@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029q">
+  <link rel="stylesheet" href="index.css?v=20261029r">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -145,20 +145,30 @@
         <div class="ez-stage" id="ezStage" tabindex="0" aria-label="3D model of the Ezana Stone. Drag, or use the arrow keys, to turn it.">
           <canvas id="ezCanvas"></canvas>
           <p class="ez-loading" id="ezLoading">Carving the stone…</p>
+          <button type="button" class="ez-zoom" id="ezZoom" aria-pressed="false">Look closer</button>
           <span class="ez-drag" aria-hidden="true">Drag to turn</span>
         </div>
         <div class="ez-side">
-          <p>King Ezana ruled Aksum from about AD 330 to 356. His stone, still standing in Aksum, records his campaigns in Ge'ez, in Ge'ez written with South Arabian letters, and in Greek, so it is often compared to the Rosetta Stone. In his reign Aksum turned Christian, and his inscriptions are the first known texts in which every Ge'ez letter carries its vowel.</p>
-          <div class="ez-block"><span class="label">Turn to a face</span><div class="ez-faces" id="ezFaces" role="tablist" aria-label="Faces of the stone"></div></div>
+          <p>King Ezana ruled Aksum from about AD 330 to 356. His stone is a tall granite slab that still stands in Aksum, in a small stone shelter whose sign names the three men who found it. Its campaigns are told in Ge'ez, in Ge'ez written with South Arabian letters, and in Greek, so it is often compared to the Rosetta Stone. In his reign Aksum turned Christian, and Ge'ez began to write every vowel.</p>
+          <div class="ez-block"><span class="label">Turn to a face</span><div class="ez-faces" id="ezFaces" role="tablist" aria-label="Faces of the stone"></div>
+            <button type="button" class="btn small" id="ezVowels" aria-pressed="false">Add the vowels</button></div>
           <label class="ez-block ez-light"><span class="label">Raking light</span>
             <input type="range" id="ezLight" min="-85" max="85" value="-62" aria-describedby="ezLightHint">
             <span class="hint" id="ezLightHint">Epigraphers read worn stones with a low light from the side, so the grooves fill with shadow. Light it head-on and the carving goes flat.</span></label>
           <div class="ez-block"><span class="label">Match a name across the faces</span><div class="ez-names" id="ezNames"></div>
-            <span class="hint">Names that sound alike in every language are how trilingual stones are read. Mark one and it is painted on all four faces.</span></div>
+            <span class="hint">Names that sound alike in every language are how trilingual stones are read. Mark one and it is painted on every face.</span></div>
         </div>
       </div>
       <div class="ez-read" id="ezRead" aria-live="polite"></div>
-      <p class="hint">A reconstruction for reading, not a facsimile. Each face carries the king's titles, the opening of his inscriptions as scholars publish them: Ge'ez with and without vowels, the same Ge'ez in South Arabian letters, and the Greek. The real stone's texts are longer, weathered, and laid out differently. Tap any Ge'ez or South Arabian letter to open its profile. Source: <a href="https://en.wikipedia.org/wiki/Ezana_Stone" target="_blank" rel="noopener">Ezana Stone, Wikipedia</a>.</p>
+      <div class="ez-coinbox">
+        <div class="ez-coin-text">
+          <h4>His coins, before and after</h4>
+          <p>Ezana's coins record the same turn as his stone. The early ones carry the crescent and disc of Aksum's old gods; the later ones carry the cross, possibly the first coins anywhere to bear it. Gold coins spoke Greek, for trade across the Red Sea and beyond. Tilt a coin to catch the light.</p>
+          <button type="button" class="btn secondary small" id="ezSpot">Spot the change</button>
+        </div>
+        <div class="ez-coins" id="ezCoins"></div>
+      </div>
+      <p class="hint">A reconstruction for reading, not a facsimile. The shape and the layout of the faces follow photographs of the stone. Each face carves only the king's titles, from published transcriptions; the long account of his campaigns below them is shown worn rather than invented. The Ge'ez as-carved form is derived letter by letter, and the South Arabian side is generated from the Ge'ez the same way. The coins are drawings of the two types, with the legend shortened. Tap any Ge'ez or South Arabian letter to open its profile. Sources: <a href="https://en.wikipedia.org/wiki/Ezana_Stone" target="_blank" rel="noopener">Ezana Stone</a> and <a href="https://en.wikipedia.org/wiki/Ezana_of_Axum" target="_blank" rel="noopener">Ezana of Axum</a> (Wikipedia), <a href="https://journals.sub.uni-hamburg.de/aethiopica/article/view/488" target="_blank" rel="noopener">Uhlig, Aethiopica 4</a>, <a href="https://coinweek.com/ancient-coins/the-coinage-of-aksum/" target="_blank" rel="noopener">CoinWeek</a>.</p>
     </div>
 
     <div class="home-two">
@@ -1123,20 +1133,20 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029q"></script>
-<script src="geez_rnn_engine.js?v=20261029q"></script>
-<script src="geez_cube.js?v=20261029q"></script>
-<script src="geez_numbers.js?v=20261029q"></script>
-<script src="geez_picto.js?v=20261029q"></script>
-<script src="geez_family.js?v=20261029q"></script>
-<script src="geez_syllo.js?v=20261029q"></script>
-<script src="geez_ideo.js?v=20261029q"></script>
-<script src="geez_home.js?v=20261029q"></script>
-<script src="geez_astro.js?v=20261029q"></script>
-<script src="geez_hasab.js?v=20261029q"></script>
-<script src="geez_calendar.js?v=20261029q"></script>
-<script src="geez_letter.js?v=20261029q"></script>
-<script src="geez_ezana.js?v=20261029q"></script>
-<script src="app.js?v=20261029q"></script>
+<script src="geez_dataset.js?v=20261029r"></script>
+<script src="geez_rnn_engine.js?v=20261029r"></script>
+<script src="geez_cube.js?v=20261029r"></script>
+<script src="geez_numbers.js?v=20261029r"></script>
+<script src="geez_picto.js?v=20261029r"></script>
+<script src="geez_family.js?v=20261029r"></script>
+<script src="geez_syllo.js?v=20261029r"></script>
+<script src="geez_ideo.js?v=20261029r"></script>
+<script src="geez_home.js?v=20261029r"></script>
+<script src="geez_astro.js?v=20261029r"></script>
+<script src="geez_hasab.js?v=20261029r"></script>
+<script src="geez_calendar.js?v=20261029r"></script>
+<script src="geez_letter.js?v=20261029r"></script>
+<script src="geez_ezana.js?v=20261029r"></script>
+<script src="app.js?v=20261029r"></script>
 </body>
 </html>
