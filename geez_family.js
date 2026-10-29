@@ -100,6 +100,12 @@
       const b = e.target.closest('.fam-tile');
       if (b) { cur = Number(b.dataset.c); render(); }
     });
+    window.GeezFamily = {
+      select(c, scroll) {
+        cur = c; render();
+        if (scroll) requestAnimationFrame(() => $('famGrid').scrollIntoView({ behavior: 'smooth', block: 'center' }));
+      }
+    };
     render();
 
     // ---------- From abjad to abugida ----------

@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------- Tabs + hash routing ----------
   const ROUTES = {
-    encrypt: 'encrypt-tab', decrypt: 'decrypt-tab', map: 'visualizer-tab',
+    home: 'home-tab', encrypt: 'encrypt-tab', decrypt: 'decrypt-tab', map: 'visualizer-tab',
     inspector: 'inspector-tab', model: 'architecture-tab', cube: 'cube-tab', history: 'infographics-tab'
   };
   const TAB_TO_ROUTE = Object.fromEntries(Object.entries(ROUTES).map(([k, v]) => [v, k]));
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabContents = document.querySelectorAll('.tab-content');
 
   function showTab(tabId, updateHash = true) {
-    if (!$(tabId)) tabId = 'encrypt-tab';
+    if (!$(tabId)) tabId = 'home-tab';
     tabButtons.forEach((b) => {
       const on = b.dataset.tab === tabId;
       b.classList.toggle('active', on);
@@ -136,6 +136,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (g) goModelSub(g.dataset.go);
   });
   showModelSub('overview', false);
+  // Other parts of the page (Ideographic links, Home) open a property, optionally scrolled to a block
+  window.GeezModel = {
+    go(sub, scrollTo) {
+      if (!$('architecture-tab').classList.contains('active')) showTab('architecture-tab');
+      goModelSub(sub);
+      const el = scrollTo && $(scrollTo);
+      if (el) requestAnimationFrame(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    }
+  };
   // Slide the dock's bump and colored bubble under the active section
   const dock = document.querySelector('.dock');
   function moveDock(instant) {

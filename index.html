@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029l">
+  <link rel="stylesheet" href="index.css?v=20261029m">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -30,7 +30,11 @@
       <svg class="dock-bump" viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true"><path d="M0 26C26 26 32 1 60 1S94 26 120 26Z"/></svg>
       <span class="dock-bubble" aria-hidden="true"></span>
       <div class="dock-items">
-        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="encrypt-tab" style="--accent: var(--c-encrypt)" title="Encrypt" aria-label="Encrypt">
+        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="home-tab" style="--accent: var(--c-home)" title="Home" aria-label="Home">
+          <svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+          <span class="tab-lbl">Home</span>
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="encrypt-tab" style="--accent: var(--c-encrypt)" title="Encrypt" aria-label="Encrypt">
           <svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10V8a6 6 0 0 1 12 0v2"/><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M12 14v3"/></svg>
           <span class="tab-lbl">Encrypt</span>
         </button>
@@ -71,8 +75,54 @@
 
 <main class="page">
 
+  <!-- ============ HOME ============ -->
+  <section id="home-tab" class="tab-content active" aria-labelledby="h-home">
+    <div class="home-hero">
+      <div class="home-intro">
+        <div class="eyebrow">Ge'ez · <span class="ge">ግዕዝ</span></div>
+        <h2 id="h-home">An ancient African script, read as a model for computation</h2>
+        <p>This site is the companion to Biruk Tesfaye Yohannes's M.Sc. thesis, Dilla University, 2019. It reads the Ge'ez script through five properties, picture, idea, calendar, number and syllable, and builds a recurrent neural network cipher on top of them.</p>
+        <div class="btn-row">
+          <button type="button" class="btn" data-home-go="model:overview">Explore the five properties</button>
+          <button type="button" class="btn secondary" data-home-tab="encrypt-tab">Try the cipher</button>
+        </div>
+      </div>
+      <button type="button" class="home-today" id="homeToday" data-home-go="astrographic:astroCalendar" aria-label="Today's letter, open the fidel calendar">
+        <span class="label">Today's letter</span>
+        <span class="home-today-g ge" id="homeTodayGlyph">ሀ</span>
+        <span class="home-today-t" id="homeTodayText"></span>
+        <span class="home-today-go">Open the fidel calendar →</span>
+      </button>
+    </div>
+
+    <div class="home-props">
+      <button type="button" class="home-prop" data-home-go="model:pictographic"><span class="ge">በ</span><b>Pictographic</b><span>Watch pictures become letters, and follow every letter's family.</span></button>
+      <button type="button" class="home-prop" data-home-go="model:ideographic"><span class="ge">ረ</span><b>Ideographic</b><span>Group the 26 letters by the ideas they carry.</span></button>
+      <button type="button" class="home-prop" data-home-go="model:astrographic"><span class="ge">ፀ</span><b>Astrographic</b><span>Find each day's letter in the 364-day calendar.</span></button>
+      <button type="button" class="home-prop" data-home-go="model:numeric"><span class="ge">፲</span><b>Numeric</b><span>Read letter values and write numbers in Ge'ez numerals.</span></button>
+      <button type="button" class="home-prop" data-home-go="model:syllographic"><span class="ge">ሀ</span><b>Syllographic</b><span>Explore the 26 × 7 grid, its homophones and Amharic letters.</span></button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><div><h3>A path through the site</h3><div class="sub">From the script to the cipher, in order.</div></div></div>
+      <ol class="home-path">
+        <li><button type="button" data-home-go="model:overview"><b>Learn the script</b><span>The five properties of Ge'ez, one page each.</span></button></li>
+        <li><button type="button" data-home-tab="cube-tab"><b>See the structure</b><span>The 182 letters as a 26 × 7 × 5 cube.</span></button></li>
+        <li><button type="button" data-home-tab="encrypt-tab"><b>Encrypt a message</b><span>Turn text into 64-bit Ge'ez blocks, then decrypt it.</span></button></li>
+        <li><button type="button" data-home-tab="inspector-tab"><b>Watch the network</b><span>Follow one letter through the eight recursions.</span></button></li>
+        <li><button type="button" data-home-tab="infographics-tab"><b>Where it comes from</b><span>The history of the script and its neighbours.</span></button></li>
+      </ol>
+    </div>
+
+    <div class="home-about">
+      <h3>About the research</h3>
+      <p>Most of today's encryption rests on mathematics that new computing may weaken. The thesis looks for a different source: the structure of an old writing system. It models a cipher on the computational behaviour of Ge'ez with a recurrent neural network and evaluates it on key size, key type, key management and bit-level operation, alongside AES-128.</p>
+      <p class="hint">Research prototype. Not for protecting real data.</p>
+    </div>
+  </section>
+
   <!-- ============ ENCRYPT ============ -->
-  <section id="encrypt-tab" class="tab-content active" aria-labelledby="h-encrypt">
+  <section id="encrypt-tab" class="tab-content" aria-labelledby="h-encrypt">
     <div class="view-head">
       <div>
         <div class="eyebrow">Encryption</div>
@@ -478,6 +528,17 @@
         <article class="panel doc-section" id="s-ideo" data-sub="ideographic">
           <h3>Ideographic property</h3>
           <p>Beyond sound, root consonant classes are read as civic, spiritual or moral ideas in traditional Ethiopian interpretation.</p>
+          <div class="id-box">
+            <div class="segmented id-themes" id="idThemes" role="group" aria-label="Themes"></div>
+            <p class="id-summary" id="idSummary"></p>
+            <div class="id-layout">
+              <div class="id-grid" id="idGrid"></div>
+              <div class="id-info" id="idInfo" aria-live="polite"></div>
+            </div>
+            <div class="id-ribbon" id="idRibbon" aria-label="The 52 class weeks of the fidel calendar"></div>
+            <p class="hint">Each class fills one week of each equinox in the fidel calendar. Highlighted weeks belong to the chosen theme.</p>
+          </div>
+          <h4 class="astro-sub">Root words</h4>
           <div class="table-wrap">
             <table class="prose-table">
               <thead><tr><th>Root</th><th>6th form</th><th>Root word</th><th>Meaning</th></tr></thead>
@@ -701,6 +762,18 @@
         <article class="panel doc-section" id="s-syll" data-sub="syllographic">
           <h3>Syllographic property and <span class="ge">ሞክሼ ፊደላት</span></h3>
           <p>Ge'ez is an abugida: each glyph carries its vowel. <em>Mokshe fidelat</em> are letters that sound alike in modern speech but carry different meanings.</p>
+          <div class="sy-box">
+            <div class="segmented" role="group" aria-label="View">
+              <button type="button" data-sy-mode="all">All letters</button>
+              <button type="button" data-sy-mode="homophones">Homophones</button>
+              <button type="button" data-sy-mode="amharic">Amharic letters</button>
+            </div>
+            <div class="sy-layout">
+              <div class="sy-grid-wrap"><div class="sy-grid" id="syGrid"></div></div>
+              <div class="sy-info" id="syInfo" aria-live="polite"></div>
+            </div>
+          </div>
+          <h4 class="astro-sub">Same sound, different meaning</h4>
           <div class="mokshe">
             <div class="mokshe-card">
               <h4>"H" letters <span class="ge">ሀ ሐ ኀ</span></h4>
@@ -936,14 +1009,17 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029l"></script>
-<script src="geez_rnn_engine.js?v=20261029l"></script>
-<script src="geez_cube.js?v=20261029l"></script>
-<script src="geez_numbers.js?v=20261029l"></script>
-<script src="geez_picto.js?v=20261029l"></script>
-<script src="geez_family.js?v=20261029l"></script>
-<script src="geez_astro.js?v=20261029l"></script>
-<script src="geez_calendar.js?v=20261029l"></script>
-<script src="app.js?v=20261029l"></script>
+<script src="geez_dataset.js?v=20261029m"></script>
+<script src="geez_rnn_engine.js?v=20261029m"></script>
+<script src="geez_cube.js?v=20261029m"></script>
+<script src="geez_numbers.js?v=20261029m"></script>
+<script src="geez_picto.js?v=20261029m"></script>
+<script src="geez_family.js?v=20261029m"></script>
+<script src="geez_syllo.js?v=20261029m"></script>
+<script src="geez_ideo.js?v=20261029m"></script>
+<script src="geez_home.js?v=20261029m"></script>
+<script src="geez_astro.js?v=20261029m"></script>
+<script src="geez_calendar.js?v=20261029m"></script>
+<script src="app.js?v=20261029m"></script>
 </body>
 </html>

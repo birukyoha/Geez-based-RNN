@@ -149,7 +149,7 @@
         // A single shown layer moves to the middle plane so it reads at full size
         const zPos = solo >= 0 ? (z === solo ? 0 : (2 - z) * gap) : (2 - z) * gap;
         el.style.transform = `translateZ(${zPos}px)`;
-        el.classList.toggle('dim', solo >= 0 && solo !== z);
+        el.classList.toggle('off', solo >= 0 && solo !== z);
       });
       solid.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
     }
