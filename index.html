@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261028f">
+  <link rel="stylesheet" href="index.css?v=20261029a">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -49,6 +49,10 @@
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="architecture-tab" style="--accent: var(--c-model)" title="Ge'ez &amp; Model" aria-label="Ge'ez &amp; Model">
           <svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H11v17H5.5A2.5 2.5 0 0 0 3 22.5z"/><path d="M21 5.5A2.5 2.5 0 0 0 18.5 3H13v17h5.5a2.5 2.5 0 0 1 2.5 2.5z"/></svg>
           <span class="tab-lbl">Model</span>
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="cube-tab" style="--accent: var(--c-cube)" title="Fidel Cube" aria-label="Fidel Cube">
+          <svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 3.5 7v10L12 21.5 20.5 17V7z"/><path d="M3.5 7 12 11.5 20.5 7M12 11.5v10"/></svg>
+          <span class="tab-lbl">Cube</span>
         </button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="infographics-tab" style="--accent: var(--c-history)" title="Script History" aria-label="Script History">
           <svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
@@ -527,6 +531,113 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
     </div>
   </section>
 
+  <!-- ============ FIDEL CUBE ============ -->
+  <section id="cube-tab" class="tab-content" aria-labelledby="h-cube">
+    <div class="view-head">
+      <div>
+        <div class="eyebrow">26 classes · 7 orders · 182 cells</div>
+        <h2 id="h-cube">The fidel as a cube</h2>
+        <p>The 182 classical syllographs folded into a 13 × 7 × 2 solid with no empty cells. Classes ሀ–ኀ form the front layer and ነ–ፐ the back. Every cell is one day of the equinox cycle and carries all five properties.</p>
+      </div>
+      <div class="cube-axes">
+        <span class="badge"><b>x</b> class row · 13</span>
+        <span class="badge"><b>y</b> order · 7</span>
+        <span class="badge"><b>z</b> layer · 2</span>
+      </div>
+    </div>
+
+    <div class="cube-top">
+      <div class="panel cube-stage">
+        <div class="panel-head">
+          <div class="btn-row">
+            <button id="cubeExplode" class="btn secondary small active" type="button" aria-pressed="true">Exploded</button>
+            <button id="cubeFront" class="btn secondary small" type="button">Front view</button>
+            <button id="cubeIso" class="btn secondary small" type="button">3-D view</button>
+          </div>
+          <span class="hint">Drag to turn · click a letter</span>
+        </div>
+        <div class="cube-scene" id="cubeScene">
+          <div class="cube-fit" id="cubeFit"><div class="cube-solid" id="cubeSolid"></div></div>
+        </div>
+        <div class="cube-legend hint">
+          <span><i class="cube-sw"></i>Front layer ሀ–ኀ</span>
+          <span><i class="cube-sw back"></i>Back layer ነ–ፐ</span>
+          <span><i class="cube-sw src"></i>Plain letter</span>
+          <span><i class="cube-sw dst"></i>Cipher letter</span>
+        </div>
+      </div>
+
+      <aside class="panel cube-inspector" aria-live="polite">
+        <div class="cube-ins-head">
+          <div class="cube-big ge" id="cubeGlyph">ሀ</div>
+          <div>
+            <h3 id="cubeName">Hoi</h3>
+            <span class="sub" id="cubeSub">Class 1 · 1st order</span>
+          </div>
+        </div>
+        <dl class="cube-props">
+          <div><dt>Syllographic</dt><dd id="cubeSyl">–</dd></div>
+          <div><dt>Numeric</dt><dd id="cubeNum">–</dd></div>
+          <div><dt>Astrographic</dt><dd id="cubeAst">–</dd></div>
+          <div><dt>Ideographic</dt><dd id="cubeIde">–</dd></div>
+          <div><dt>Pictographic</dt><dd id="cubePic">–</dd></div>
+          <div><dt>Cube address</dt><dd id="cubePos" class="mono">–</dd></div>
+        </dl>
+      </aside>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Cube cipher</h3>
+          <div class="sub">Each Ge'ez letter moves along all three axes: x by 13, y by 7, z by 2. The shift is the key stream plus a rotor that steps one day of the 182-day cycle per letter.</div>
+        </div>
+      </div>
+      <div class="cube-controls">
+        <div class="field">
+          <label for="cubeKey">Key phrase</label>
+          <input type="text" id="cubeKey" value="ቀዳሚ ቃል" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="cubeDay">Rotor start (day 1–182)</label>
+          <div class="cube-dayrow">
+            <input type="text" id="cubeDay" value="37" inputmode="numeric" autocomplete="off">
+            <button id="cubeToday" class="btn secondary small" type="button">Today</button>
+          </div>
+        </div>
+        <div class="segmented" role="group" aria-label="Mode">
+          <button id="cubeModeEnc" class="active" type="button" aria-pressed="true">Encrypt</button>
+          <button id="cubeModeDec" type="button" aria-pressed="false">Decrypt</button>
+        </div>
+      </div>
+      <div class="grid-2 even">
+        <div class="field">
+          <label for="cubeInput" id="cubeInLabel">Plain text</label>
+          <textarea id="cubeInput" class="ge cube-text" rows="2">ሰላም ለዓለም ። ሀገረ ኢትዮጵያ</textarea>
+        </div>
+        <div class="field">
+          <span class="label" id="cubeOutLabel">Cipher text</span>
+          <div id="cubeOutput" class="output ge cube-text">–</div>
+          <div class="btn-row">
+            <button class="copy-btn" type="button" data-copy="cubeOutput">Copy</button>
+            <button id="cubeSwap" class="btn secondary small" type="button">Use as input and reverse</button>
+          </div>
+        </div>
+      </div>
+      <div class="cube-seal">
+        <span class="hint">Numeric seal of the plain text <b class="mono" id="cubeSeal">0</b></span>
+        <span id="cubeSealNote" class="status">–</span>
+      </div>
+      <div class="table-wrap cube-steps-wrap">
+        <table class="step-table">
+          <thead><tr><th>#</th><th>In</th><th>x·y·z</th><th>Key Δ</th><th>Rotor</th><th>Out</th><th>x·y·z</th><th>Value</th></tr></thead>
+          <tbody id="cubeSteps"></tbody>
+        </table>
+      </div>
+      <p class="hint">The key stream on this tab comes from a keyed number generator so the cube can run on its own. In the full model the RNN supplies Δx, Δy and Δz. Spaces, punctuation and Amharic-only letters pass through unchanged. Research prototype, not for protecting real data.</p>
+    </div>
+  </section>
+
   <!-- ============ SCRIPT HISTORY ============ -->
   <section id="infographics-tab" class="tab-content" aria-labelledby="h-hist">
     <div class="view-head">
@@ -613,8 +724,9 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261028f"></script>
-<script src="geez_rnn_engine.js?v=20261028f"></script>
-<script src="app.js?v=20261028f"></script>
+<script src="geez_dataset.js?v=20261029a"></script>
+<script src="geez_rnn_engine.js?v=20261029a"></script>
+<script src="geez_cube.js?v=20261029a"></script>
+<script src="app.js?v=20261029a"></script>
 </body>
 </html>

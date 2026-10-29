@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------- Tabs + hash routing ----------
   const ROUTES = {
     encrypt: 'encrypt-tab', decrypt: 'decrypt-tab', map: 'visualizer-tab',
-    inspector: 'inspector-tab', model: 'architecture-tab', history: 'infographics-tab'
+    inspector: 'inspector-tab', model: 'architecture-tab', cube: 'cube-tab', history: 'infographics-tab'
   };
   const TAB_TO_ROUTE = Object.fromEntries(Object.entries(ROUTES).map(([k, v]) => [v, k]));
   const tabButtons = document.querySelectorAll('.tab-btn');
@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabId === 'visualizer-tab') renderVisualizer();
     if (tabId === 'inspector-tab') renderInspector();
     if (tabId === 'architecture-tab') renderNumerologyWheel();
+    if (tabId === 'cube-tab' && window.renderGeezCube) window.renderGeezCube();
     if (tabId === 'infographics-tab') renderGeezTree();
     if (updateHash) {
       const route = TAB_TO_ROUTE[tabId];
