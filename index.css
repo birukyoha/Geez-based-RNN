@@ -892,9 +892,11 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .picto-stage { appearance: none; display: grid; justify-items: center; gap: 4px; width: 92px; padding: 8px 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; }
 .picto-stage:hover { border-color: var(--muted); }
 .picto-stage.done { color: var(--muted); }
+.picto-stage .picto-thumb .ink { transition: transform 0.2s ease; }
+.picto-stage:hover .picto-thumb .ink { transform: scale(1.08); }
 .picto-stage.active { border-color: var(--rubric); box-shadow: inset 0 0 0 1px var(--rubric); color: var(--ink); }
 .picto-thumb { display: grid; place-items: center; height: 44px; width: 100%; }
-.picto-thumb .ink { width: 60px; height: 40px; }
+.picto-thumb .ink { width: 64px; height: 44px; }
 .picto-thumb .ge { font-size: 18px; }
 .picto-lbl { font-size: 11px; font-weight: 600; text-align: center; line-height: 1.2; }
 .picto-view { display: grid; gap: 12px; min-height: 230px; align-content: start; }
@@ -902,7 +904,15 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .picto-name { font-weight: 700; }
 .picto-name .ge { color: var(--rubric); font-size: 20px; }
 .picto-big { display: flex; align-items: center; justify-content: center; gap: 28px; min-height: 150px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
-.picto-big .ink.big { width: min(240px, 60vw); height: 130px; color: var(--ink); animation: picto-in 0.45s ease; }
+.picto-big { background: radial-gradient(ellipse at 50% 40%, var(--surface) 0%, var(--bg) 100%); min-height: 220px; }
+.picto-big .ink.big { width: min(300px, 70vw); height: 190px; animation: picto-draw 0.9s cubic-bezier(0.45, 0, 0.25, 1) both; }
+/* Colour by stage: pictures in ochre, other scripts in ink, Proto-Ethiopic in teal, the Ge'ez letter in red */
+.stage-pic { color: var(--ochre); }
+.stage-trail { color: var(--ink); }
+.stage-proto { color: var(--c-model); }
+.stage-eth { color: var(--rubric); }
+.picto-stage.done .picto-thumb { opacity: 0.55; }
+@keyframes picto-draw { from { clip-path: inset(0 100% 0 0); opacity: 0.4; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
 .picto-font { font-size: 64px; line-height: 1; color: var(--rubric); }
 @keyframes picto-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
 .picto-text { max-width: 70ch; }
@@ -919,10 +929,12 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .picto-trail td, .picto-trail th { text-align: center; vertical-align: middle; }
 .picto-trail th[scope="row"] { background: none; color: var(--ink); text-align: left; }
 .picto-trail th[scope="row"] .ge { font-size: 18px; }
-.picto-trail .ink.cell { width: 58px; height: 36px; color: var(--ink); }
+.picto-trail .ink.cell { width: 64px; height: 42px; color: var(--ink); }
+.picto-trail td:first-of-type .ink.cell { color: var(--ochre); }
+.picto-trail td:nth-last-of-type(2) .ink.cell { color: var(--c-model); }
 .picto-trail td:last-child .ink.cell { color: var(--rubric); }
 .picto-refs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; align-items: start; }
-@media (prefers-reduced-motion: reduce) { .picto-big .ink.big, .picto-order { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .picto-big .ink.big, .picto-order { animation: none; clip-path: none; } }
 
 /* Numeric: Ge'ez numerals */
 .num-digits { display: grid; gap: 12px; }

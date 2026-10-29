@@ -4,7 +4,7 @@
  * first sound of the thing's name (acrophony): Bet, "house", gives b. The picture is simplified
  * into the Proto-Ethiopic (Musnad) sign and then the classical Ge'ez letter, and Ge'ez adds
  * vowels by marking that letter, giving its seven orders.
- * Drawings are cut from Bekerie's tables (img/picto) and drawn in the page's ink colour.
+ * Drawings are traced from Bekerie's tables into vector outlines (img/picto/*.svg) and drawn in the page's colours.
  * Data: geez_dataset.js (ethiopianClasses).
  */
 (function () {
@@ -42,7 +42,7 @@
     ['ሳብዕ', 'o', 'the left leg lengthened, or a ring on top']
   ];
 
-  const ink = (name, cls = '') => `<span class="ink ${cls}" style="--src:url(img/picto/${name}.png)" aria-hidden="true"></span>`;
+  const ink = (name, cls = '') => `<span class="ink ${cls}" style="--src:url(img/picto/${name}.svg)" aria-hidden="true"></span>`;
   const $ = (id) => document.getElementById(id);
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -76,7 +76,7 @@
       $('pictoStrip').innerHTML = st.map((s, i) =>
         (i ? '<span class="picto-arrow" aria-hidden="true">→</span>' : '') +
         `<button type="button" class="picto-stage${i === step ? ' active' : ''}${i < step ? ' done' : ''}" data-i="${i}">` +
-        `<span class="picto-thumb">${s.kind === 'orders' ? `<span class="ge">${FORMS.slice(0, 3).map((f) => cls[f]).join('')}…</span>` : ink(s.img)}</span>` +
+        `<span class="picto-thumb stage-${s.kind}">${s.kind === 'orders' ? `<span class="ge">${FORMS.slice(0, 3).map((f) => cls[f]).join('')}…</span>` : ink(s.img)}</span>` +
         `<span class="picto-lbl">${s.label}</span></button>`).join('');
       const s = st[step];
       let big;
@@ -86,7 +86,7 @@
           `<ul class="picto-marks">${ORDER_MARKS.slice(1).map((m, o) => `<li><b>${o + 2}</b> <span class="ge">${m[0]}</span> (${m[1]}): ${m[2]}</li>`).join('')}</ul>` +
           `<p class="hint">The marks are the usual pattern; some letters bend them to fit their shape.</p>`;
       } else {
-        big = `<div class="picto-big">${ink(s.img, 'big')}${s.kind === 'eth' ? `<span class="ge picto-font">${cls.geez}</span>` : ''}${s.kind === 'proto' && L.osa ? `<span class="osa picto-font">${L.osa}</span>` : ''}</div>`;
+        big = `<div class="picto-big stage-${s.kind}">${ink(s.img, 'big')}${s.kind === 'eth' ? `<span class="ge picto-font">${cls.geez}</span>` : ''}${s.kind === 'proto' && L.osa ? `<span class="osa picto-font">${L.osa}</span>` : ''}</div>`;
       }
       $('pictoView').innerHTML =
         `<div class="picto-view-head"><span class="badge rubric">${step + 1} / ${st.length} · ${s.label}</span>` +
