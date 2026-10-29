@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029e">
+  <link rel="stylesheet" href="index.css?v=20261029f">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -354,6 +354,8 @@
         <a href="#s-picto">Pictographic</a>
         <a href="#s-ideo">Ideographic</a>
         <a href="#s-astro">Astrographic</a>
+        <a href="#s-stars" class="toc-sub">Twelve stars</a>
+        <a href="#s-dial" class="toc-sub">Calendar dial</a>
         <a href="#s-num">Numeric</a>
         <a href="#s-syll">Syllographic</a>
         <a href="#s-model">The cipher model</a>
@@ -473,17 +475,68 @@
           <div class="astro-calendar" id="astroCalendar"></div>
           <p class="hint">“Starts 1 April” follows the thesis dates. “Starts on a Sunday” begins on the first Sunday after the March equinox, so every 1st-order letter falls on a Sunday and every 7th-order letter on a Saturday, as in the table above.</p>
 
-          <h4 class="astro-sub">Older witnesses</h4>
-          <div class="astro-gallery">
-            <figure>
-              <a href="img/astro-twelve-stars.webp" target="_blank" rel="noopener"><img src="img/astro-twelve-stars.webp" width="700" height="908" loading="lazy" alt="Hand-drawn wheel of the twelve star signs with the Ethiopian months, star names and natures written in Ge'ez around the sun"></a>
-              <figcaption><span class="ge">የ፲፪ ከዋክብት የባሕርያቸው ምሳሌ</span>, the twelve stars and their natures. Each sector pairs a month (<span class="ge">ወር</span>), a star (<span class="ge">ኮከብ</span>) and its nature (<span class="ge">ባሕርይ</span>), numbered with Ge'ez numerals. Drawing by Ayele Bekerie, September 2001.</figcaption>
-            </figure>
-            <figure>
-              <a href="img/calendar-dial-card.webp" target="_blank" rel="noopener"><img src="img/calendar-dial-card.webp" width="526" height="771" loading="lazy" alt="Printed Ethiopian calendar card with year columns in Ge'ez numerals and a rotating dial of weekdays and dates"></a>
-              <figcaption>An Ethiopian perpetual calendar card from the reign of Haile Selassie. Year columns in Ge'ez numerals (<span class="ge">ዓ.ም.</span> 1922–1977) work with the dial of weekdays and dates to find the weekday of any day of the year.</figcaption>
-            </figure>
+</article>
+
+        <article class="panel doc-section" id="s-stars">
+          <h3>The twelve stars <span class="ge">የ፲፪ ከዋክብት</span></h3>
+          <p>Ayele Bekerie's drawing of the twelve stars and their natures arranges the Ethiopian year in three rings: ፩ the month (<span class="ge">ወር</span>), ፪ the star (<span class="ge">ኮከብ</span>) and ፫ its nature (<span class="ge">ባሕርይ</span>). The count starts at ① <span class="ge">መጋቢት</span>, the month of the March equinox, with <span class="ge">ሐመል</span>, the Ram, and ends at ⑫ <span class="ge">የካቲት</span> with <span class="ge">ሑት</span>, the Fish. The natures repeat in fours: fire, earth, air, water.</p>
+          <div class="stars-box">
+            <svg id="starsWheel" class="stars-wheel" viewBox="0 0 460 460" role="group" aria-label="The twelve stars, months and natures"></svg>
+            <div class="stars-side">
+              <div id="starsInfo" aria-live="polite"></div>
+              <figure class="ref-fig">
+                <a href="img/astro-twelve-stars.webp" target="_blank" rel="noopener"><img src="img/astro-twelve-stars.webp" width="700" height="908" loading="lazy" alt="Ayele Bekerie's hand-drawn wheel of the twelve stars with Ethiopian months and natures"></a>
+                <figcaption><span class="ge">የ፲፪ ከዋክብት የባሕርያቸው ምሳሌ</span>. Drawing by Ayele Bekerie, September 2001. Tap to open full size.</figcaption>
+              </figure>
+            </div>
           </div>
+          <p class="hint">Pick a date in the fidel calendar and the wheel turns to that date's month. Every Ethiopian month has 30 days, so a month holds about four class weeks of the fidel calendar. The thirteenth month, <span class="ge">ጳጉሜ</span>, has no star of its own.</p>
+        </article>
+
+        <article class="panel doc-section" id="s-dial">
+          <h3>The calendar dial <span class="ge">መፍቻ ፊደል</span></h3>
+          <p>The printed calendar card from the reign of Haile Selassie finds the weekday of any Ethiopian date with one turn of a paper disc. It rests on one fact: every month has 30 days, and 30 is 2 more than four weeks. So each month begins two weekdays after the month before, and months seven apart begin on the same weekday. The card's top fan pairs those months: <span class="ge">መስከረም</span> with <span class="ge">ሚያዝያ</span>, <span class="ge">ጥቅምት</span> with <span class="ge">ግንቦት</span>, and so on.</p>
+          <ol class="dial-steps">
+            <li>Find the year in the side columns. Next to it is its key letter (<span class="ge">መፍቻ ፊደል</span>). The seven letters stand for the seven weekdays a year can begin on.</li>
+            <li>Turn the disc until that letter shows in its window. The weekday now under each month is the day that month begins.</li>
+            <li>Read the date in the fan below. Dates 1, 8, 15, 22 and 29 share the month's first weekday, dates 2, 9, 16, 23 and 30 the next, and so on.</li>
+          </ol>
+          <p>Below, the disc is unrolled into a strip. It turns by itself when you change the year.</p>
+
+          <div class="dial-box">
+            <div class="dial-top">
+              <div class="btn-row">
+                <button id="dialPrev" class="btn secondary small" type="button" aria-label="Previous year">←</button>
+                <span class="dial-year" id="dialYear"></span>
+                <button id="dialNext" class="btn secondary small" type="button" aria-label="Next year">→</button>
+                <span class="hint">Ethiopian year (E.C.)</span>
+              </div>
+              <div class="dial-window-wrap"><span class="hint">Window</span><span class="dial-window ge" id="dialWindow"></span></div>
+            </div>
+            <dl class="cube-props dial-facts" id="dialFacts"></dl>
+
+            <div class="dial-machine">
+              <div class="dial-label">Month fan</div>
+              <div class="dial-months" id="dialMonths"></div>
+              <div class="dial-label">Disc</div>
+              <div class="dial-disc"><div class="dial-disc-track" id="dialDisc"></div></div>
+            </div>
+
+            <div class="dial-label dial-month-title" id="dialMonthTitle"></div>
+            <div class="dial-dates" id="dialDates"></div>
+            <div class="astro-info dial-read" id="dialRead"></div>
+
+            <div class="dial-keys-wrap">
+              <span class="label">The seven key letters</span>
+              <div class="dial-keys" id="dialKeys"></div>
+              <p class="hint">Letters as read from the card. On the card's columns, ✱ marks a year of Luke (<span class="ge">ዘመነ ሉቃስ</span>), whose <span class="ge">ጳጉሜ</span> has six days, so the next year begins two weekdays later instead of one. The weekday rule from Bahire Hasab gives the same answer for every year without the card.</p>
+            </div>
+          </div>
+
+          <figure class="ref-fig ref-fig-wide">
+            <a href="img/calendar-dial-card.webp" target="_blank" rel="noopener"><img src="img/calendar-dial-card.webp" width="526" height="771" loading="lazy" alt="Ethiopian perpetual calendar card with year columns, key letters, a month fan, a turning weekday disc and a date fan"></a>
+            <figcaption>The original card: year columns 1922–1977 E.C. with key letters (<span class="ge">መ.ፊ.</span>) and Ge'ez numerals, the month fan at the top, the turning weekday disc with its letter window, and the date fan below. Tap to open full size.</figcaption>
+          </figure>
         </article>
 
         <article class="panel doc-section" id="s-num">
@@ -745,10 +798,11 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029e"></script>
-<script src="geez_rnn_engine.js?v=20261029e"></script>
-<script src="geez_cube.js?v=20261029e"></script>
-<script src="geez_calendar.js?v=20261029e"></script>
-<script src="app.js?v=20261029e"></script>
+<script src="geez_dataset.js?v=20261029f"></script>
+<script src="geez_rnn_engine.js?v=20261029f"></script>
+<script src="geez_cube.js?v=20261029f"></script>
+<script src="geez_astro.js?v=20261029f"></script>
+<script src="geez_calendar.js?v=20261029f"></script>
+<script src="app.js?v=20261029f"></script>
 </body>
 </html>

@@ -45,6 +45,7 @@
   const glyph = (c, o) => CLASSES[c][FORMS[o]];
 
   const $ = (id) => document.getElementById(id);
+  window.GeezCalendar = { cycleStart, locate };
 
   document.addEventListener('DOMContentLoaded', () => {
     const cal = $('astroCalendar');
@@ -94,17 +95,19 @@
       const dateText = `${WEEKDAYS[wd]} ${d} ${MONTHS[m]} ${y}`;
       const box = $('astroInfo');
       if (!loc) {
-        box.innerHTML = `<b>${dateText}</b> is outside this 364-day cycle. The solar year has 365 or 366 days, so one or two days fall between cycles.`;
+        box.innerHTML = `<b>${dateText}</b> is outside this 364-day cycle. The solar year has 365 or 366 days, so one or two days fall between cycles.` +
+          (window.EthiopicTime ? ` <span class="hint">Ethiopian date: <span class="ge">${window.EthiopicTime.ethText(t)}</span></span>` : '');
         return;
       }
       const ord = ORDERS[loc.o] || {};
       const match = ord.day === WEEKDAYS[wd];
+      const eth = window.EthiopicTime ? ` <span class="hint">Ethiopian date: <span class="ge">${window.EthiopicTime.ethText(t)}</span></span>` : '';
       box.innerHTML =
         `<span class="ge astro-info-glyph">${glyph(loc.c, loc.o)}</span>` +
         `<span><b>${dateText}</b> is day ${loc.k + 1} of 364: Equinox ${loc.half}, week ${Math.floor((loc.k % 182) / 7) + 1}. ` +
         `Class ${CLASSES[loc.c].geez} (${CLASSES[loc.c].name}), ${ORDN[loc.o]} order${ord.name ? ' ' + ord.name : ''}.` +
         (ord.day ? ` <span class="hint">The ${ORDN[loc.o]} order belongs to ${ord.day}${match ? ', and this date is a ' + ord.day + '.' : '; this date is a ' + WEEKDAYS[wd] + '.'}</span>` : '') +
-        `</span>`;
+        eth + `</span>`;
     }
 
     function render() {
@@ -143,7 +146,9 @@
       cal.innerHTML = html;
       info(picked);
       drawCircle();
+      announce();
     }
+    const announce = () => document.dispatchEvent(new CustomEvent('fidel-date', { detail: { t: picked } }));
     const fmt = (t) => { const [y, m, d] = parts(t); return `${d} ${MONTHS[m].slice(0, 3)} ${y}`; };
 
     cal.addEventListener('click', (e) => {
@@ -154,7 +159,19 @@
       b.classList.add('picked');
       info(picked);
       drawCircle();
+      announce();
     });
+    // Other models (the twelve stars, the calendar dial) read letters from here and can move the picked date
+    window.GeezCalendar.letterOn = (t) => {
+      const loc = locate(t, year, mode);
+      return loc ? { glyph: glyph(loc.c, loc.o), base: CLASSES[loc.c].geez } : null;
+    };
+    window.GeezCalendar.pick = (t) => {
+      picked = t;
+      year = parts(t)[0];
+      if (t < cycleStart(year, mode)) year -= 1;
+      render();
+    };
     $('astroPrev').addEventListener('click', () => { year--; picked = cycleStart(year, mode); render(); });
     $('astroNext').addEventListener('click', () => { year++; picked = cycleStart(year, mode); render(); });
     $('astroToday').addEventListener('click', () => {
@@ -176,5 +193,5 @@
     render();
   });
 
-  window.GeezCalendar = { cycleStart, locate };
+
 })();

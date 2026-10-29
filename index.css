@@ -764,12 +764,91 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .ac-n { font-family: var(--font-mono); font-size: 9.5px; line-height: 1.5; color: inherit; opacity: 0.75; font-variant-numeric: tabular-nums; }
 .ac-g { font-size: 17px; line-height: 1.1; }
 
-.astro-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
-@media (max-width: 640px) { .astro-gallery { grid-template-columns: minmax(0, 1fr); } }
-.astro-gallery figure { margin: 0; display: grid; gap: 8px; }
-.astro-gallery img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
-.astro-gallery figcaption { font-size: var(--step--1); color: var(--muted); line-height: 1.5; }
-.astro-gallery figcaption .ge { color: var(--ink); }
+.toc a.toc-sub { padding-left: 22px; font-size: 12.5px; }
+
+/* Reference image beside a model */
+.ref-fig { margin: 0; display: grid; gap: 6px; }
+.ref-fig img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.ref-fig figcaption { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.ref-fig figcaption .ge { color: var(--ink); }
+.ref-fig-wide { max-width: 340px; }
+
+/* Twelve stars */
+.stars-box { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .stars-box { grid-template-columns: minmax(0, 1fr); } }
+.stars-wheel { width: 100%; max-width: 480px; height: auto; display: block; justify-self: center; }
+.stars-side { display: grid; gap: 16px; }
+.stars-side .ref-fig { max-width: 220px; }
+.sw-sector { cursor: pointer; outline: none; }
+.sw-outer { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.sw-sign { fill: var(--bg); stroke: var(--line); stroke-width: 1; }
+.sw-num { fill: var(--surface-2); stroke: var(--line); stroke-width: 1; }
+.sw-sector:hover .sw-outer, .sw-sector:focus-visible .sw-outer { fill: var(--ochre-soft); }
+.sw-sector.here .sw-num { fill: var(--ochre-soft); }
+.sw-sector.on .sw-outer, .sw-sector.on .sw-sign { fill: var(--rubric-soft); stroke: var(--rubric); }
+.sw-sector.on .sw-num { fill: var(--rubric); }
+.sw-sector.on .sw-n { fill: var(--rubric-ink); }
+.sw-month { fill: var(--ink); font-family: var(--font-ethiopic); font-size: 12.5px; font-weight: 700; }
+.sw-name { fill: var(--ink); font-family: var(--font-ethiopic); font-size: 12px; }
+.sw-nature { fill: var(--muted); font-family: var(--font-ethiopic); font-size: 11px; }
+.sw-sym { fill: var(--ink); font-size: 24px; font-family: "Segoe UI Symbol", "Noto Sans Symbols", "DejaVu Sans", sans-serif; }
+.sw-n { fill: var(--ink); font-family: var(--font-ethiopic); font-size: 14px; font-weight: 700; }
+.sw-sun { fill: var(--ochre-soft); stroke: var(--ochre); stroke-width: 1.5; }
+.sw-ray { stroke: var(--ochre); stroke-width: 2.5; stroke-linecap: round; }
+.sw-core { fill: var(--ochre); }
+.sw-sun-t { fill: var(--surface); font-family: var(--font-ethiopic); font-size: 15px; font-weight: 700; }
+.sw-head { display: flex; gap: 14px; align-items: center; margin-bottom: 6px; }
+.sw-big { font-size: 46px; line-height: 1; color: var(--rubric); min-width: 52px; text-align: center; font-family: "Segoe UI Symbol", "Noto Sans Symbols", "DejaVu Sans", sans-serif; }
+.sw-head h4 { font-size: var(--step-1); }
+.sw-classes { font-size: 20px; letter-spacing: 0.08em; color: var(--rubric); }
+
+/* Calendar dial */
+.dial-steps { margin: 0; padding-left: 22px; display: grid; gap: 6px; max-width: 72ch; }
+.dial-box { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.dial-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.dial-year { font-family: var(--font-mono); font-size: var(--step-2); font-weight: 600; min-width: 7.5em; text-align: center; }
+.dial-year .ge { font-family: var(--font-ethiopic); font-size: 0.8em; color: var(--rubric); margin-left: 6px; }
+.dial-window-wrap { display: flex; align-items: center; gap: 8px; }
+.dial-window { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--rubric); background: var(--surface); font-size: 30px; color: var(--rubric); font-weight: 700; }
+.dial-key { font-size: 22px; color: var(--rubric); font-weight: 700; }
+.dial-facts > div { grid-template-columns: 116px minmax(0, 1fr); }
+.dial-label { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.dial-month-title { text-transform: none; letter-spacing: 0; font-size: var(--step-0); color: var(--ink); font-weight: 600; }
+.dial-machine { display: grid; gap: 6px; overflow-x: auto; }
+.dial-months, .dial-disc, .dial-dates { min-width: 476px; }
+.dial-months { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.dial-col { display: grid; gap: 4px; align-content: start; }
+.dial-month { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 6px 2px; cursor: pointer; font-size: 13px; }
+.dial-month:hover { border-color: var(--muted); }
+.dial-month.on { background: var(--rubric); border-color: var(--rubric); color: var(--rubric-ink); }
+.dial-disc { overflow: hidden; border: 2px solid var(--ink); border-radius: 8px; background: var(--surface); }
+.dial-disc-track {
+  --turn: 0;
+  display: grid; grid-template-columns: repeat(14, calc(100% / 14)); width: 200%;
+  transform: translateX(calc(var(--turn) * -100% / 14));
+  transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.dial-wd { display: grid; justify-items: center; padding: 7px 2px; border-right: 1px solid var(--line); font-size: 13px; }
+.dial-wd .sub { font-size: 10px; }
+.dial-dates { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.dial-dh { text-align: center; font-size: 12px; color: var(--muted); padding-bottom: 2px; }
+.dial-date { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 3px 0 4px; cursor: pointer; display: grid; justify-items: center; }
+.dial-date:hover { border-color: var(--muted); }
+.dial-date .ge { font-size: 16px; line-height: 1.15; color: var(--muted); }
+.dial-dn { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+.dial-date.on { background: var(--rubric); border-color: var(--rubric); color: var(--rubric-ink); }
+.dial-date.on .ge { color: var(--rubric-ink); }
+.dial-date.picked:not(.on) { border-color: var(--rubric); }
+.dial-read { display: block; min-height: 0; }
+.dial-read .mono { font-size: 12px; color: var(--muted); }
+.dial-keys { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.dial-keys span { display: inline-flex; align-items: baseline; gap: 6px; border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; font-size: 12px; color: var(--muted); background: var(--surface); }
+.dial-keys b { font-size: 17px; color: var(--ink); }
+.dial-keys span.on { border-color: var(--rubric); color: var(--rubric); background: var(--rubric-soft); }
+.dial-keys span.on b { color: var(--rubric); }
+.dial-keys-wrap .hint { margin-top: 8px; max-width: 75ch; }
+.dial-machine::-webkit-scrollbar { height: 6px; }
+@media (max-width: 560px) { .dial-dates { min-width: 0; } .dial-dh .ge { font-size: 10px; } }
 
 /* ---------- Fidel cube ---------- */
 .cube-axes { display: flex; flex-wrap: wrap; gap: 6px; }
