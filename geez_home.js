@@ -61,6 +61,8 @@
     } catch (err) { /* the rest of Home still works without the live demo */ }
 
     home.addEventListener('click', (e) => {
+      const sc = e.target.closest('[data-home-scroll]');
+      if (sc) { const t = document.getElementById(sc.dataset.homeScroll); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
       const go = e.target.closest('[data-home-go]');
       if (go && window.GeezModel) {
         const [sub, anchor] = go.dataset.homeGo.split(':');
