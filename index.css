@@ -712,6 +712,65 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 
 .wheel-open { margin-top: 10px; }
 
+/* ---------- Astrographic: equinox circle, fidel calendar, figures ---------- */
+.astro-sub { font-size: var(--step-1); margin-top: 8px; }
+.astro-pair { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 24px; align-items: center; }
+@media (max-width: 760px) { .astro-pair { grid-template-columns: minmax(0, 1fr); } }
+.astro-pair-text { display: grid; gap: 10px; }
+.astro-pair-text h4 { font-size: var(--step-1); }
+.astro-circle { margin: 0; max-width: 360px; width: 100%; justify-self: center; }
+.astro-circle svg { width: 100%; height: auto; display: block; }
+.eq-ring { fill: var(--bg); stroke: var(--ink); stroke-width: 1.6; }
+.eq-axis { stroke: var(--ink); stroke-width: 2.4; }
+.eq-tick { stroke: var(--line); stroke-width: 1.2; }
+.eq-big { fill: var(--ink); font-family: Georgia, "Times New Roman", serif; font-size: 19px; letter-spacing: 0.04em; }
+.eq-mid { fill: var(--ink); font-family: Georgia, "Times New Roman", serif; font-size: 16px; font-weight: 700; letter-spacing: 0.03em; }
+.eq-small { fill: var(--muted); font-family: var(--font-ui); font-size: 11px; }
+.eq-letter { fill: var(--ink); font-family: var(--font-ethiopic); font-size: 14px; }
+.eq-letter.on { fill: var(--rubric-ink); font-weight: 700; }
+.eq-on { fill: var(--rubric); }
+
+.astro-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.astro-range { font-size: 12.5px; color: var(--muted); min-width: 13em; text-align: center; }
+.astro-info { display: flex; gap: 14px; align-items: center; min-height: 64px; padding: 10px 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; font-size: var(--step--1); line-height: 1.5; }
+.astro-info .hint { display: block; margin-top: 2px; }
+.astro-info-glyph { font-size: 38px; line-height: 1; color: var(--rubric); flex: none; min-width: 44px; text-align: center; }
+.astro-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.ac-sw { display: inline-block; width: 11px; height: 11px; margin-right: 6px; vertical-align: -1px; border: 1px solid var(--line); border-radius: 2px; }
+.ac-sw.h1 { background: var(--surface); }
+.ac-sw.h2 { background: var(--ochre-soft); }
+.ac-sw.wk { background: var(--surface); box-shadow: inset 3px 0 0 var(--c-model); }
+.ac-sw.gap { background: repeating-linear-gradient(45deg, var(--surface-2) 0 3px, var(--bg) 3px 6px); }
+
+.astro-calendar { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 14px; }
+.ac-month { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.ac-head { background: var(--c-model); color: #fff; font-weight: 700; font-size: var(--step--1); text-align: center; padding: 6px; }
+.ac-head span { font-weight: 500; opacity: 0.85; }
+.ac-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; padding: 6px; }
+.ac-wd { font-size: 10px; font-weight: 700; color: var(--muted); text-align: center; padding-bottom: 2px; }
+.ac-day {
+  appearance: none; border: 1px solid transparent; border-radius: 5px; padding: 2px 0 3px; min-width: 0;
+  display: grid; justify-items: center; gap: 0; background: var(--surface); color: var(--ink); cursor: pointer;
+}
+.ac-day.h2 { background: var(--ochre-soft); }
+.ac-day.wk { box-shadow: inset 3px 0 0 var(--c-model); }
+.ac-day.gap { background: repeating-linear-gradient(45deg, var(--surface-2) 0 3px, var(--bg) 3px 6px); color: var(--muted); }
+.ac-day.off { visibility: hidden; pointer-events: none; }
+.ac-day:hover { border-color: var(--muted); }
+.ac-day:focus-visible { outline: 2px solid var(--c-model); outline-offset: 1px; }
+.ac-day.eqx { border-color: var(--c-model); }
+.ac-day.today .ac-n { background: var(--ink); color: var(--surface); border-radius: 999px; padding: 0 4px; }
+.ac-day.picked { background: var(--rubric); color: var(--rubric-ink); border-color: var(--rubric); }
+.ac-n { font-family: var(--font-mono); font-size: 9.5px; line-height: 1.5; color: inherit; opacity: 0.75; font-variant-numeric: tabular-nums; }
+.ac-g { font-size: 17px; line-height: 1.1; }
+
+.astro-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+@media (max-width: 640px) { .astro-gallery { grid-template-columns: minmax(0, 1fr); } }
+.astro-gallery figure { margin: 0; display: grid; gap: 8px; }
+.astro-gallery img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.astro-gallery figcaption { font-size: var(--step--1); color: var(--muted); line-height: 1.5; }
+.astro-gallery figcaption .ge { color: var(--ink); }
+
 /* ---------- Fidel cube ---------- */
 .cube-axes { display: flex; flex-wrap: wrap; gap: 6px; }
 .cube-axes b { color: var(--ink); font-family: var(--font-mono); }
