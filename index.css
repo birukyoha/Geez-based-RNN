@@ -617,11 +617,30 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; 
 
 /* ---------- Script (architecture) ---------- */
 .doc { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
-.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); display: grid; gap: 2px; font-size: var(--step--1); }
-.toc a { color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--line); }
-.toc a:hover { color: var(--ink); border-left-color: var(--ink); }
-/* Narrow screens: one column, no side menu (kept after the .toc rules so it wins) */
-@media (max-width: 860px) { .doc { grid-template-columns: minmax(0, 1fr); } .toc { display: none; } }
+/* Model page menu: a side list on wide screens, a dropdown on narrow ones */
+.subnav { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); display: grid; gap: 10px; font-size: var(--step--1); }
+.subnav-pick { display: none; gap: 6px; }
+.subnav-list { display: grid; gap: 2px; }
+.subnav-list > button, .subnav-sub > button {
+  appearance: none; background: none; border: 0; border-left: 2px solid var(--line); cursor: pointer;
+  display: flex; align-items: baseline; gap: 8px; text-align: left; width: 100%;
+  padding: 6px 10px; color: var(--muted); font: inherit;
+}
+.subnav-list > button .ge { width: 16px; text-align: center; color: inherit; flex: none; }
+.subnav-list > button:hover, .subnav-sub > button:hover { color: var(--ink); border-left-color: var(--ink); }
+.subnav-list > button.active { color: var(--section, var(--rubric)); border-left-color: var(--section, var(--rubric)); font-weight: 700; background: color-mix(in srgb, var(--section, var(--rubric)) 8%, transparent); }
+.subnav-list > button:focus-visible, .subnav-sub > button:focus-visible { outline: 2px solid var(--section, var(--rubric)); outline-offset: -2px; }
+.subnav-group { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 12px 10px 4px; }
+.subnav-sub { display: grid; gap: 0; }
+.subnav-sub > button { padding: 4px 10px 4px 34px; font-size: 12.5px; }
+.subnav-pager { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+/* Narrow screens: one column, the menu becomes a dropdown (kept after the rules above so it wins) */
+@media (max-width: 860px) {
+  .doc { grid-template-columns: minmax(0, 1fr); }
+  .subnav { position: static; }
+  .subnav-list { display: none; }
+  .subnav-pick { display: grid; }
+}
 .doc-body { display: grid; gap: 20px; min-width: 0; }
 .doc-section { display: grid; gap: 14px; scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 96px); }
 .doc-section h3 { font-size: var(--step-2); letter-spacing: -0.01em; display: flex; gap: 10px; align-items: baseline; }
@@ -633,8 +652,12 @@ td { padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; 
 @media (max-width: 1100px) { .dims { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); } }
 .dim { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--bg); display: grid; gap: 6px; align-content: start; }
 .dim .ge { font-size: 26px; color: var(--rubric); line-height: 1; }
-.dim h4 { font-size: var(--step-0); }
-.dim p { font-size: var(--step--1); color: var(--muted); }
+.dim { appearance: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; transition: border-color 0.15s ease, transform 0.15s ease; }
+.dim:hover { border-color: var(--section, var(--rubric)); transform: translateY(-1px); }
+.dim:focus-visible { outline: 2px solid var(--section, var(--rubric)); outline-offset: 2px; }
+.dim-title { font-size: var(--step-0); font-weight: 700; }
+.dim-text { font-size: var(--step--1); color: var(--muted); }
+.dim-go { font-size: 12px; font-weight: 600; color: var(--section, var(--rubric)); margin-top: 2px; }
 
 .figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 @media (max-width: 560px) { .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -768,7 +791,6 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .ac-n { font-family: var(--font-mono); font-size: 9.5px; line-height: 1.5; color: inherit; opacity: 0.75; font-variant-numeric: tabular-nums; }
 .ac-g { font-size: 17px; line-height: 1.1; }
 
-.toc a.toc-sub { padding-left: 22px; font-size: 12.5px; }
 
 /* Reference image beside a model */
 .ref-fig { margin: 0; display: grid; gap: 6px; }

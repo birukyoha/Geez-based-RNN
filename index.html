@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029g">
+  <link rel="stylesheet" href="index.css?v=20261029h">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -349,33 +349,53 @@
     </div>
 
     <div class="doc">
-      <nav class="toc" aria-label="On this page">
-        <a href="#s-five">Five properties</a>
-        <a href="#s-picto">Pictographic</a>
-        <a href="#s-ideo">Ideographic</a>
-        <a href="#s-astro">Astrographic</a>
-        <a href="#s-stars" class="toc-sub">Twelve stars</a>
-        <a href="#s-dial" class="toc-sub">Calendar dial</a>
-        <a href="#s-num">Numeric</a>
-        <a href="#s-syll">Syllographic</a>
-        <a href="#s-model">The cipher model</a>
-        <a href="#s-refs">References</a>
+      <nav class="subnav" id="modelNav" aria-label="Model sections">
+        <div class="subnav-pick">
+          <label class="label" for="modelPick">Property</label>
+          <select id="modelPick">
+            <option value="overview">Overview</option>
+            <option value="pictographic">Pictographic</option>
+            <option value="ideographic">Ideographic</option>
+            <option value="astrographic">Astrographic</option>
+            <option value="numeric">Numeric</option>
+            <option value="syllographic">Syllographic</option>
+            <option value="model">The cipher model</option>
+            <option value="references">References</option>
+          </select>
+        </div>
+        <div class="subnav-list">
+          <button type="button" data-sub="overview">Overview</button>
+          <span class="subnav-group">Five properties</span>
+          <button type="button" data-sub="pictographic"><span class="ge">በ</span>Pictographic</button>
+          <button type="button" data-sub="ideographic"><span class="ge">ረ</span>Ideographic</button>
+          <button type="button" data-sub="astrographic"><span class="ge">ፀ</span>Astrographic</button>
+          <div class="subnav-sub" data-for="astrographic">
+            <button type="button" data-jump="s-astro">Circle and calendar</button>
+            <button type="button" data-jump="s-stars">Twelve stars</button>
+            <button type="button" data-jump="s-dial">Calendar dial</button>
+          </div>
+          <button type="button" data-sub="numeric"><span class="ge">፲</span>Numeric</button>
+          <button type="button" data-sub="syllographic"><span class="ge">ሀ</span>Syllographic</button>
+          <span class="subnav-group">Model</span>
+          <button type="button" data-sub="model">The cipher model</button>
+          <button type="button" data-sub="references">References</button>
+        </div>
       </nav>
 
       <div class="doc-body">
-        <article class="panel doc-section" id="s-five">
+        <article class="panel doc-section" id="s-five" data-sub="overview">
           <h3>Five properties of the script</h3>
           <p class="lead">Ge'ez is treated as more than a set of sounds. The thesis combines five properties into one framework.</p>
           <div class="dims">
-            <div class="dim"><span class="ge">በ</span><h4>Pictographic</h4><p>Shapes drawn from nature and daily life, stylized into proto-graphs and then classical fidels.</p></div>
-            <div class="dim"><span class="ge">ረ</span><h4>Ideographic</h4><p>Consonant classes carry social and moral ideas, e.g. <em>Re'es</em> for leadership and <em>Bèt</em> for shelter.</p></div>
-            <div class="dim"><span class="ge">ፀ</span><h4>Astrographic</h4><p>26 classes × 7 orders = 182 syllographs, matched to the 182 days of one equinox.</p></div>
-            <div class="dim"><span class="ge">፲</span><h4>Numeric</h4><p>Each root carries a base value. Across seven orders the values span 1 to 5,600.</p></div>
-            <div class="dim"><span class="ge">ሀ</span><h4>Syllographic</h4><p>Every glyph joins a consonant to a vowel (an abugida), with homophone letters that keep distinct meanings.</p></div>
+            <button type="button" class="dim" data-go="pictographic"><span class="ge">በ</span><span class="dim-title">Pictographic</span><span class="dim-text">Shapes drawn from nature and daily life, stylized into proto-graphs and then classical fidels.</span><span class="dim-go">Open →</span></button>
+            <button type="button" class="dim" data-go="ideographic"><span class="ge">ረ</span><span class="dim-title">Ideographic</span><span class="dim-text">Consonant classes carry social and moral ideas, e.g. <em>Re'es</em> for leadership and <em>Bèt</em> for shelter.</span><span class="dim-go">Open →</span></button>
+            <button type="button" class="dim" data-go="astrographic"><span class="ge">ፀ</span><span class="dim-title">Astrographic</span><span class="dim-text">26 classes × 7 orders = 182 syllographs, matched to the 182 days of one equinox.</span><span class="dim-go">Open →</span></button>
+            <button type="button" class="dim" data-go="numeric"><span class="ge">፲</span><span class="dim-title">Numeric</span><span class="dim-text">Each root carries a base value. Across seven orders the values span 1 to 5,600.</span><span class="dim-go">Open →</span></button>
+            <button type="button" class="dim" data-go="syllographic"><span class="ge">ሀ</span><span class="dim-title">Syllographic</span><span class="dim-text">Every glyph joins a consonant to a vowel (an abugida), with homophone letters that keep distinct meanings.</span><span class="dim-go">Open →</span></button>
           </div>
         </article>
 
-        <article class="panel doc-section" id="s-picto">
+        <article class="panel doc-section" id="s-picto" data-sub="pictographic">
           <h3>Pictographic property</h3>
           <p>Following Scelta (2001) and Bekerie (1997), each graph began as an abstract picture of a living thing, a tool or a sky feature.</p>
           <div class="table-wrap">
@@ -393,7 +413,7 @@
           </div>
         </article>
 
-        <article class="panel doc-section" id="s-ideo">
+        <article class="panel doc-section" id="s-ideo" data-sub="ideographic">
           <h3>Ideographic property</h3>
           <p>Beyond sound, root consonant classes are read as civic, spiritual or moral ideas in traditional Ethiopian interpretation.</p>
           <div class="table-wrap">
@@ -411,7 +431,7 @@
           </div>
         </article>
 
-        <article class="panel doc-section" id="s-astro">
+        <article class="panel doc-section" id="s-astro" data-sub="astrographic">
           <h3>Astrographic property</h3>
           <p>The thesis reads the script as a solar calendar. The year has two 182-day equinox cycles, and the 182 syllographs map one-to-one onto the days of each cycle.</p>
           <div class="figures">
@@ -474,7 +494,7 @@
 
 </article>
 
-        <article class="panel doc-section" id="s-stars">
+        <article class="panel doc-section" id="s-stars" data-sub="astrographic">
           <h3>The twelve stars <span class="ge">የ፲፪ ከዋክብት</span></h3>
           <p>Ayele Bekerie's drawing of the twelve stars and their natures arranges the Ethiopian year in three rings: ፩ the month (<span class="ge">ወር</span>), ፪ the star (<span class="ge">ኮከብ</span>) and ፫ its nature (<span class="ge">ባሕርይ</span>). The count starts at ① <span class="ge">መጋቢት</span>, the month of the March equinox, with <span class="ge">ሐመል</span>, the Ram, and ends at ⑫ <span class="ge">የካቲት</span> with <span class="ge">ሑት</span>, the Fish. The natures repeat in fours: fire, earth, air, water.</p>
           <div class="stars-box">
@@ -490,7 +510,7 @@
           <p class="hint">Pick a date in the fidel calendar and the wheel turns to that date's month. Every Ethiopian month has 30 days, so a month holds about four class weeks of the fidel calendar. The thirteenth month, <span class="ge">ጳጉሜ</span>, has no star of its own.</p>
         </article>
 
-        <article class="panel doc-section" id="s-dial">
+        <article class="panel doc-section" id="s-dial" data-sub="astrographic">
           <h3>The calendar dial <span class="ge">መፍቻ ፊደል</span></h3>
           <p>The printed calendar card from the reign of Haile Selassie finds the weekday of any Ethiopian date with one turn of a paper disc. It rests on one fact: every month has 30 days, and 30 is 2 more than four weeks. So each month begins two weekdays after the month before, and months seven apart begin on the same weekday. The card's top fan pairs those months: <span class="ge">መስከረም</span> with <span class="ge">ሚያዝያ</span>, <span class="ge">ጥቅምት</span> with <span class="ge">ግንቦት</span>, and so on.</p>
           <ol class="dial-steps">
@@ -536,7 +556,7 @@
           </figure>
         </article>
 
-        <article class="panel doc-section" id="s-num">
+        <article class="panel doc-section" id="s-num" data-sub="numeric">
           <h3>Numeric property</h3>
           <p>Each root consonant has a base value from 1 to 800. Across the seven orders the value grows linearly, giving a range of 1 to 5,600.</p>
 <pre class="math"><b>Base values</b>
@@ -558,7 +578,7 @@
           </div>
         </article>
 
-        <article class="panel doc-section" id="s-syll">
+        <article class="panel doc-section" id="s-syll" data-sub="syllographic">
           <h3>Syllographic property and <span class="ge">ሞክሼ ፊደላት</span></h3>
           <p>Ge'ez is an abugida: each glyph carries its vowel. <em>Mokshe fidelat</em> are letters that sound alike in modern speech but carry different meanings.</p>
           <div class="mokshe">
@@ -604,7 +624,7 @@
           </div>
         </article>
 
-        <article class="panel doc-section" id="s-model">
+        <article class="panel doc-section" id="s-model" data-sub="model">
           <h3>The cipher model</h3>
           <p>The thesis describes the cipher as a deterministic finite automaton over the binary alphabet {0, 1}. At each recursion trₖ, k = 1 … 8:</p>
 <pre class="math">V[i]   = W[i] · X[i] + B[i]
@@ -615,7 +635,7 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
           <p>The thesis proposes the 64-bit weight matrix W and 64-bit bias matrix B as the key, for 128 bits per character, and suggests extending it to 512 bits by adding hidden layers.</p>
         </article>
 
-        <article class="panel doc-section" id="s-refs">
+        <article class="panel doc-section" id="s-refs" data-sub="references">
           <h3>References</h3>
           <ol class="refs">
             <li><span><strong>Scelta, G. F.</strong> (2001). <em>The Comparative Origin and Usage of the Ge'ez Writing System of Ethiopia.</em> Arts of Africa, AH 215.</span></li>
@@ -624,6 +644,7 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
             <li><span><strong>Lambdin, T. O.</strong> (1978). <em>Introduction to Classical Ethiopic (Ge'ez).</em> Harvard Semitic Studies 24.</span></li>
           </ol>
         </article>
+        <div class="subnav-pager" id="modelPager"></div>
       </div>
     </div>
   </section>
@@ -795,11 +816,11 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029g"></script>
-<script src="geez_rnn_engine.js?v=20261029g"></script>
-<script src="geez_cube.js?v=20261029g"></script>
-<script src="geez_astro.js?v=20261029g"></script>
-<script src="geez_calendar.js?v=20261029g"></script>
-<script src="app.js?v=20261029g"></script>
+<script src="geez_dataset.js?v=20261029h"></script>
+<script src="geez_rnn_engine.js?v=20261029h"></script>
+<script src="geez_cube.js?v=20261029h"></script>
+<script src="geez_astro.js?v=20261029h"></script>
+<script src="geez_calendar.js?v=20261029h"></script>
+<script src="app.js?v=20261029h"></script>
 </body>
 </html>

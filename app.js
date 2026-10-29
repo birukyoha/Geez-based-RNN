@@ -76,12 +76,66 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabId === 'cube-tab' && window.renderGeezCube) window.renderGeezCube();
     if (tabId === 'infographics-tab') renderGeezTree();
     if (updateHash) {
-      const route = TAB_TO_ROUTE[tabId];
+      let route = TAB_TO_ROUTE[tabId];
+      if (route === 'model') route = modelRoute();
       if (route && location.hash !== '#' + route) {
         try { history.replaceState(null, '', '#' + route); } catch (e) { location.hash = route; }
       }
     }
   }
+
+  // ---------- Model page: one property at a time ----------
+  const MODEL_SUBS = ['overview', 'pictographic', 'ideographic', 'astrographic', 'numeric', 'syllographic', 'model', 'references'];
+  const MODEL_LABELS = { overview: 'Overview', pictographic: 'Pictographic', ideographic: 'Ideographic', astrographic: 'Astrographic',
+    numeric: 'Numeric', syllographic: 'Syllographic', model: 'The cipher model', references: 'References' };
+  let modelSub = 'overview';
+  const modelRoute = () => (modelSub === 'overview' ? 'model' : 'model-' + modelSub);
+  function showModelSub(sub, updateHash = true) {
+    if (!MODEL_SUBS.includes(sub)) sub = 'overview';
+    modelSub = sub;
+    document.querySelectorAll('#architecture-tab .doc-section[data-sub]').forEach((a) => { a.hidden = a.dataset.sub !== sub; });
+    document.querySelectorAll('#modelNav [data-sub]').forEach((b) => {
+      const on = b.dataset.sub === sub;
+      b.classList.toggle('active', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('#modelNav .subnav-sub').forEach((g) => { g.hidden = g.dataset.for !== sub; });
+    const pick = $('modelPick');
+    if (pick) pick.value = sub;
+    const i = MODEL_SUBS.indexOf(sub);
+    const prev = MODEL_SUBS[i - 1], next = MODEL_SUBS[i + 1];
+    const pager = $('modelPager');
+    if (pager) {
+      pager.innerHTML =
+        (prev ? `<button type="button" class="btn secondary small" data-go="${prev}">← ${MODEL_LABELS[prev]}</button>` : '<span></span>') +
+        (next ? `<button type="button" class="btn secondary small" data-go="${next}">${MODEL_LABELS[next]} →</button>` : '');
+    }
+    if (sub === 'numeric') renderNumerologyWheel();
+    if (updateHash && $('architecture-tab').classList.contains('active')) {
+      try { history.replaceState(null, '', '#' + modelRoute()); } catch (e) { location.hash = modelRoute(); }
+    }
+  }
+  function goModelSub(sub) {
+    showModelSub(sub);
+    const top = $('architecture-tab').getBoundingClientRect().top + window.scrollY - 80;
+    if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
+  }
+  const modelNav = $('modelNav');
+  if (modelNav) {
+    modelNav.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-sub]');
+      if (b) { goModelSub(b.dataset.sub); return; }
+      const j = e.target.closest('[data-jump]');
+      if (j) { const el = $(j.dataset.jump); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+    $('modelPick').addEventListener('change', (e) => goModelSub(e.target.value));
+  }
+  // Overview cards and the pager open a property
+  $('architecture-tab').addEventListener('click', (e) => {
+    const g = e.target.closest('[data-go]');
+    if (g) goModelSub(g.dataset.go);
+  });
+  showModelSub('overview', false);
   // Slide the dock's bump and colored bubble under the active section
   const dock = document.querySelector('.dock');
   function moveDock(instant) {
@@ -139,6 +193,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   function routeFromHash() {
     const key = (location.hash || '').replace('#', '');
+    if (key.startsWith('model-') && MODEL_SUBS.includes(key.slice(6))) {
+      showModelSub(key.slice(6), false);
+      showTab('architecture-tab', false);
+      return;
+    }
     if (ROUTES[key]) showTab(ROUTES[key], false);
   }
   window.addEventListener('hashchange', routeFromHash);
