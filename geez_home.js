@@ -18,6 +18,27 @@
       $('homeTodayGlyph').textContent = g ? g.glyph : '·';
       $('homeTodayText').innerHTML = `<span class="ge">${E.ethText(t)}</span>` +
         (loc ? `<span>Day ${loc.k + 1} of 364 · Equinox ${loc.half}</span>` : '<span>Between cycles: ጳጉሜ closes the year</span>');
+      const pb = $('homeTodayProfile');
+      if (pb) {
+        if (loc) { const k = loc.k % 182; pb.dataset.letter = `${Math.floor(k / 7)},${k % 7}`; }
+        else pb.hidden = true;
+      }
+
+      // Today's feast, or the next one, from the Bahire Hasab of this year (and next year if all have passed)
+      const B = window.BahireHasab, fe = $('homeFeast');
+      if (B && fe) {
+        const today = E.utcToJdn(t), Y = E.jdnToEth(today)[0];
+        const list = [Y, Y + 1].flatMap((y) => B.compute(y).feasts);
+        const hit = list.find((f) => f.j >= today);
+        if (hit) {
+          const days = hit.j - today, ut = E.jdnToUtc(hit.j);
+          const gd = new Date(ut).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+          fe.innerHTML = days === 0
+            ? `Today is <b class="ge">${hit.am}</b> (${hit.en})`
+            : `Next feast: <b class="ge">${hit.am}</b> (${hit.en}) in ${days} day${days === 1 ? '' : 's'} · <span class="ge">${E.ethText(ut)}</span> · ${gd}`;
+          fe.hidden = false;
+        }
+      }
     }
 
     // How the cipher works, live on today's letter

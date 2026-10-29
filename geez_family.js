@@ -55,6 +55,7 @@
   }));
 
   const $ = (id) => document.getElementById(id);
+  window.GeezFamily = Object.assign(window.GeezFamily || {}, { data: fam });
 
   document.addEventListener('DOMContentLoaded', () => {
     if (!$('famGrid')) return;
@@ -94,18 +95,18 @@
         `<div class="fam-readings">` +
         `<div><span class="label">Alphabet history</span><p>${f.pic ? `The Proto-Sinaitic sign showed ${f.pic}. Its name began with <b class="mono">${f.sound}</b>, so it stood for that sound.` : 'No Proto-Sinaitic sign is known for this letter.'}</p></div>` +
         `<div><span class="label">Bekerie's reading</span><p>${f.bekerie ? `<span class="ge">${f.geez}</span> ${f.name}: ${f.bekerie}.` : '–'}</p></div>` +
-        `</div>` + cousins;
+        `</div>` + cousins + `<div class="btn-row"><button type="button" class="btn small lp-open-btn" data-letter="${cur},0">Full letter profile</button></div>`;
     }
     $('famGrid').addEventListener('click', (e) => {
       const b = e.target.closest('.fam-tile');
       if (b) { cur = Number(b.dataset.c); render(); }
     });
-    window.GeezFamily = {
+    Object.assign(window.GeezFamily, {
       select(c, scroll) {
         cur = c; render();
         if (scroll) requestAnimationFrame(() => $('famGrid').scrollIntoView({ behavior: 'smooth', block: 'center' }));
       }
-    };
+    });
     render();
 
     // ---------- From abjad to abugida ----------

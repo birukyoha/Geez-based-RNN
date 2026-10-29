@@ -22,6 +22,7 @@
     { key: 'ideas', label: 'Ideas and order', ideas: { 0: 'beginning', 1: 'word', 2: 'life', 5: 'leader', 7: 'top', 9: 'mark, sign', 12: 'origin', 21: 'split, form', 22: 'righteousness', 25: 'end, boundary' } }
   ];
 
+  window.GeezIdeo = { themesOf: (c) => THEMES.filter((t) => c in t.ideas).map((t) => ({ label: t.label, idea: t.ideas[c] })) };
   /** Ethiopian month/day of a cycle day k (0–363) */
   const md = (k) => [Math.floor(k / 30) + 1, (k % 30) + 1];
   const weekText = (c, half) => {
@@ -74,7 +75,7 @@
         `<div><dt>Calendar weeks</dt><dd><span class="ge">${weekText(cur, 1)}</span> and <span class="ge">${weekText(cur, 2)}</span> <span class="sub">Week ${cur + 1} of each equinox carries ${cls.geez} through its seven orders</span></dd></div>` +
         `</dl>` +
         `<div class="btn-row"><button type="button" class="btn secondary small" data-id-go="calendar">Show in the calendar</button>` +
-        `<button type="button" class="btn secondary small" data-id-go="family">See its family</button></div>`;
+        `<button type="button" class="btn secondary small" data-id-go="family">See its family</button><button type="button" class="btn small lp-open-btn" data-letter="${cur},0">Full letter profile</button></div>`;
     }
 
     $('idThemes').addEventListener('click', (e) => {

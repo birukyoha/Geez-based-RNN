@@ -1042,13 +1042,11 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .home-intro h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); line-height: 1.12; letter-spacing: -0.02em; font-weight: 700; text-wrap: balance; }
 .home-intro p { color: var(--muted); max-width: 62ch; }
 .home-today {
-  appearance: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer;
+  color: var(--ink); text-align: left;
   display: grid; gap: 6px; align-content: center; justify-items: start; padding: 20px 22px;
   border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
   background: radial-gradient(circle at 85% 30%, var(--rubric-soft), transparent 60%), var(--surface);
 }
-.home-today:hover { border-color: var(--rubric); }
-.home-today:focus-visible { outline: 2px solid var(--rubric); outline-offset: 2px; }
 .home-today-g { font-size: 92px; line-height: 1; color: var(--rubric); }
 .home-today-t { display: grid; gap: 2px; font-size: var(--step--1); color: var(--muted); }
 .home-today-t .ge { font-size: var(--step-1); color: var(--ink); font-weight: 600; }
@@ -1332,4 +1330,55 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- Home: feast line and card buttons ---------- */
+.home-feast { margin: 2px 0 0; font-size: var(--step--1); color: var(--muted); padding-left: 10px; border-left: 3px solid var(--ochre); }
+.home-feast b { color: var(--ink); font-size: 1.08em; }
+.home-today-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+/* ---------- Letter profile ---------- */
+html.lp-open { overflow: hidden; }
+.lp-backdrop { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px;
+  background: color-mix(in srgb, #0b0d12 55%, transparent); }
+.lp-backdrop[hidden] { display: none; }
+.lp-panel { width: min(980px, 100%); max-height: calc(100dvh - 32px); overflow: auto; overscroll-behavior: contain;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 24px 60px rgba(0,0,0,.35); }
+.lp-bar { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 6px; padding: 10px 14px;
+  background: var(--surface); border-bottom: 1px solid var(--line); }
+.lp-pos { margin-right: auto; margin-left: 6px; }
+.lp-body { padding: 18px 20px 22px; display: grid; gap: 16px; }
+.lp-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; }
+.lp-big { font-size: 104px; line-height: 1; color: var(--rubric); }
+.lp-head h3 { margin: 0; font-size: var(--step-2, 1.6rem); }
+.lp-sub { margin: 4px 0 8px; color: var(--muted); font-size: var(--step--1); }
+.lp-orders { display: flex; flex-wrap: wrap; gap: 4px; }
+.lp-orders button { font-family: 'Noto Serif Ethiopic', serif; font-size: 22px; min-width: 42px; min-height: 42px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--surface-2, var(--surface)); color: var(--ink); cursor: pointer; }
+.lp-orders button.on { background: var(--rubric); border-color: var(--rubric); color: #fff; }
+.lp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 12px; }
+.lp-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.lp-card h4 { margin: 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lp-card p { margin: 0; }
+.lp-card .btn { justify-self: start; }
+.lp-draw { display: block; width: 72px; height: 72px; color: var(--ochre); }
+.lp-fam { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 22px; }
+.lp-fam i { font-size: 14px; }
+.lp-arrow { color: var(--muted); font-size: 14px; }
+.lp-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: var(--step--1); }
+.lp-num { font-size: var(--step-1); }
+.lp-num .ge { color: var(--rubric); font-size: 1.3em; margin-left: 4px; }
+.lp-g { font-size: 1.25em; color: var(--rubric); }
+.lp-maps { display: flex; gap: 14px; flex-wrap: wrap; }
+.lp-maps > div { display: grid; gap: 4px; justify-items: center; }
+.lp-hex { font-size: 12px; word-break: break-all; color: var(--muted); }
+.lp-link { appearance: none; border: 0; background: none; padding: 0 2px; font: inherit; font-weight: 600; color: var(--rubric); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.lp-open-btn { margin-top: 10px; }
+@media (max-width: 560px) {
+  .lp-backdrop { padding: 0; place-items: stretch; }
+  .lp-panel { max-height: 100dvh; border-radius: 0; border: 0; }
+  .lp-body { padding: 14px 16px 20px; }
+  .lp-big { font-size: 76px; }
+  .lp-head { gap: 12px; }
+  .lp-orders button { min-width: 38px; min-height: 40px; font-size: 20px; }
 }

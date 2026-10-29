@@ -225,6 +225,7 @@
         ? `<span class="cube-osa-inline">${g}</span> Musnad <span class="mono">${tr}</span> · ${cls.pictoOrigin || ''}`
         : `Ge'ez addition, no Musnad ancestor · ${cls.pictoOrigin || ''}`;
       $('cubePos').textContent = `x ${c} · y ${o} · z 0–4`;
+      if ($('cubeProfile')) $('cubeProfile').dataset.letter = `${c},${o}`;
     }
 
     // ---------- Guided sample ----------

@@ -102,7 +102,7 @@
       box.innerHTML =
         `<span class="ge astro-info-glyph">${glyph(loc.c, loc.o)}</span>` +
         `<span><b>${dateText}</b> is day ${loc.k + 1} of 364: Equinox ${loc.half}, week ${Math.floor((loc.k % 182) / 7) + 1}. ` +
-        `Class ${CLASSES[loc.c].geez} (${CLASSES[loc.c].name}), ${ORDN[loc.o]} order${ord.name ? ' ' + ord.name : ''}. ${greg}</span>`;
+        `Class ${CLASSES[loc.c].geez} (${CLASSES[loc.c].name}), ${ORDN[loc.o]} order${ord.name ? ' ' + ord.name : ''}. ${greg} <button type="button" class="lp-link" data-letter="${loc.c},${loc.o}">Letter profile</button></span>`;
     }
 
     function render() {

@@ -33,6 +33,7 @@
     { key: 'ts', classes: [22, 23], sound: 'ṣ', was: ['ṣ, an ejective s', 'ṣ́, an ejective lateral sound'] }
   ];
   const groupOf = (c) => GROUPS.find((g) => g.classes.includes(c));
+  window.GeezSyllo = { CONS, VOWELS, ORDER_NAMES, MARKS, groupOf, MUSNAD };
 
   const $ = (id) => document.getElementById(id);
 
@@ -99,7 +100,7 @@
           `<div><dt>Order mark</dt><dd>${MARKS[o]}</dd></div>` +
           `<div><dt>All seven</dt><dd class="ge sy-row">${FORMS.map((f, k) => `<span class="${k === o ? 'on' : ''}">${cls[f]}</span>`).join('')}</dd></div>` +
           (amhKids.length ? `<div><dt>Amharic child</dt><dd><span class="ge sy-from">${amhKids.map((a) => a.geez).join(' ')}</span> <span class="sub">Built from this letter for a sound Ge'ez did not have</span></dd></div>` : '') +
-          `</dl>` + homo;
+          `</dl>` + homo + `<div class="btn-row"><button type="button" class="btn small lp-open-btn" data-letter="${c},${o}">Full letter profile</button></div>`;
       }
       $('syInfo').innerHTML = html;
     }

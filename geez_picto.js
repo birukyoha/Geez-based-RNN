@@ -42,6 +42,7 @@
     ['ሳብዕ', 'o', 'the left leg lengthened, or a ring on top']
   ];
 
+  window.GeezPicto = { drawingFor: (c) => { const L = LETTERS.find((x) => x.c === c); return L ? { pic: L.pic, proto: L.proto, thing: L.thing } : null; } };
   const ink = (name, cls = '') => `<span class="ink ${cls}" style="--src:url(img/picto/${name}.svg)" aria-hidden="true"></span>`;
   const $ = (id) => document.getElementById(id);
 

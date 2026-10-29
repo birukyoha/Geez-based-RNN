@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029o">
+  <link rel="stylesheet" href="index.css?v=20261029p">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -87,12 +87,17 @@
           <button type="button" class="btn secondary" data-home-tab="encrypt-tab">Try the cipher</button>
         </div>
       </div>
-      <button type="button" class="home-today" id="homeToday" data-home-go="astrographic:astroCalendar" aria-label="Today's letter, open the fidel calendar">
+      <div class="home-today" id="homeToday">
         <span class="label">Today's letter</span>
         <span class="home-today-g ge" id="homeTodayGlyph">ሀ</span>
         <span class="home-today-t" id="homeTodayText"></span>
-        <span class="home-today-go">Open the fidel calendar →</span>
-      </button>
+        <p class="home-feast" id="homeFeast" hidden></p>
+        <div class="home-today-btns">
+          <button type="button" class="btn small" id="homeTodayProfile" data-letter="0,0">Letter profile</button>
+          <button type="button" class="btn secondary small" data-home-go="astrographic:astroCalendar">Fidel calendar</button>
+          <button type="button" class="btn secondary small" data-home-go="astrographic:s-hasab">Bahire Hasab</button>
+        </div>
+      </div>
     </div>
 
 
@@ -1005,6 +1010,7 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
           <div><dt>Pictographic</dt><dd id="cubePic">–</dd></div>
           <div><dt>Cube address</dt><dd id="cubePos" class="mono">–</dd></div>
         </dl>
+        <button type="button" class="btn small lp-open-btn" id="cubeProfile" data-letter="0,0">Full letter profile</button>
       </aside>
     </div>
   </section>
@@ -1095,18 +1101,19 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029o"></script>
-<script src="geez_rnn_engine.js?v=20261029o"></script>
-<script src="geez_cube.js?v=20261029o"></script>
-<script src="geez_numbers.js?v=20261029o"></script>
-<script src="geez_picto.js?v=20261029o"></script>
-<script src="geez_family.js?v=20261029o"></script>
-<script src="geez_syllo.js?v=20261029o"></script>
-<script src="geez_ideo.js?v=20261029o"></script>
-<script src="geez_home.js?v=20261029o"></script>
-<script src="geez_astro.js?v=20261029o"></script>
-<script src="geez_hasab.js?v=20261029o"></script>
-<script src="geez_calendar.js?v=20261029o"></script>
-<script src="app.js?v=20261029o"></script>
+<script src="geez_dataset.js?v=20261029p"></script>
+<script src="geez_rnn_engine.js?v=20261029p"></script>
+<script src="geez_cube.js?v=20261029p"></script>
+<script src="geez_numbers.js?v=20261029p"></script>
+<script src="geez_picto.js?v=20261029p"></script>
+<script src="geez_family.js?v=20261029p"></script>
+<script src="geez_syllo.js?v=20261029p"></script>
+<script src="geez_ideo.js?v=20261029p"></script>
+<script src="geez_home.js?v=20261029p"></script>
+<script src="geez_astro.js?v=20261029p"></script>
+<script src="geez_hasab.js?v=20261029p"></script>
+<script src="geez_calendar.js?v=20261029p"></script>
+<script src="geez_letter.js?v=20261029p"></script>
+<script src="app.js?v=20261029p"></script>
 </body>
 </html>

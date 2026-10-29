@@ -202,14 +202,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   function routeFromHash() {
     const key = (location.hash || '').replace('#', '');
+    if (!key.startsWith('letter-') && window.GeezLetter) window.GeezLetter.close(false);   // leaving a profile by the address bar or Back
     if (key.startsWith('model-') && MODEL_SUBS.includes(key.slice(6))) {
       showModelSub(key.slice(6), false);
       showTab('architecture-tab', false);
       return;
     }
+    if (/^letter-\d+-\d$/.test(key)) {             // a letter profile, opened over the current tab
+      const [, c, o] = key.split('-').map(Number);
+      if (window.GeezLetter) window.GeezLetter.open(c, o, false);
+      return;
+    }
     if (ROUTES[key]) showTab(ROUTES[key], false);
   }
   window.addEventListener('hashchange', routeFromHash);
+  // Lets other parts of the page open a character in the 8×8 map
+  window.GeezApp = { openMap(ch) { selectChar(ch); showTab('visualizer-tab'); window.scrollTo({ top: 0 }); } };
 
   // ---------- Copy buttons ----------
   document.querySelectorAll('.copy-btn').forEach((btn) => {
