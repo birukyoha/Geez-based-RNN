@@ -732,6 +732,7 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 
 .astro-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
 .astro-range { font-size: 12.5px; color: var(--muted); min-width: 13em; text-align: center; }
+.astro-range .ge { color: var(--rubric); font-size: 14px; }
 .astro-info { display: flex; gap: 14px; align-items: center; min-height: 64px; padding: 10px 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; font-size: var(--step--1); line-height: 1.5; }
 .astro-info .hint { display: block; margin-top: 2px; }
 .astro-info-glyph { font-size: 38px; line-height: 1; color: var(--rubric); flex: none; min-width: 44px; text-align: center; }
@@ -745,7 +746,10 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .astro-calendar { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 14px; }
 .ac-month { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
 .ac-head { background: var(--c-model); color: #fff; font-weight: 700; font-size: var(--step--1); text-align: center; padding: 6px; }
-.ac-head span { font-weight: 500; opacity: 0.85; }
+.ac-head .ge { font-size: 15px; }
+.ac-greg { display: block; font-weight: 500; font-size: 11px; opacity: 0.85; }
+.ac-month.pagume { align-self: start; }
+.ac-wd.ge { font-size: 10px; }
 .ac-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; padding: 6px; }
 .ac-wd { font-size: 10px; font-weight: 700; color: var(--muted); text-align: center; padding-bottom: 2px; }
 .ac-day {

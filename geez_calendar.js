@@ -1,51 +1,51 @@
 /**
- * Ge'ez RNN Cipher — Astrographic calendar
- * The 364-day solar cycle as two equinoxes of 182 days. Each equinox runs through the
- * 26 classes, one class per week, and the class's 7 orders fill the 7 days of that week:
- *   day k (0–363): equinox = k < 182 ? 1 : 2,  class = floor((k mod 182) / 7),  order = k mod 7
- * Renders the equinox circle (#equinoxCircle) and a month-by-month calendar (#astroCalendar).
- * Data: geez_dataset.js (ethiopianClasses, orders).
+ * Ge'ez RNN Cipher — Astrographic calendar (Ethiopian calendar)
+ * The 364-day solar cycle as two equinoxes of 182 days, laid on the Ethiopian year:
+ * 12 months of 30 days and ጳጉሜ of 5 or 6. Day 1 is መስከረም 1.
+ * Each equinox runs through the 26 classes, one class per 7 days, and the class's
+ * 7 orders fill those 7 days:
+ *   k = 30(month − 1) + (day − 1)            (0–363; ጳጉሜ 5 and 6 fall outside)
+ *   equinox = k < 182 ? 1 : 2,  class = ⌊(k mod 182) / 7⌋,  order = k mod 7
+ * Because every month has 30 days, a month always holds 4 class weeks and 2 days,
+ * so each month starts 2 orders further on, the same step the weekdays take.
+ * Renders the equinox circle (#equinoxCircle) and the 13-month calendar (#astroCalendar).
+ * Data: geez_dataset.js; dates: EthiopicTime from geez_astro.js.
  */
 (function () {
   'use strict';
 
   const D = (typeof GEEZ_DATASET !== 'undefined') ? GEEZ_DATASET : null;
-  if (!D || !Array.isArray(D.ethiopianClasses)) return;
+  const E = window.EthiopicTime;
+  if (!D || !Array.isArray(D.ethiopianClasses) || !E) return;
 
   const FORMS = ['geez', 'kaeb', 'salis', 'rabe', 'hamis', 'sadis', 'sabe'];
   const CLASSES = D.ethiopianClasses.slice(0, 26);
   const ORDERS = D.orders || [];
-  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const WD_SHORT = ['ሰኞ', 'ማክ', 'ረቡ', 'ሐሙ', 'ዓር', 'ቅዳ', 'እሁ'];     // Monday first, as on Ethiopian wall calendars
+  const G_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const ORDN = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th'];
-  const DAY = 864e5;
 
-  // Dates are handled at UTC midnight so daylight-saving changes never shift a day
-  const utc = (y, m, d) => Date.UTC(y, m, d);
-  const parts = (t) => { const x = new Date(t); return [x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate(), x.getUTCDay()]; };
-  const todayUTC = () => { const n = new Date(); return utc(n.getFullYear(), n.getMonth(), n.getDate()); };
+  const ethOf = (t) => E.jdnToEth(E.utcToJdn(t));
+  const toUtc = (y, m, d) => E.jdnToUtc(E.ethToJdn(y, m, d));
+  const todayUTC = () => { const n = new Date(); return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()); };
+  const fmtG = (t) => { const x = new Date(t); return `${x.getUTCDate()} ${G_MONTHS[x.getUTCMonth()]} ${x.getUTCFullYear()}`; };
 
-  /** Start of the cycle that begins in `year`. */
-  function cycleStart(year, mode) {
-    if (mode === 'sunday') {
-      // First Sunday on or after 20 March (the March equinox), so order 1 falls on Sunday
-      const eq = utc(year, 2, 20);
-      const wd = new Date(eq).getUTCDay();
-      return eq + ((7 - wd) % 7) * DAY;
-    }
-    return utc(year, 3, 1);   // 1 April, as in the thesis
-  }
-  /** Where a date falls: day index 0–363, or null for days outside the 364-day cycle. */
-  function locate(t, year, mode) {
-    const k = Math.round((t - cycleStart(year, mode)) / DAY);
-    if (k < 0 || k > 363) return null;
+  /** Where an Ethiopian date falls in the 364-day cycle, or null for ጳጉሜ 5 and 6. */
+  function locateEth(m, d) {
+    const k = 30 * (m - 1) + (d - 1);
+    if (k > 363) return null;
     const j = k % 182;
     return { k, half: k < 182 ? 1 : 2, c: Math.floor(j / 7), o: j % 7 };
   }
+  const locate = (t) => { const [, m, d] = ethOf(t); return locateEth(m, d); };
   const glyph = (c, o) => CLASSES[c][FORMS[o]];
 
   const $ = (id) => document.getElementById(id);
-  window.GeezCalendar = { cycleStart, locate };
+  window.GeezCalendar = {
+    locate,
+    letterOn: (t) => { const l = locate(t); return l ? { glyph: glyph(l.c, l.o), base: CLASSES[l.c].geez } : null; }
+  };
 
   document.addEventListener('DOMContentLoaded', () => {
     const cal = $('astroCalendar');
@@ -53,23 +53,21 @@
     if (!cal) return;
 
     const t0 = todayUTC();
-    let mode = 'april';
-    let year = parts(t0)[0];
-    if (t0 < cycleStart(year, mode)) year -= 1;
     let picked = t0;
+    let year = ethOf(t0)[0];
 
     // ---------- Equinox circle ----------
     function drawCircle() {
       if (!circle) return;
       const cx = 220, cy = 220, r = 150, R = 176;
-      const here = locate(picked, year, mode);
+      const here = locate(picked);
       let s = `<circle class="eq-ring" cx="${cx}" cy="${cy}" r="${r}"/>`;
       s += `<line class="eq-axis" x1="${cx - r}" y1="${cy}" x2="${cx - 92}" y2="${cy}"/><line class="eq-axis" x1="${cx + 92}" y1="${cy}" x2="${cx + r}" y2="${cy}"/>`;
       s += `<text class="eq-big" x="${cx}" y="${cy - 44}" text-anchor="middle">EQUINOX 1 = 182</text>`;
       s += `<text class="eq-mid" x="${cx}" y="${cy + 5}" text-anchor="middle">1 + 2 = 364 DAYS</text>`;
       s += `<text class="eq-big" x="${cx}" y="${cy + 58}" text-anchor="middle">EQUINOX 2 = 182</text>`;
-      s += `<text class="eq-small" x="${cx}" y="${cy - 20}" text-anchor="middle">weeks 1–26 · ሀ → ፐ</text>`;
-      s += `<text class="eq-small" x="${cx}" y="${cy + 80}" text-anchor="middle">weeks 27–52 · ሀ → ፐ again</text>`;
+      s += `<text class="eq-small" x="${cx}" y="${cy - 20}" text-anchor="middle">መስከረም 1 → መጋቢት 2 · ሀ → ፐ</text>`;
+      s += `<text class="eq-small" x="${cx}" y="${cy + 80}" text-anchor="middle">መጋቢት 3 → ጳጉሜ 4 · ሀ → ፐ again</text>`;
       // 26 classes around each half: Equinox 1 over the top, left to right; Equinox 2 under the bottom, right to left
       for (let half = 1; half <= 2; half++) {
         for (let i = 0; i < 26; i++) {
@@ -90,46 +88,37 @@
 
     // ---------- Calendar ----------
     function info(t) {
-      const [y, m, d, wd] = parts(t);
-      const loc = locate(t, year, mode);
-      const dateText = `${WEEKDAYS[wd]} ${d} ${MONTHS[m]} ${y}`;
+      const [y, m, d] = ethOf(t);
+      const wd = E.weekday(E.utcToJdn(t));
+      const loc = locateEth(m, d);
+      const dateText = `<span class="ge">${E.MONTHS[m - 1]} ${d}, ${y}</span>`;
+      const greg = `<span class="hint">${WEEKDAYS[wd]}, ${fmtG(t)}</span>`;
       const box = $('astroInfo');
       if (!loc) {
-        box.innerHTML = `<b>${dateText}</b> is outside this 364-day cycle. The solar year has 365 or 366 days, so one or two days fall between cycles.` +
-          (window.EthiopicTime ? ` <span class="hint">Ethiopian date: <span class="ge">${window.EthiopicTime.ethText(t)}</span></span>` : '');
+        box.innerHTML = `<span><b>${dateText}</b> is outside the 364-day cycle. The year has 365 or 366 days, so ጳጉሜ 5, and ጳጉሜ 6 in a leap year, close the year before the alphabet starts again on መስከረም 1. ${greg}</span>`;
         return;
       }
       const ord = ORDERS[loc.o] || {};
-      const match = ord.day === WEEKDAYS[wd];
-      const eth = window.EthiopicTime ? ` <span class="hint">Ethiopian date: <span class="ge">${window.EthiopicTime.ethText(t)}</span></span>` : '';
       box.innerHTML =
         `<span class="ge astro-info-glyph">${glyph(loc.c, loc.o)}</span>` +
         `<span><b>${dateText}</b> is day ${loc.k + 1} of 364: Equinox ${loc.half}, week ${Math.floor((loc.k % 182) / 7) + 1}. ` +
-        `Class ${CLASSES[loc.c].geez} (${CLASSES[loc.c].name}), ${ORDN[loc.o]} order${ord.name ? ' ' + ord.name : ''}.` +
-        (ord.day ? ` <span class="hint">The ${ORDN[loc.o]} order belongs to ${ord.day}${match ? ', and this date is a ' + ord.day + '.' : '; this date is a ' + WEEKDAYS[wd] + '.'}</span>` : '') +
-        eth + `</span>`;
+        `Class ${CLASSES[loc.c].geez} (${CLASSES[loc.c].name}), ${ORDN[loc.o]} order${ord.name ? ' ' + ord.name : ''}. ${greg}</span>`;
     }
 
     function render() {
-      const start = cycleStart(year, mode);
-      const next = cycleStart(year + 1, mode);
-      const [sy, sm] = parts(start);
-      const [ey, em] = parts(next - DAY);
-      $('astroRange').textContent = `${fmt(start)} – ${fmt(start + 363 * DAY)}`;
+      $('astroRange').innerHTML = `${year} <span class="ge">${E.geezNumber(year)}</span> · ${fmtG(toUtc(year, 1, 1))} – ${fmtG(toUtc(year, 13, E.isLeap(year) ? 6 : 5))}`;
       let html = '';
-      for (let yy = sy, mm = sm; yy < ey || (yy === ey && mm <= em); mm === 11 ? (yy++, mm = 0) : mm++) {
-        const first = utc(yy, mm, 1);
-        const days = new Date(Date.UTC(yy, mm + 1, 0)).getUTCDate();
-        const lead = new Date(first).getUTCDay();
+      for (let m = 1; m <= 13; m++) {
+        const len = m < 13 ? 30 : (E.isLeap(year) ? 6 : 5);
+        const first = toUtc(year, m, 1);
+        const lead = (E.weekday(E.utcToJdn(first)) + 6) % 7;     // Monday = 0
         let cells = '';
         for (let i = 0; i < lead; i++) cells += '<span class="ac-pad"></span>';
-        for (let d = 1; d <= days; d++) {
-          const t = utc(yy, mm, d);
-          const inRange = t >= start && t < next;
-          const loc = inRange ? locate(t, year, mode) : null;
+        for (let d = 1; d <= len; d++) {
+          const t = toUtc(year, m, d);
+          const loc = locateEth(m, d);
           const cls = ['ac-day'];
-          if (!inRange) cls.push('off');
-          else if (!loc) cls.push('gap');
+          if (!loc) cls.push('gap');
           else {
             cls.push('h' + loc.half);
             if (loc.o === 0) cls.push('wk');
@@ -137,11 +126,12 @@
           }
           if (t === t0) cls.push('today');
           if (t === picked) cls.push('picked');
-          cells += `<button type="button" class="${cls.join(' ')}" data-t="${t}"${inRange ? '' : ' tabindex="-1"'} aria-label="${d} ${MONTHS[mm]}${loc ? ', ' + glyph(loc.c, loc.o) : ''}">` +
-            `<span class="ac-n">${d}</span>${loc ? `<span class="ac-g ge">${glyph(loc.c, loc.o)}</span>` : (inRange ? '<span class="ac-g">·</span>' : '')}</button>`;
+          cells += `<button type="button" class="${cls.join(' ')}" data-t="${t}" aria-label="${E.MONTHS[m - 1]} ${d}${loc ? ', ' + glyph(loc.c, loc.o) : ''}">` +
+            `<span class="ac-n">${d}</span>${loc ? `<span class="ac-g ge">${glyph(loc.c, loc.o)}</span>` : '<span class="ac-g">·</span>'}</button>`;
         }
-        html += `<div class="ac-month"><div class="ac-head">${MONTHS[mm]} <span>${yy}</span></div>` +
-          `<div class="ac-grid">${['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((w) => `<span class="ac-wd">${w}</span>`).join('')}${cells}</div></div>`;
+        const last = toUtc(year, m, len);
+        html += `<div class="ac-month${m === 13 ? ' pagume' : ''}"><div class="ac-head"><span class="ge">${E.MONTHS[m - 1]}</span> <span class="ac-greg">${fmtG(first).replace(/ \d{4}$/, '')} – ${fmtG(last).replace(/ \d{4}$/, '')}</span></div>` +
+          `<div class="ac-grid">${WD_SHORT.map((w) => `<span class="ac-wd ge">${w}</span>`).join('')}${cells}</div></div>`;
       }
       cal.innerHTML = html;
       info(picked);
@@ -149,11 +139,10 @@
       announce();
     }
     const announce = () => document.dispatchEvent(new CustomEvent('fidel-date', { detail: { t: picked } }));
-    const fmt = (t) => { const [y, m, d] = parts(t); return `${d} ${MONTHS[m].slice(0, 3)} ${y}`; };
 
     cal.addEventListener('click', (e) => {
       const b = e.target.closest('.ac-day');
-      if (!b || b.classList.contains('off')) return;
+      if (!b) return;
       picked = Number(b.dataset.t);
       cal.querySelectorAll('.ac-day.picked').forEach((x) => x.classList.remove('picked'));
       b.classList.add('picked');
@@ -161,37 +150,12 @@
       drawCircle();
       announce();
     });
-    // Other models (the twelve stars, the calendar dial) read letters from here and can move the picked date
-    window.GeezCalendar.letterOn = (t) => {
-      const loc = locate(t, year, mode);
-      return loc ? { glyph: glyph(loc.c, loc.o), base: CLASSES[loc.c].geez } : null;
-    };
-    window.GeezCalendar.pick = (t) => {
-      picked = t;
-      year = parts(t)[0];
-      if (t < cycleStart(year, mode)) year -= 1;
-      render();
-    };
-    $('astroPrev').addEventListener('click', () => { year--; picked = cycleStart(year, mode); render(); });
-    $('astroNext').addEventListener('click', () => { year++; picked = cycleStart(year, mode); render(); });
-    $('astroToday').addEventListener('click', () => {
-      year = parts(t0)[0];
-      if (t0 < cycleStart(year, mode)) year -= 1;
-      picked = t0;
-      render();
-    });
-    document.querySelectorAll('[data-astro-mode]').forEach((b) => b.addEventListener('click', () => {
-      mode = b.dataset.astroMode;
-      document.querySelectorAll('[data-astro-mode]').forEach((x) => {
-        x.classList.toggle('active', x === b);
-        x.setAttribute('aria-pressed', String(x === b));
-      });
-      if (!locate(picked, year, mode)) picked = cycleStart(year, mode);
-      render();
-    }));
+    // The twelve stars and the calendar dial can move the picked date
+    window.GeezCalendar.pick = (t) => { picked = t; year = ethOf(t)[0]; render(); };
+    $('astroPrev').addEventListener('click', () => { year--; picked = toUtc(year, 1, 1); render(); });
+    $('astroNext').addEventListener('click', () => { year++; picked = toUtc(year, 1, 1); render(); });
+    $('astroToday').addEventListener('click', () => { picked = t0; year = ethOf(t0)[0]; render(); });
 
     render();
   });
-
-
 })();

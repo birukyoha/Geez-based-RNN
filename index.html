@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029f">
+  <link rel="stylesheet" href="index.css?v=20261029g">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -421,9 +421,9 @@
             <div><div class="n">364</div><div class="l">Days in the solar cycle</div></div>
           </div>
           <div class="equinox">
-            <div><strong>Equinox 1 · 182 days</strong><span>1 April – 30 September</span></div>
+            <div><strong>Equinox 1 · 182 days</strong><span><span class="ge">መስከረም</span> 1 – <span class="ge">መጋቢት</span> 2 (about 11 September – 11 March)</span></div>
             <div class="mid">182 + 182 = 364</div>
-            <div><strong>Equinox 2 · 182 days</strong><span>1 October – 31 March</span></div>
+            <div><strong>Equinox 2 · 182 days</strong><span><span class="ge">መጋቢት</span> 3 – <span class="ge">ጳጉሜ</span> 4 (about 12 March – 9 September)</span></div>
           </div>
           <div class="astro-pair">
             <figure class="astro-circle">
@@ -452,28 +452,25 @@
           </div>
         
           <h4 class="astro-sub">The fidel calendar</h4>
-          <p>Every day of the 364-day cycle carries one syllograph. Week 1 is ሀ ሁ ሂ ሃ ሄ ህ ሆ, week 2 is ለ ሉ ሊ ላ ሌ ል ሎ, and so on to ፐ in week 26. On day 183 the alphabet starts again from ሀ for the second equinox. Pick a date to see its letter.</p>
+          <p>The Ethiopian year has 12 months of 30 days and a short 13th month, <span class="ge">ጳጉሜ</span>, of 5 days (6 in a leap year). Laid on it, every day of the 364-day cycle carries one syllograph. <span class="ge">መስከረም</span> 1 to 7 is <span class="ge">ሀ ሁ ሂ ሃ ሄ ህ ሆ</span>, 8 to 14 is <span class="ge">ለ ሉ ሊ ላ ሌ ል ሎ</span>, and so on to <span class="ge">ፐ</span> on day 182, <span class="ge">መጋቢት</span> 2. On <span class="ge">መጋቢት</span> 3 the alphabet starts again from <span class="ge">ሀ</span> for the second equinox and ends on <span class="ge">ጳጉሜ</span> 4.</p>
+          <p>Because every month has 30 days, each month holds four class weeks and two days more. So each month begins two orders further on, the same two-step that moves the weekdays forward from month to month in the calendar dial below. Pick a date to see its letter.</p>
           <div class="astro-controls">
-            <div class="segmented" role="group" aria-label="Cycle start">
-              <button type="button" class="active" data-astro-mode="april" aria-pressed="true">Starts 1 April</button>
-              <button type="button" data-astro-mode="sunday" aria-pressed="false">Starts on a Sunday</button>
-            </div>
             <div class="btn-row">
-              <button id="astroPrev" class="btn secondary small" type="button" aria-label="Previous cycle">←</button>
+              <button id="astroPrev" class="btn secondary small" type="button" aria-label="Previous year">←</button>
               <span class="mono astro-range" id="astroRange"></span>
-              <button id="astroNext" class="btn secondary small" type="button" aria-label="Next cycle">→</button>
+              <button id="astroNext" class="btn secondary small" type="button" aria-label="Next year">→</button>
               <button id="astroToday" class="btn secondary small" type="button">Today</button>
             </div>
           </div>
           <div class="astro-info" id="astroInfo" aria-live="polite"></div>
           <div class="astro-legend hint">
-            <span><i class="ac-sw h1"></i>Equinox 1, days 1–182</span>
-            <span><i class="ac-sw h2"></i>Equinox 2, days 183–364</span>
+            <span><i class="ac-sw h1"></i>Equinox 1, <span class="ge">መስከረም</span> 1 – <span class="ge">መጋቢት</span> 2</span>
+            <span><i class="ac-sw h2"></i>Equinox 2, <span class="ge">መጋቢት</span> 3 – <span class="ge">ጳጉሜ</span> 4</span>
             <span><i class="ac-sw wk"></i>First day of a class week</span>
             <span><i class="ac-sw gap"></i>Outside the 364-day cycle</span>
           </div>
           <div class="astro-calendar" id="astroCalendar"></div>
-          <p class="hint">“Starts 1 April” follows the thesis dates. “Starts on a Sunday” begins on the first Sunday after the March equinox, so every 1st-order letter falls on a Sunday and every 7th-order letter on a Saturday, as in the table above.</p>
+          <p class="hint">Weeks run Monday to Sunday, as on Ethiopian wall calendars. Each month card also gives its Gregorian dates.</p>
 
 </article>
 
@@ -798,11 +795,11 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029f"></script>
-<script src="geez_rnn_engine.js?v=20261029f"></script>
-<script src="geez_cube.js?v=20261029f"></script>
-<script src="geez_astro.js?v=20261029f"></script>
-<script src="geez_calendar.js?v=20261029f"></script>
-<script src="app.js?v=20261029f"></script>
+<script src="geez_dataset.js?v=20261029g"></script>
+<script src="geez_rnn_engine.js?v=20261029g"></script>
+<script src="geez_cube.js?v=20261029g"></script>
+<script src="geez_astro.js?v=20261029g"></script>
+<script src="geez_calendar.js?v=20261029g"></script>
+<script src="app.js?v=20261029g"></script>
 </body>
 </html>
