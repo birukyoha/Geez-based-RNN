@@ -924,6 +924,41 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .picto-refs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; align-items: start; }
 @media (prefers-reduced-motion: reduce) { .picto-big .ink.big, .picto-order { animation: none; } }
 
+/* Numeric: Ge'ez numerals */
+.num-digits { display: grid; gap: 12px; }
+.num-row { display: grid; gap: 6px; }
+.num-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
+.num-card { appearance: none; display: grid; justify-items: center; gap: 2px; padding: 8px 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; }
+.num-card:hover { border-color: var(--rubric); }
+.num-card:focus-visible { outline: 2px solid var(--rubric); outline-offset: 1px; }
+.num-card.zero { cursor: default; background: var(--bg); border-style: dashed; }
+.num-g { font-size: 28px; line-height: 1.15; color: var(--rubric); }
+.num-card .mono { font-size: 12px; font-weight: 600; }
+.num-w { font-size: 12px; color: var(--muted); }
+.num-box { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.num-inputs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: 12px; align-items: end; }
+@media (max-width: 640px) { .num-inputs { grid-template-columns: minmax(0, 1fr); } }
+#numGeezIn { font-family: var(--font-ethiopic); font-size: 20px; }
+.num-examples .btn { font-family: var(--font-mono); }
+.num-out { display: grid; gap: 10px; min-height: 120px; }
+.num-result { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; }
+.num-big { font-size: 40px; line-height: 1.1; color: var(--rubric); word-break: break-all; }
+.num-val { font-size: var(--step-1); color: var(--muted); }
+.num-alt { font-size: 18px; color: var(--ink); }
+.num-steps { display: grid; gap: 4px; }
+.num-step { display: grid; grid-template-columns: 4.5em minmax(5em, auto) minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 6px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.num-step.zero { opacity: 0.7; }
+.num-step .mono { font-size: 13px; }
+.num-step-g { font-size: 22px; }
+.num-step-g b { color: var(--rubric); font-weight: 400; }
+.num-words { font-size: 20px; line-height: 1.5; }
+.num-powers .glyph-cell { font-size: 20px; }
+.num-details { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--surface); }
+.num-details summary { cursor: pointer; font-weight: 600; }
+.num-details[open] summary { margin-bottom: 10px; }
+.num-details .table-wrap { max-height: 420px; overflow: auto; margin-top: 8px; }
+.num-details th { position: sticky; top: 0; }
+
 /* ---------- Fidel cube ---------- */
 .cube-axes { display: flex; flex-wrap: wrap; gap: 6px; }
 .cube-axes b { color: var(--ink); font-family: var(--font-mono); }
