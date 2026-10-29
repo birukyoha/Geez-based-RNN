@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029k">
+  <link rel="stylesheet" href="index.css?v=20261029l">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -424,6 +424,44 @@
               <tbody id="pictoTrail"></tbody>
             </table>
           </div>
+
+          <h4 class="astro-sub">Every letter's family</h4>
+          <p>The same principle runs through the history of the alphabet. Around 1850 BCE, workers in Sinai borrowed Egyptian pictures and gave each the sound that began its name in their own language. That Proto-Sinaitic script became Phoenician and South Arabian, and South Arabian became Ge'ez. Pick a letter to follow its line, and to see its relatives in the Greek and Latin alphabets.</p>
+          <div class="fam-box">
+            <div class="fam-grid" id="famGrid" role="group" aria-label="Ge'ez letters"></div>
+            <div class="fam-detail" id="famDetail" aria-live="polite"></div>
+            <p class="hint">Letters with a dashed border begin in South Arabian or in Ge'ez itself, so their line is shorter.</p>
+          </div>
+
+          <h4 class="astro-sub">From abjad to abugida</h4>
+          <p>An abjad writes only consonants and leaves the reader to supply the vowels. Ge'ez became an abugida, where every letter carries its vowel. Follow one word, <span class="ge">ንጉሠ</span>, "king of", through the change.</p>
+          <div class="ab-box">
+            <div class="ab-steps" id="abSteps"></div>
+            <div class="ab-stage">
+              <div class="ab-when"><span class="badge rubric" id="abWhen"></span> <b id="abTitle"></b></div>
+              <div class="ab-word" id="abWord" aria-live="polite"></div>
+              <div class="ab-dir hint" id="abDir"></div>
+              <p id="abText"></p>
+            </div>
+            <div class="btn-row">
+              <button id="abPrev" class="btn secondary small" type="button">← Prev</button>
+              <button id="abPlay" class="btn small" type="button">Play</button>
+              <button id="abNext" class="btn secondary small" type="button">Next →</button>
+            </div>
+          </div>
+
+          <h4 class="astro-sub">Two readings</h4>
+          <div class="two-readings">
+            <div>
+              <span class="label">Bekerie (1997)</span>
+              <p>Ayele Bekerie reads the Ethiopic letters as an African system rooted in Egyptian pictures, with pictographic, ideographic and numeric layers of meaning. The pictographs on this page follow his tables.</p>
+            </div>
+            <div>
+              <span class="label">Most historians of writing</span>
+              <p>Ge'ez descends from the South Arabian script, which descends from Proto-Sinaitic, which in turn drew on Egyptian signs. Reviewers such as Peter Daniels accept that line but dispute several of Bekerie's direct comparisons between Ethiopic letters and particular hieroglyphs.</p>
+            </div>
+          </div>
+          <p class="hint">Both readings lead back to Egyptian pictures; they differ on the path. Sources: <a href="https://en.wikipedia.org/wiki/History_of_the_alphabet" target="_blank" rel="noopener">History of the alphabet</a>, <a href="https://en.wikipedia.org/wiki/Ancient_South_Arabian_script" target="_blank" rel="noopener">Ancient South Arabian script</a>, <a href="https://en.wikipedia.org/wiki/Ge%CA%BDez_script" target="_blank" rel="noopener">Geʽez script</a>, <a href="https://www.aa.tufs.ac.jp/~P_aflang/TEXTS/review/Daniels.html" target="_blank" rel="noopener">Daniels' review of Bekerie</a>.</p>
 
           <div class="picto-refs">
             <figure class="ref-fig">
@@ -898,13 +936,14 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029k"></script>
-<script src="geez_rnn_engine.js?v=20261029k"></script>
-<script src="geez_cube.js?v=20261029k"></script>
-<script src="geez_numbers.js?v=20261029k"></script>
-<script src="geez_picto.js?v=20261029k"></script>
-<script src="geez_astro.js?v=20261029k"></script>
-<script src="geez_calendar.js?v=20261029k"></script>
-<script src="app.js?v=20261029k"></script>
+<script src="geez_dataset.js?v=20261029l"></script>
+<script src="geez_rnn_engine.js?v=20261029l"></script>
+<script src="geez_cube.js?v=20261029l"></script>
+<script src="geez_numbers.js?v=20261029l"></script>
+<script src="geez_picto.js?v=20261029l"></script>
+<script src="geez_family.js?v=20261029l"></script>
+<script src="geez_astro.js?v=20261029l"></script>
+<script src="geez_calendar.js?v=20261029l"></script>
+<script src="app.js?v=20261029l"></script>
 </body>
 </html>

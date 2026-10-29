@@ -971,6 +971,67 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .num-details .table-wrap { max-height: 420px; overflow: auto; margin-top: 8px; }
 .num-details th { position: sticky; top: 0; }
 
+/* Pictographic: every letter's family */
+.hiero { font-family: "Noto Sans Egyptian Hieroglyphs", "Segoe UI Historic", serif; }
+.phn { font-family: "Noto Sans Phoenician", "Segoe UI Historic", serif; }
+.fam-box, .ab-box { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.fam-grid { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 4px; }
+@media (max-width: 760px) { .fam-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+.fam-tile { appearance: none; display: grid; justify-items: center; gap: 0; padding: 6px 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; min-width: 0; }
+.fam-tile .ge { font-size: 20px; line-height: 1.2; }
+.fam-tile-n { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.fam-tile.short { border-style: dashed; }
+.fam-tile:hover { border-color: var(--muted); }
+.fam-tile.active { border: 1px solid var(--rubric); background: var(--rubric-soft); }
+.fam-tile.active .ge { color: var(--rubric); }
+.fam-detail { display: grid; gap: 12px; }
+.fam-chain { display: flex; align-items: stretch; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.fam-arrow { align-self: center; color: var(--muted); flex: none; }
+.fam-card { flex: 1 0 116px; display: grid; justify-items: center; align-content: start; gap: 2px; padding: 10px 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); text-align: center; animation: picto-in 0.4s ease both; }
+.fam-card:nth-of-type(2) { animation-delay: 0.08s; } .fam-card:nth-of-type(3) { animation-delay: 0.16s; } .fam-card:nth-of-type(4) { animation-delay: 0.24s; } .fam-card:nth-of-type(5) { animation-delay: 0.32s; }
+.fam-card.empty { opacity: 0.45; border-style: dashed; }
+.fam-lbl { font-size: 10.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.fam-glyph { font-size: 40px; line-height: 1.25; min-height: 50px; display: grid; place-items: center; }
+.fam-card.egy .fam-glyph { font-family: "Noto Sans Egyptian Hieroglyphs", "Segoe UI Historic", serif; color: var(--ochre); }
+.fam-card.phn .fam-glyph { font-family: "Noto Sans Phoenician", "Segoe UI Historic", serif; }
+.fam-card.osa .fam-glyph { font-family: "Noto Sans Old South Arabian", "Segoe UI Historic", serif; color: var(--c-model); }
+.fam-card.eth .fam-glyph { color: var(--rubric); }
+.fam-card.ps .fam-glyph { font-size: 20px; }
+.fam-word { font-style: italic; font-weight: 700; }
+.fam-l1 { font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+.fam-l2 { font-size: 11.5px; color: var(--muted); }
+.fam-note, .fam-names { font-size: var(--step--1); max-width: 75ch; }
+.fam-readings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .fam-readings { grid-template-columns: minmax(0, 1fr); } }
+.fam-readings > div { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.fam-readings p { font-size: var(--step--1); margin-top: 4px; }
+.fam-cousins { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.fam-cousin-g { display: flex; gap: 6px; }
+.fam-cousin-g span { display: grid; place-items: center; min-width: 36px; height: 36px; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-family: Georgia, "Times New Roman", serif; font-size: 20px; }
+
+/* From abjad to abugida */
+.ab-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 760px) { .ab-steps { display: flex; overflow-x: auto; } .ab-step { flex: 0 0 150px; } }
+.ab-step { appearance: none; display: grid; gap: 2px; text-align: left; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; font-size: 12.5px; }
+.ab-step .mono { font-size: 11px; color: var(--muted); }
+.ab-step .hint { font-size: 11px; }
+.ab-step.done { opacity: 0.7; }
+.ab-step.active { border-color: var(--rubric); box-shadow: inset 0 0 0 1px var(--rubric); }
+.ab-stage { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: radial-gradient(ellipse at 50% 40%, var(--surface) 0%, var(--bg) 100%); }
+.ab-when { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ab-word { display: flex; justify-content: center; gap: 18px; min-height: 96px; align-items: center; }
+.ab-word[data-dir="rtl"] { flex-direction: row-reverse; }
+.ab-ch { font-size: 64px; line-height: 1; color: var(--ink); }
+.ab-ch.osa { font-family: "Noto Sans Old South Arabian", "Segoe UI Historic", serif; color: var(--c-model); }
+.ab-ch.ge { font-family: var(--font-ethiopic); }
+.ab-ch.marked { color: var(--rubric); }
+.ab-dir { text-align: center; font-family: var(--font-mono); }
+.two-readings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .two-readings { grid-template-columns: minmax(0, 1fr); } }
+.two-readings > div { padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.two-readings p { font-size: var(--step--1); margin-top: 4px; }
+@media (prefers-reduced-motion: reduce) { .fam-card { animation: none; } }
+
 /* ---------- Fidel cube ---------- */
 .cube-axes { display: flex; flex-wrap: wrap; gap: 6px; }
 .cube-axes b { color: var(--ink); font-family: var(--font-mono); }
