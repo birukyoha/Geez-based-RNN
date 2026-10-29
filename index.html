@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029n">
+  <link rel="stylesheet" href="index.css?v=20261029o">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -477,6 +477,7 @@
             <button type="button" data-jump="s-astro">Circle and calendar</button>
             <button type="button" data-jump="s-stars">Twelve stars</button>
             <button type="button" data-jump="s-dial">Calendar dial</button>
+            <button type="button" data-jump="s-hasab">Bahire Hasab</button>
           </div>
           <button type="button" data-sub="numeric"><span class="ge">፲</span>Numeric</button>
           <button type="button" data-sub="syllographic"><span class="ge">ሀ</span>Syllographic</button>
@@ -731,6 +732,37 @@
             <a href="img/calendar-dial-card.webp" target="_blank" rel="noopener"><img src="img/calendar-dial-card.webp" width="526" height="771" loading="lazy" alt="Ethiopian perpetual calendar card with year columns, key letters, a month fan, a turning weekday disc and a date fan"></a>
             <figcaption>The original card: year columns 1922–1977 E.C. with key letters (<span class="ge">መ.ፊ.</span>) and Ge'ez numerals, the month fan at the top, the turning weekday disc with its letter window, and the date fan below. Tap to open full size.</figcaption>
           </figure>
+        </article>
+
+        <article class="panel doc-section" id="s-hasab" data-sub="astrographic">
+          <h3>Bahire Hasab <span class="ge">ባሕረ ሐሳብ</span></h3>
+          <p>Ethiopian astronomy manuscripts such as British Library Or. 816 draw the church calendar as concentric wheels. Their method, Bahire Hasab, the "sea of reckoning", needs no tables of Easter dates: from the year alone it finds the moon's place in its 19-year cycle, then the day of the Nineveh fast, and from that day every moveable feast of the year.</p>
+          <div class="hb-box">
+            <div class="hb-top">
+              <div class="btn-row">
+                <button id="hbPrev" class="btn secondary small" type="button" aria-label="Previous year">←</button>
+                <span class="dial-year" id="hbYear"></span>
+                <button id="hbNext" class="btn secondary small" type="button" aria-label="Next year">→</button>
+                <button id="hbToday" class="btn secondary small" type="button">This year</button>
+              </div>
+              <button id="hbPlay" class="btn small" type="button">Play</button>
+            </div>
+            <div class="hb-layout">
+              <figure class="hb-wheel-fig">
+                <svg id="hbWheel" class="hb-wheel" viewBox="0 0 520 520" role="group" aria-label="The 19-year moon cycle: ወንበር, አበቅቴ and መጥቅዕ for each year of the cycle"></svg>
+                <figcaption class="hint">The 19 places of the moon cycle. The wheel turns so the chosen year sits under the pointer. Tap a sector to choose its year.</figcaption>
+              </figure>
+              <ol class="hb-steps" id="hbSteps"></ol>
+            </div>
+            <div class="table-wrap">
+              <table class="prose-table hb-feasts">
+                <thead><tr><th>Feast</th><th></th><th>From ነነዌ</th><th>Ethiopian date</th><th>Day</th><th>Gregorian</th></tr></thead>
+                <tbody id="hbFeasts"></tbody>
+              </table>
+            </div>
+            <p class="hint">Every feast sits a fixed number of days after the Monday of the Nineveh fast, so all of them move together from year to year. This reckoning gives the same Easter as the Julian computus in every year from 1500 to 2500 E.C.</p>
+          </div>
+          <p class="hint">Manuscript: British Library Or. 816, an Ethiopian chronographic work and treatise on astronomy with circular charts; <a href="https://x.com/DerilloEyob/status/984158930342502400" target="_blank" rel="noopener">photograph shared by Eyob Derillo</a>. See also <a href="https://www.theprinceandtheplunder.com/2020/09/14/a-19th-century-manuscript-with-a-chronographic-work-and-treatise-on-astronomy-or-814/" target="_blank" rel="noopener">its catalogue note</a>.</p>
         </article>
 
         <article class="panel doc-section" id="s-num" data-sub="numeric">
@@ -1063,17 +1095,18 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029n"></script>
-<script src="geez_rnn_engine.js?v=20261029n"></script>
-<script src="geez_cube.js?v=20261029n"></script>
-<script src="geez_numbers.js?v=20261029n"></script>
-<script src="geez_picto.js?v=20261029n"></script>
-<script src="geez_family.js?v=20261029n"></script>
-<script src="geez_syllo.js?v=20261029n"></script>
-<script src="geez_ideo.js?v=20261029n"></script>
-<script src="geez_home.js?v=20261029n"></script>
-<script src="geez_astro.js?v=20261029n"></script>
-<script src="geez_calendar.js?v=20261029n"></script>
-<script src="app.js?v=20261029n"></script>
+<script src="geez_dataset.js?v=20261029o"></script>
+<script src="geez_rnn_engine.js?v=20261029o"></script>
+<script src="geez_cube.js?v=20261029o"></script>
+<script src="geez_numbers.js?v=20261029o"></script>
+<script src="geez_picto.js?v=20261029o"></script>
+<script src="geez_family.js?v=20261029o"></script>
+<script src="geez_syllo.js?v=20261029o"></script>
+<script src="geez_ideo.js?v=20261029o"></script>
+<script src="geez_home.js?v=20261029o"></script>
+<script src="geez_astro.js?v=20261029o"></script>
+<script src="geez_hasab.js?v=20261029o"></script>
+<script src="geez_calendar.js?v=20261029o"></script>
+<script src="app.js?v=20261029o"></script>
 </body>
 </html>
