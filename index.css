@@ -876,6 +876,54 @@ pre.math b { color: var(--rubric); font-weight: 700; }
 .dial-machine::-webkit-scrollbar { height: 6px; }
 @media (max-width: 560px) { .dial-dates { min-width: 0; } .dial-dh .ge { font-size: 10px; } }
 
+/* Pictographic: from picture to letter */
+.ink { display: inline-block; background: currentColor; -webkit-mask: var(--src) center / contain no-repeat; mask: var(--src) center / contain no-repeat; }
+.osa { font-family: "Noto Sans Old South Arabian", "Segoe UI Historic", serif; }
+.picto-steps { margin: 0; padding-left: 22px; display: grid; gap: 6px; max-width: 72ch; }
+.picto-box { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.picto-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.picto-chips button { appearance: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 12px 4px 6px; font: inherit; font-size: 13px; cursor: pointer; }
+.picto-chips button .ge { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-2); font-size: 16px; }
+.picto-chips button.active { border-color: var(--rubric); background: var(--rubric-soft); }
+.picto-chips button.active .ge { background: var(--rubric); color: var(--rubric-ink); }
+.picto-strip-wrap { overflow-x: auto; position: relative; }
+.picto-strip { display: flex; align-items: center; gap: 6px; min-width: max-content; padding: 2px; }
+.picto-arrow { color: var(--muted); }
+.picto-stage { appearance: none; display: grid; justify-items: center; gap: 4px; width: 92px; padding: 8px 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; }
+.picto-stage:hover { border-color: var(--muted); }
+.picto-stage.done { color: var(--muted); }
+.picto-stage.active { border-color: var(--rubric); box-shadow: inset 0 0 0 1px var(--rubric); color: var(--ink); }
+.picto-thumb { display: grid; place-items: center; height: 44px; width: 100%; }
+.picto-thumb .ink { width: 60px; height: 40px; }
+.picto-thumb .ge { font-size: 18px; }
+.picto-lbl { font-size: 11px; font-weight: 600; text-align: center; line-height: 1.2; }
+.picto-view { display: grid; gap: 12px; min-height: 230px; align-content: start; }
+.picto-view-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.picto-name { font-weight: 700; }
+.picto-name .ge { color: var(--rubric); font-size: 20px; }
+.picto-big { display: flex; align-items: center; justify-content: center; gap: 28px; min-height: 150px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.picto-big .ink.big { width: min(240px, 60vw); height: 130px; color: var(--ink); animation: picto-in 0.45s ease; }
+.picto-font { font-size: 64px; line-height: 1; color: var(--rubric); }
+@keyframes picto-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
+.picto-text { max-width: 70ch; }
+.picto-orders { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.picto-order { display: grid; justify-items: center; gap: 2px; padding: 8px 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; animation: picto-in 0.45s ease both; }
+.picto-order:nth-child(2) { animation-delay: 0.05s; } .picto-order:nth-child(3) { animation-delay: 0.1s; } .picto-order:nth-child(4) { animation-delay: 0.15s; }
+.picto-order:nth-child(5) { animation-delay: 0.2s; } .picto-order:nth-child(6) { animation-delay: 0.25s; } .picto-order:nth-child(7) { animation-delay: 0.3s; }
+.picto-order > .ge { font-size: 30px; line-height: 1.1; }
+.picto-order:first-child > .ge { color: var(--rubric); }
+.picto-order .sub { text-align: center; }
+.picto-marks { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: var(--step--1); color: var(--muted); }
+.picto-marks b { color: var(--ink); }
+@media (max-width: 560px) { .picto-orders { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.picto-trail td, .picto-trail th { text-align: center; vertical-align: middle; }
+.picto-trail th[scope="row"] { background: none; color: var(--ink); text-align: left; }
+.picto-trail th[scope="row"] .ge { font-size: 18px; }
+.picto-trail .ink.cell { width: 58px; height: 36px; color: var(--ink); }
+.picto-trail td:last-child .ink.cell { color: var(--rubric); }
+.picto-refs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; align-items: start; }
+@media (prefers-reduced-motion: reduce) { .picto-big .ink.big, .picto-order { animation: none; } }
+
 /* ---------- Fidel cube ---------- */
 .cube-axes { display: flex; flex-wrap: wrap; gap: 6px; }
 .cube-axes b { color: var(--ink); font-family: var(--font-mono); }

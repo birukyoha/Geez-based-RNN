@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Noto+Serif+Ethiopic:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+Egyptian+Hieroglyphs&family=Noto+Sans+Old+South+Arabian&family=Noto+Sans+Meroitic&family=Noto+Sans+Phoenician&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="index.css?v=20261029h">
+  <link rel="stylesheet" href="index.css?v=20261029i">
   <script>
     // Apply the saved theme before first paint to avoid a flash.
     try { var t = localStorage.getItem('geez-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -397,19 +397,43 @@
 
         <article class="panel doc-section" id="s-picto" data-sub="pictographic">
           <h3>Pictographic property</h3>
-          <p>Following Scelta (2001) and Bekerie (1997), each graph began as an abstract picture of a living thing, a tool or a sky feature.</p>
+          <p>Following Scelta (2001) and Bekerie (1997), each graph began as an abstract picture of a living thing, a tool or a sky feature. Four steps turn a picture into a Ge'ez syllable:</p>
+          <ol class="picto-steps">
+            <li><b>Picture.</b> Draw a thing: a house, an eye, water.</li>
+            <li><b>Name to sound.</b> The sign stands for the first sound of the thing's name. <em>Bét</em>, house, gives <b>b</b>; <em>Mai</em>, water, gives <b>m</b>; <em>Re'es</em>, head, gives <b>r</b>.</li>
+            <li><b>Simplify.</b> The picture is reduced to a few strokes in the Proto-Ethiopic script, then to the classical Ge'ez letter.</li>
+            <li><b>Mark the vowel.</b> Small marks on the letter give its seven orders, so one picture becomes seven syllables.</li>
+          </ol>
+
+          <div class="picto-box">
+            <div class="picto-chips" id="pictoChips" role="group" aria-label="Letters"></div>
+            <div class="picto-strip-wrap"><div class="picto-strip" id="pictoStrip"></div></div>
+            <div class="btn-row">
+              <button id="pictoPrev" class="btn secondary small" type="button">← Prev</button>
+              <button id="pictoPlay" class="btn small" type="button">Play</button>
+              <button id="pictoNext" class="btn secondary small" type="button">Next →</button>
+            </div>
+            <div class="picto-view" id="pictoView" aria-live="polite"></div>
+          </div>
+
+          <h4 class="astro-sub">Across scripts</h4>
+          <p>The same signs appear in the neighbouring scripts of northeast Africa and the Red Sea. Each row follows one sign from its Egyptian picture to its Ge'ez letter.</p>
           <div class="table-wrap">
-            <table class="prose-table">
-              <thead><tr><th>Natural prototype</th><th>Proto-Ethiopic</th><th>Classical</th><th>Name</th><th>Meaning</th></tr></thead>
-              <tbody>
-                <tr><td>Long-horned bull</td><td class="glyph-old">𐩱</td><td class="glyph-cell">ሀ</td><td><strong>Hoi</strong> <span class="ge">(ሆይ)</span></td><td class="muted">Front of lion or bull; first graph of the alphabet, symbol of praise and life.</td></tr>
-                <tr><td>Right fisted hand</td><td class="glyph-old">𐩺</td><td class="glyph-cell">የ</td><td><strong>Yäman</strong> <span class="ge">(የማን)</span></td><td class="muted">Right hand of truth, covenant and justice.</td></tr>
-                <tr><td>Human eye</td><td class="glyph-old">𐩲</td><td class="glyph-cell">ዐ</td><td><strong>A'yn</strong> <span class="ge">(ዐይን)</span></td><td class="muted">Vision and understanding; also a spring of water.</td></tr>
-                <tr><td>House or temple</td><td class="glyph-old">𐩨</td><td class="glyph-cell">በ</td><td><strong>Bèt</strong> <span class="ge">(ቤት)</span></td><td class="muted">Dwelling, door, family and shelter.</td></tr>
-                <tr><td>Walking camel</td><td class="glyph-old">𐩴</td><td class="glyph-cell">ገ</td><td><strong>Gämäl</strong> <span class="ge">(ገመል)</span></td><td class="muted">Endurance, caravan routes and trade.</td></tr>
-                <tr><td>Water waves</td><td class="glyph-old">𐩣</td><td class="glyph-cell">መ</td><td><strong>Mai</strong> <span class="ge">(ማይ)</span></td><td class="muted">Running water, nourishment and cleansing.</td></tr>
-              </tbody>
+            <table class="picto-trail">
+              <thead><tr><th>Sign</th><th>Egyptian</th><th>Meroitic</th><th>Sinaitic</th><th>Cretan linear</th><th>Meroitic linear</th><th>Proto-Ethiopic</th><th>Ethiopic</th></tr></thead>
+              <tbody id="pictoTrail"></tbody>
             </table>
+          </div>
+
+          <div class="picto-refs">
+            <figure class="ref-fig">
+              <a href="img/picto-table-bekerie.webp" target="_blank" rel="noopener"><img src="img/picto-table-bekerie.webp" width="604" height="331" loading="lazy" alt="Table of six Ge'ez letters with their pictographs, Proto-Ethiopic forms, transcriptions and names"></a>
+              <figcaption>Pictograph, Proto-Ethiopic and Ethiopic forms of six letters, with their names. After Bekerie (1997). Tap to open full size.</figcaption>
+            </figure>
+            <figure class="ref-fig">
+              <a href="img/picto-table-scripts.webp" target="_blank" rel="noopener"><img src="img/picto-table-scripts.webp" width="776" height="257" loading="lazy" alt="Comparative table rows for the signs O, R, T and S across seven scripts"></a>
+              <figcaption>Rows O, R, T and S of the comparative table across seven scripts. Tap to open full size.</figcaption>
+            </figure>
           </div>
         </article>
 
@@ -816,11 +840,12 @@ C      = A(tr1) ‖ A(tr2) ‖ … ‖ A(tr8)      <b>64-bit block</b></pre>
   </footer>
 </main>
 
-<script src="geez_dataset.js?v=20261029h"></script>
-<script src="geez_rnn_engine.js?v=20261029h"></script>
-<script src="geez_cube.js?v=20261029h"></script>
-<script src="geez_astro.js?v=20261029h"></script>
-<script src="geez_calendar.js?v=20261029h"></script>
-<script src="app.js?v=20261029h"></script>
+<script src="geez_dataset.js?v=20261029i"></script>
+<script src="geez_rnn_engine.js?v=20261029i"></script>
+<script src="geez_cube.js?v=20261029i"></script>
+<script src="geez_picto.js?v=20261029i"></script>
+<script src="geez_astro.js?v=20261029i"></script>
+<script src="geez_calendar.js?v=20261029i"></script>
+<script src="app.js?v=20261029i"></script>
 </body>
 </html>
